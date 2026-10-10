@@ -21,4 +21,7 @@ import os
 os.makedirs('docs', exist_ok=True)
 for f in ('index.html', 'adapter.js', 'config.js'): shutil.copy('public/' + f, 'docs/' + f)
 open('docs/.nojekyll', 'w').close()
+# e na raiz, para o GitHub Pages funcionar com a pasta / (root) ou /docs
+for f in ('index.html', 'adapter.js', 'config.js'): shutil.copy('public/' + f, f)
+open('.nojekyll', 'w').close()
 print('public/index.html', len(head + src))
