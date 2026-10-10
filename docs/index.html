@@ -583,6 +583,10 @@ function doRender(){
 let myRegUnsub = null;
 function watchMyReg(){ if (!S.uid || S.admin || !S.db) return; if (myRegUnsub) myRegUnsub(); myRegUnsub = S.db.doc('regs/' + S.uid).onSnapshot(d => { S.myReg = d.exists ? d.data() : null; render(); }, e => console.error(e)); }
 async function ensureMe(){ const id = await S.user.ensure(); if (id && S.uid !== id){ S.uid = id; watchMyReg(); } return id; }
+function errMsg(e, base){ const c = e && e.code; console.error(e);
+  if (c === 'rate_limited') return 'Demasiadas tentativas. Espera uma hora.';
+  if (c === 'anonymous_provider_disabled') return 'O login anónimo está desligado no Supabase (Authentication → Sign In / Providers → Allow anonymous sign-ins).';
+  return base + ' (' + (c || (e && e.message) || 'erro') + ')'; }
 function copyText(t, msg){ const ok = () => toast(msg || 'Copiado.'); try { navigator.clipboard.writeText(t).then(ok, () => toast('Não foi possível copiar; seleciona o texto.')); } catch(e){ toast('Não foi possível copiar; seleciona o texto.'); } }
 function codeCard(){
   return h('div',{class:'card stack code'}, h('h3',{}, 'O teu código pessoal'),
@@ -598,7 +602,7 @@ function loginBox(){
   const inp = h('input',{type:'text', placeholder:'GRD-XXXXX-XXXXX', autocomplete:'off', autocapitalize:'characters', spellcheck:false, style:'text-transform:uppercase'});
   const go = async () => { if (inp.value.trim().length < 8) return toast('Escreve o código completo.');
     try { const ok = await S.user.loginCode(inp.value); if (!ok) return toast('Código inválido.'); toast('Código aceite.'); setTimeout(() => location.reload(), 500); }
-    catch(e){ toast(e && e.code === 'rate_limited' ? 'Demasiadas tentativas. Espera uma hora.' : 'Não foi possível validar o código.'); } };
+    catch(e){ toast(errMsg(e, 'Não foi possível validar o código.')); } };
   return h('details',{}, h('summary',{}, 'Já me inscrevi: tenho um código'), h('div',{class:'row', style:'margin-top:10px'}, inp, h('button',{class:'b', onclick:go}, 'Entrar')));
 }
 function orgFooter(){
@@ -606,7 +610,7 @@ function orgFooter(){
   if (S.admin){ f.replaceChildren(h('button',{class:'linkb', onclick:async()=>{ await safe(()=>S.user.leaveAdmin()); location.reload(); }}, 'Sair do acesso de organização')); return; }
   if (!S.orgOpen){ f.replaceChildren(h('button',{class:'linkb', onclick:()=>{ S.orgOpen = true; orgFooter(); }}, 'Acesso da organização')); return; }
   const inp = h('input',{type:'password', placeholder:'Frase secreta da organização', autocomplete:'current-password', style:'max-width:320px'});
-  const go = async () => { try { const ok = await S.user.claimAdmin(inp.value); if (!ok) return toast('Frase incorreta.'); location.reload(); } catch(e){ toast(e && e.code === 'rate_limited' ? 'Demasiadas tentativas. Espera uma hora.' : 'Não foi possível entrar.'); } };
+  const go = async () => { try { const ok = await S.user.claimAdmin(inp.value); if (!ok) return toast('Frase incorreta.'); location.reload(); } catch(e){ toast(errMsg(e, 'Não foi possível entrar.')); } };
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
   f.replaceChildren(h('div',{class:'row'}, inp, h('button',{class:'b', onclick:go}, 'Entrar'), h('button',{class:'linkb', onclick:()=>{ S.orgOpen = false; orgFooter(); }}, 'Cancelar')));
 }
