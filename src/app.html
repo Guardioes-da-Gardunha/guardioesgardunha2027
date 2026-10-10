@@ -149,9 +149,9 @@ details>summary{cursor:pointer;font-weight:700}
 const DEF = {open:true, periodOn:false, from:'2027-01-01', to:'2027-12-15', hide:false, R:25, podium:[8,5,3], checkin:1, checkinMax:3, halfAt:0, halfBonus:16, allAt:0, allBonus:32, treinoPts:8, treinoMax:40, stealMonth:3, stealSeason:5, stealLegend:8, podiumBy:'genero', mod:'c', maxRun:6.5};
 const S = {db:null, user:null, dl:null, uid:null, admin:false, ready:false,
   segs:[], ath:[], claims:{}, eff:{}, man:{}, cfg:Object.assign({}, DEF), rev:{ok:{}, no:{}},
-  tab:'sub', month:'all', segSel:1, fG:'M', fV:false, fMod:null, clsCat:'geral', clsG:'M', open:{},
+  tab:'reg', month:'all', segSel:1, fG:'M', fV:false, fMod:null, clsCat:'geral', clsG:'M', open:{},
   pending:[], target:'self', busy:false, cut:null, profiles:{}, regs:{}, myReg:null, priv:{}, rf:{nome:'', g:'', nasc:'', contacto:'', ok:false}, na:{nome:'', g:'M', nasc:''}};
-const TABS = [['sub','Submeter'],['lenda','A Lenda'],['seg','Caminhos'],['cls','Classificação'],['ins','Inscrições'],['adm','Organização']];
+const TABS = [['reg','Inscrição'],['sub','Carregar atividade'],['lenda','A Lenda'],['seg','Caminhos'],['cls','Classificação'],['ins','Inscrições'],['adm','Organização']];
 const ADMIN_TABS = ['ins','adm'];
 const TIPO_LBL = {Subida:'Subida', Descida:'Descida', Cumeada:'Cumeada', Loop:'Loop'};
 const MOD_LBL = {b:'Bicicleta', c:'Corrida'};
@@ -309,7 +309,7 @@ function doRender(){
   orgFooter();
   const main = document.getElementById('main');
   if (!S.db){ main.replaceChildren(h('div',{class:'card notice'}, h('strong',{},'Não foi possível ligar à base de dados. '), 'Verifica a ligação à internet e recarrega a página.')); return; }
-  const v = S.tab === 'lenda' ? viewLenda() : S.tab === 'seg' ? viewSeg() : S.tab === 'cls' ? viewCls() : S.tab === 'adm' && S.admin ? viewAdm() : S.tab === 'ins' && S.admin ? viewIns() : viewSub();
+  const v = S.tab === 'lenda' ? viewLenda() : S.tab === 'seg' ? viewSeg() : S.tab === 'cls' ? viewCls() : S.tab === 'adm' && S.admin ? viewAdm() : S.tab === 'ins' && S.admin ? viewIns() : S.tab === 'reg' ? viewReg() : viewSub();
   main.replaceChildren(...[].concat(v));
 }
 
@@ -350,41 +350,57 @@ function orgFooter(){
 }
 
 /* ===== Submeter ===== */
+function goTab(k){ S.tab = k; try{ localStorage.setItem('g27tab',k); }catch(e){} doRender(); window.scrollTo(0,0); }
+/* ===== Inscrição ===== */
+function viewReg(){
+  const out = [], aid = myAid(), claim = S.claims[S.uid], reg = S.myReg;
+  out.push(h('section',{class:'stack'}, h('h2',{},'Inscrição'),
+    h('p',{class:'muted', style:'margin:0;max-width:68ch'}, 'Inscreve-te no Desafio Guardiões da Gardunha 2027. Recebes um código pessoal que liga este telemóvel à tua inscrição; a organização confirma o pedido e a partir daí podes carregar as tuas atividades.')));
+  if (S.myCode) out.push(codeCard());
+  const card = h('div',{class:'card stack'});
+  if (aid){
+    card.append(h('h3',{}, 'Estás inscrito'), h('div',{class:'notice f'}, 'Inscrição confirmada como ', h('strong',{}, athName(athById(aid))), '. Já podes carregar atividades.'),
+      h('div',{class:'row'}, h('button',{class:'b t', onclick:()=>goTab('sub')}, 'Carregar atividade')), codeActions());
+  } else if (reg && reg.estado === 'pendente'){
+    card.append(h('h3',{}, 'A tua inscrição'), h('div',{class:'notice f'}, h('strong',{}, 'Inscrição enviada. '), `Pedido de ${reg.nome} recebido a ${fmtDate(Math.round(reg.at/1000))}. Quando a organização aprovar, podes guardar os tempos das tuas atividades.`), codeActions());
+  } else if (claim && athById(claim.aid)){
+    card.append(h('h3',{}, 'A tua inscrição'), h('div',{class:'notice w'}, 'Pediste a inscrição de ', h('strong',{}, athName(athById(claim.aid))), ', mas ela está associada a outra pessoa. Fala com a organização.'), claimPicker());
+  } else {
+    card.append(h('h3',{}, 'Formulário de inscrição'));
+    if (reg && reg.estado === 'rejeitada') card.append(h('div',{class:'notice'}, 'A tua inscrição não foi aceite. Fala com a organização antes de voltar a enviar.'));
+    card.append(regForm(),
+      ...(S.ath.some(a => !ownerOf(a.id) && !a.ex) ? [h('details',{}, h('summary',{}, 'A organização já te inscreveu? Escolhe o teu nome'), h('div',{style:'margin-top:10px'}, claimPicker()))] : []), loginBox());
+  }
+  out.push(card);
+  return out;
+}
+/* ===== Carregar atividade ===== */
 function viewSub(){
   const c = cfg(), out = [], aid = myAid(), withTrace = S.segs.filter(hasTrace).length;
-  out.push(h('section',{class:'stack'}, h('h2',{},'Submeter atividades'),
-    h('p',{class:'muted', style:'margin:0;max-width:68ch'}, 'Carrega um ou vários ficheiros GPX das tuas atividades. A página compara cada percurso com o traçado dos caminhos oficiais e regista o tempo de cada tentativa. Nenhum ficheiro é guardado — só os tempos.')));
-  if (S.myCode) out.push(codeCard());
-  if (withTrace < S.segs.length) out.push(h('div',{class:'card notice w'}, h('strong',{}, `${withTrace} de ${S.segs.length} caminhos têm traçado de referência. `), withTrace ? 'Só esses são detetados nos teus GPX; os restantes ficam disponíveis quando a organização os preparar.' : 'A organização ainda está a preparar os traçados — até lá não é possível detetar tempos.'));
-  // identidade
-  const idCard = h('div',{class:'card stack'}, h('h3',{},'Quem está a submeter'));
+  out.push(h('section',{class:'stack'}, h('h2',{},'Carregar atividade'),
+    h('p',{class:'muted', style:'margin:0;max-width:68ch'}, 'Carrega um ou vários ficheiros GPX das tuas corridas. A página compara cada percurso com o traçado dos caminhos oficiais e mede o tempo de cada tentativa. Nenhum ficheiro é guardado — só os tempos.')));
+  if (withTrace < S.segs.length) out.push(h('div',{class:'card notice w'}, h('strong',{}, `${withTrace} de ${S.segs.length} caminhos têm traçado de referência. `), withTrace ? 'Só esses são detetados nos teus GPX.' : 'A organização ainda está a preparar os traçados.'));
   if (S.admin){
     const sel = h('select',{onchange:e=>{ S.target = e.target.value; S.pending = []; doRender(); }},
       h('option',{value:'self', selected:S.target==='self'}, 'A minha própria inscrição'),
       S.ath.map(a => h('option',{value:'m:'+a.id, selected:S.target==='m:'+a.id}, 'Em nome de: ' + athName(a))));
-    idCard.append(h('div',{class:'row'}, h('span',{class:'lbl'},'Organização'), sel), h('p',{class:'small muted', style:'margin:0'}, 'Em nome de um atleta serve para quem não consegue submeter por si: os tempos ficam associados a essa inscrição.'));
+    out.push(h('div',{class:'card stack'}, h('div',{class:'row'}, h('span',{class:'lbl'},'Organização · carregar para'), sel), h('p',{class:'small muted', style:'margin:0'}, 'Em nome de um atleta serve para quem não consegue carregar por si: os tempos ficam associados a essa inscrição.')));
   }
-  if (S.target === 'self'){
-    const claim = S.claims[S.uid], reg = S.myReg;
-    if (aid) idCard.append(h('p',{style:'margin:0'}, 'Estás inscrito como ', h('strong',{}, athName(athById(aid))), '.'), codeActions());
-    else if (reg && reg.estado === 'pendente') { idCard.firstChild.textContent = 'A tua inscrição'; idCard.append(h('div',{class:'notice f'}, h('strong',{}, 'Inscrição enviada. '), `Pedido de ${reg.nome} recebido a ${fmtDate(Math.round(reg.at/1000))}. Quando a organização aprovar, podes começar a submeter atividades.`), codeActions()); }
-    else if (claim && athById(claim.aid)) idCard.append(h('div',{class:'notice w'}, 'Pediste a inscrição de ', h('strong',{}, athName(athById(claim.aid))), ', mas ela está associada a outra conta. Fala com a organização.'), claimPicker());
-    else { idCard.firstChild.textContent = 'Inscrição';
-      if (reg && reg.estado === 'rejeitada') idCard.append(h('div',{class:'notice'}, 'A tua inscrição não foi aceite. Fala com a organização antes de voltar a enviar.'));
-      idCard.append(h('p',{style:'margin:0'}, 'Ainda não estás inscrito no Desafio Gardunha 2027. Preenche a inscrição; a organização confirma.'), regForm(),
-        ...(S.ath.some(a => !ownerOf(a.id) && !a.ex) ? [h('details',{}, h('summary',{}, 'A organização já te inscreveu? Escolhe o teu nome'), h('div',{style:'margin-top:10px'}, claimPicker()))] : []), loginBox()); }
-  }
-  out.push(idCard);
   const target = S.target === 'self' ? (aid ? {kind:'u', uid:S.uid, aid} : null) : {kind:'m', aid:S.target.slice(2)};
-  if (!target) return out;
-  if (!c.open && !S.admin){ out.push(h('div',{class:'card notice'}, 'As submissões estão fechadas pela organização.')); return out; }
-  // carregar
+  if (S.target === 'self' && aid) out.push(h('div',{class:'card row', style:'justify-content:space-between'}, h('span',{}, 'A carregar como ', h('strong',{}, athName(athById(aid)))), h('span',{class:'tag ok'}, 'inscrição confirmada')));
+  else if (S.target === 'self'){
+    const reg = S.myReg;
+    out.push(h('div',{class:'card notice w'}, h('strong',{}, reg && reg.estado === 'pendente' ? 'Inscrição à espera de aprovação. ' : 'Ainda não estás inscrito. '),
+      reg && reg.estado === 'pendente' ? 'Podes já testar os teus GPX; os tempos só ficam guardados depois de a organização aprovar.' : 'Podes testar os teus GPX, mas para guardar tempos tens de te inscrever primeiro. ',
+      reg && reg.estado === 'pendente' ? null : h('button',{class:'linkb', onclick:()=>goTab('reg')}, 'Fazer a inscrição')));
+  }
+  if (!c.open && !S.admin){ out.push(h('div',{class:'card notice'}, 'O carregamento de atividades está fechado pela organização.')); return out; }
   const inp = h('input',{type:'file', accept:'.gpx,application/gpx+xml', multiple:true, class:'sr', id:'gpxin', onchange:e=>handleFiles(e.target.files)});
   const drop = h('div',{class:'drop', ondragover:e=>{ e.preventDefault(); drop.classList.add('on'); }, ondragleave:()=>drop.classList.remove('on'), ondrop:e=>{ e.preventDefault(); drop.classList.remove('on'); handleFiles(e.dataTransfer.files); }},
     h('div',{class:'big'}, 'GPX'), h('div',{}, 'Arrasta os ficheiros para aqui ou'), h('label',{class:'b t', for:'gpxin'}, 'Escolher ficheiros'), inp,
     h('div',{class:'small muted'}, 'Exporta o GPX original da atividade na app do teu relógio. No Garmin Connect: ⚙ → Exportar para GPX.'));
   out.push(h('div',{class:'card stack'}, h('h3',{},'Carregar GPX de corrida'), drop, S.busy ? h('p',{class:'muted'},'A analisar…') : null, pendingView(target)));
-  out.push(myTimes(target));
+  if (target) out.push(myTimes(target));
   return out;
 }
 function regForm(){
@@ -414,8 +430,8 @@ function claimPicker(){
 }
 async function handleFiles(files){
   if (!files || !files.length) return; S.busy = true; doRender();
-  const c = cfg(), segs = S.segs.filter(hasTrace), res = [], tgt = currentTarget(); if (!tgt){ S.busy = false; return doRender(); }
-  const mySrc = srcOf(tgt), seen = new Set(S.pending.map(it => it.fp).filter(Boolean));
+  const c = cfg(), segs = S.segs.filter(hasTrace), res = [], tgt = currentTarget();
+  const mySrc = tgt ? srcOf(tgt) : 'preview', seen = new Set(S.pending.map(it => it.fp).filter(Boolean));
   for (const f of files){
     const item = {f:f.name, rows:[], err:null};
     try {
@@ -429,8 +445,8 @@ async function handleFiles(files){
         const fp = fpOf(act), prev = fpOwner(fp); item.fp = fp;
         if (seen.has(fp)) { item.err = 'Ficheiro repetido: já está na lista acima.'; res.push(item); continue; }
         seen.add(fp);
-        if (prev && prev.src === mySrc) { item.err = `Esta atividade já foi submetida a ${fmtDate(prev.at)}. O mesmo ficheiro só conta uma vez.`; res.push(item); continue; }
-        if (prev) { item.err = 'Esta atividade já foi submetida por outro atleta. Se é tua, fala com a organização.'; res.push(item); continue; }
+        if (prev && tgt && prev.src === mySrc) { item.err = `Esta atividade já foi submetida a ${fmtDate(prev.at)}. O mesmo ficheiro só conta uma vez.`; res.push(item); continue; }
+        if (prev && tgt) { item.err = 'Esta atividade já foi submetida por outro atleta. Se é tua, fala com a organização.'; res.push(item); continue; }
         for (const sg of segs){
           for (const p of C.detectSegment(act, sg.trace, {R:c.R})){
             const r = {s:sg.n, t:p.t, st:p.st, hr:p.hr, len:p.len, mod, fl:C.suspicion(p, sg, mod, c), f:f.name, fp, out:!inPeriod(p.st), use:inPeriod(p.st)};
@@ -460,6 +476,7 @@ function pendingView(target){
           h('td',{}, r.out ? h('span',{class:'tag warn'},'fora do período') : r.fl ? h('span',{class:'tag warn', title:r.fl}, 'vai para revisão: ' + r.fl) : h('span',{class:'tag ok'},'ok'))); })))));
     box.firstChild && box.lastChild.prepend(h('div',{style:'padding:10px 10px 0'}, head));
   }
+  if (!target){ box.append(h('div',{class:'notice w'}, h('strong',{}, 'Pré-visualização. '), 'Estes tempos só podem ser guardados depois de a tua inscrição estar aprovada. ', h('button',{class:'linkb', onclick:()=>goTab('reg')}, 'Ir para a Inscrição')), h('div',{}, h('button',{class:'b o', onclick:()=>{ S.pending = []; doRender(); }}, 'Limpar'))); return box; }
   box.append(h('div',{class:'row'}, !total ? null : h('button',{class:'b t', onclick:async()=>{
       const rows = S.pending.flatMap(it => it.rows.filter(r => r.use));
       let n = 0; const ok = await safe(async()=>{ n = await saveAttempts(target, rows); });
