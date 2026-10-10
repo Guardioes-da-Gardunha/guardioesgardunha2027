@@ -1,0 +1,17 @@
+# Evita que o projeto gratuito do Supabase seja pausado por inatividade: um pedido leve por dia.
+name: keepalive
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ping Supabase
+        run: |
+          URL=$(grep -o "url: *'[^']*'" public/config.js | sed "s/.*'\(.*\)'/\1/")
+          KEY=$(grep -o "anonKey: *'[^']*'" public/config.js | sed "s/.*'\(.*\)'/\1/")
+          code=$(curl -s -o /dev/null -w "%{http_code}" "$URL/rest/v1/docs?select=id&limit=1" -H "apikey: $KEY" -H "Authorization: Bearer $KEY")
+          echo "HTTP $code"; test "$code" = "200"
