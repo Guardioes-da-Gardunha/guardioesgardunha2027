@@ -221,4 +221,14 @@
   window.G27 = { db: db, user: user, dl: dl, ready: ready, PUBLIC_COLS: PUBLIC_COLS, _pollOnce: pollOnce, _resetCache: resetCache };
   // compatibilidade com o código que usa claude.use('db'|'user'|'downloads')
   window.claude = { use: async function (n) { try { await ready; } catch (e) { return null; } return { db: db, user: user, downloads: dl }[n] || null; } };
+
+  /* se algo falhar enquanto a página ainda diz "A carregar…", mostra o erro em vez de ficar parada */
+  function showFatal(msg) {
+    var m = document.getElementById('main'); if (!m || !/A carregar/.test(m.textContent)) return;
+    m.innerHTML = ''; var d = document.createElement('div'); d.className = 'card notice';
+    var b = document.createElement('strong'); b.textContent = 'Não foi possível carregar a página. '; d.appendChild(b); d.appendChild(document.createTextNode(String(msg).slice(0, 300) + ' — Recarrega com Ctrl+Shift+R; se continuar, envia esta mensagem à organização.')); m.appendChild(d);
+  }
+  window.addEventListener('error', function (e) { showFatal(e.message || 'erro'); });
+  window.addEventListener('unhandledrejection', function (e) { showFatal((e.reason && (e.reason.message || e.reason)) || 'erro'); });
+  setTimeout(function () { var m = document.getElementById('main'); if (m && /A carregar/.test(m.textContent)) showFatal('A página demorou demasiado a arrancar (ligação lenta ou bloqueada).'); }, 12000);
 })();
