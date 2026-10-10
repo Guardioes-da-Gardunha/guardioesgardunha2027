@@ -26,6 +26,9 @@ Site do desafio de trail: inscrição sem login (código pessoal), caminhos com 
 2. **Build command**: vazio · **Build output directory**: `public`.
 3. Depois de publicar, o site fica em `https://<nome>.pages.dev` (podes ligar um domínio teu em *Custom domains*).
 
+#### Alternativa: GitHub Pages (sem criar mais contas)
+Repositório → **Settings → Pages → Build and deployment → Source: Deploy from a branch → Branch `main`, pasta `/docs` → Save**. Fica em `https://<utilizador>.github.io/guardioesgardunha2027/`. (`docs/` é uma cópia de `public/`, gerada por `python3 build.py`.) Num repositório privado o GitHub Pages exige plano pago; num público é gratuito.
+
 ### 3. Entrar como organização
 No site, rodapé → **Acesso da organização** → escreve a frase. Aparecem os separadores *Inscrições* e *Organização*.
 
