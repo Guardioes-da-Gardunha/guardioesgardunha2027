@@ -1,5 +1,7 @@
 # Guardiões da Gardunha 2027
 
+Site: https://guardioes-da-gardunha.github.io/guardioesgardunha2027/
+
 Site do desafio de trail: inscrição sem login (código pessoal), caminhos com mapa e GPX, submissão de tempos por GPX, classificações e área da organização.
 
 - `public/` — o site (HTML + JS estático). É isto que se publica.
