@@ -179,7 +179,8 @@ main.in-r{animation:inR .22s ease} main.in-l{animation:inL .22s ease}
 .tmap{position:relative;height:300px;border-radius:12px;overflow:hidden;background:var(--mapbg);touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
 .tmap.drag{cursor:grabbing}
 .tmap .lyr{position:absolute;inset:0;will-change:transform}
-.tmap img{position:absolute;width:256px;height:256px;max-width:none;pointer-events:none;-webkit-user-drag:none}
+.tmap img{position:absolute;left:0;top:0;width:256px;height:256px;max-width:none;pointer-events:none;-webkit-user-drag:none;transform-origin:0 0;will-change:transform}
+.tmap svg{z-index:2}
 .tmap svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
 .tmap .halo{fill:none;stroke:#fff;stroke-opacity:.85;stroke-width:7;stroke-linejoin:round;stroke-linecap:round}
 .tmap .line{fill:none;stroke:var(--terra);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
@@ -719,50 +720,70 @@ function pagedTrack(pages, titles, key){
   return h('div',{class:'stack noswipe', style:'gap:14px'}, bar(), track, h('div',{class:'pager'}, h('button',{class:'b o s', onclick:()=>go((S[key]||0) - 1)}, '← Anterior'), h('button',{class:'b o s', onclick:()=>go((S[key]||0) + 1)}, 'Seguinte →')));
 }
 const TILES = {
-  topo:{n:'Terreno', max:17, attr:'© OpenStreetMap · SRTM · © OpenTopoMap (CC-BY-SA)', url:(z,x,y)=>`https://${'abc'[(x+y)%3]}.tile.opentopomap.org/${z}/${x}/${y}.png`},
-  sat:{n:'Satélite', max:18, attr:'Imagens © Esri, Maxar, Earthstar Geographics', url:(z,x,y)=>`https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`},
-  osm:{n:'Mapa', max:19, attr:'© OpenStreetMap', url:(z,x,y)=>`https://tile.openstreetmap.org/${z}/${x}/${y}.png`}
+  osm:{n:'Mapa', max:19, attr:'© OpenStreetMap', url:(z,x,y)=>`https://tile.openstreetmap.org/${z}/${x}/${y}.png`},
+  sat:{n:'Satélite', max:19, attr:'Imagens © Esri, Maxar, Earthstar Geographics', url:(z,x,y)=>`https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`}
 };
 function wpx(lat, lon, z){ const sc = 256 * Math.pow(2, z), si = Math.sin(lat * Math.PI / 180); return [(lon + 180) / 360 * sc, (0.5 - Math.log((1 + si) / (1 - si)) / (4 * Math.PI)) * sc]; }
 function tileMap(sg){
   const f = sg.trace, P = []; for (let i = 0; i + 1 < f.length; i += 2) P.push([f[i], f[i+1]]);
   const box = h('div',{class:'tmap noswipe', role:'img', 'aria-label':'Mapa do caminho ' + sg.nome}), lyr = h('div',{class:'lyr'}); box.append(lyr);
-  const attr = h('div',{class:'tm-attr'}); const st = {z:13, cx:0, cy:0, W:0, H:0};
-  if (!TILES[S.mapLayer]) S.mapLayer = 'topo';
-  const lays = h('div',{class:'seg tm-lay', role:'group', 'aria-label':'Fundo do mapa'}, ...Object.entries(TILES).map(([k, L]) => h('button',{'aria-pressed':String(S.mapLayer===k), onclick:e=>{ e.stopPropagation(); S.mapLayer = k; [...lays.children].forEach(b => b.setAttribute('aria-pressed', String(b.textContent === L.n))); draw(); }}, L.n)));
-  const zoom = d => { const L = TILES[S.mapLayer], z = Math.max(3, Math.min(L.max, st.z + d)); if (z === st.z) return; const k = Math.pow(2, z - st.z); st.cx *= k; st.cy *= k; st.z = z; draw(); };
-  const ctl = h('div',{class:'tm-ctl'}, h('button',{'aria-label':'Aproximar', onclick:e=>{ e.stopPropagation(); zoom(1); }}, '+'), h('button',{'aria-label':'Afastar', onclick:e=>{ e.stopPropagation(); zoom(-1); }}, '−'), h('button',{'aria-label':'Centrar no caminho', title:'Centrar', onclick:e=>{ e.stopPropagation(); fit(); draw(); }}, '⌖'));
+  const attr = h('div',{class:'tm-attr'}); const st = {z:13, cx:0, cy:0, W:0, H:0}; const tiles = new Map(); let svg = null, raf = 0;
+  if (!TILES[S.mapLayer]) S.mapLayer = 'osm';
+  const MINZ = 3, maxZ = () => TILES[S.mapLayer].max;
+  const lays = h('div',{class:'seg tm-lay', role:'group', 'aria-label':'Fundo do mapa'}, ...Object.entries(TILES).map(([k, L]) => h('button',{'aria-pressed':String(S.mapLayer===k), onclick:e=>{ e.stopPropagation(); S.mapLayer = k; [...lays.children].forEach(b => b.setAttribute('aria-pressed', String(b.textContent === L.n))); tiles.forEach(t => t.remove()); tiles.clear(); zoomAt(st.W/2, st.H/2, 1); }}, L.n)));
+  // zoom contínuo à volta de um ponto do ecrã (px, py), por um fator k
+  function zoomAt(px, py, k){
+    const z2 = Math.max(MINZ, Math.min(maxZ(), st.z + Math.log2(k))); k = Math.pow(2, z2 - st.z);
+    const wx = st.cx - st.W/2 + px, wy = st.cy - st.H/2 + py; st.cx = wx * k - px + st.W/2; st.cy = wy * k - py + st.H/2; st.z = z2; req();
+  }
+  const ctl = h('div',{class:'tm-ctl'}, h('button',{'aria-label':'Aproximar', onclick:e=>{ e.stopPropagation(); anim(2); }}, '+'), h('button',{'aria-label':'Afastar', onclick:e=>{ e.stopPropagation(); anim(0.5); }}, '−'), h('button',{'aria-label':'Centrar no caminho', title:'Centrar', onclick:e=>{ e.stopPropagation(); fit(); req(); }}, '⌖'));
+  function anim(k){ const steps = 8; let n = 0; const step = Math.pow(k, 1/steps); const go = () => { zoomAt(st.W/2, st.H/2, step); if (++n < steps) requestAnimationFrame(go); }; go(); }
   box.append(lays, ctl, attr);
   function fit(){
     st.W = box.clientWidth || 600; st.H = box.clientHeight || 300;
     let a = 90, b = -90, c = 180, d = -180; for (const [la, lo] of P){ if (la < a) a = la; if (la > b) b = la; if (lo < c) c = lo; if (lo > d) d = lo; }
-    let z = Math.min(17, TILES[S.mapLayer].max); for (; z > 3; z--){ const [x0, y1] = wpx(a, c, z), [x1, y0] = wpx(b, d, z); if (x1 - x0 < st.W - 90 && y1 - y0 < st.H - 110) break; }
-    const [x0, y1] = wpx(a, c, z), [x1, y0] = wpx(b, d, z); st.z = z; st.cx = (x0 + x1) / 2; st.cy = (y0 + y1) / 2 - 10;
+    const [x0, y1] = wpx(a, c, 0), [x1, y0] = wpx(b, d, 0);
+    const z = Math.min(17, maxZ(), Math.log2(Math.min((st.W - 80) / Math.max(x1 - x0, 1e-9), (st.H - 110) / Math.max(y1 - y0, 1e-9))));
+    st.z = Math.max(MINZ, z); const sc = Math.pow(2, st.z); st.cx = (x0 + x1) / 2 * sc; st.cy = (y0 + y1) / 2 * sc - 10;
   }
+  function req(){ if (!raf) raf = requestAnimationFrame(() => { raf = 0; draw(); }); }
   function draw(){
-    const L = TILES[S.mapLayer]; if (st.z > L.max){ const k = Math.pow(2, L.max - st.z); st.cx *= k; st.cy *= k; st.z = L.max; }
-    const ox = st.cx - st.W / 2, oy = st.cy - st.H / 2, n = Math.pow(2, st.z);
-    const imgs = [];
-    for (let tx = Math.floor(ox / 256); tx <= Math.floor((ox + st.W) / 256); tx++) for (let ty = Math.floor(oy / 256); ty <= Math.floor((oy + st.H) / 256); ty++){
-      if (ty < 0 || ty >= n) continue; const wx = ((tx % n) + n) % n;
-      const im = new Image(); im.alt = ''; im.decoding = 'async'; im.referrerPolicy = 'strict-origin-when-cross-origin'; im.style.left = (tx * 256 - ox) + 'px'; im.style.top = (ty * 256 - oy) + 'px'; im.onerror = () => { im.style.visibility = 'hidden'; }; im.src = L.url(st.z, wx, ty); imgs.push(im); }
-    const svg = sv('svg',{viewBox:`0 0 ${st.W} ${st.H}`});
-    const pts = P.map(([la, lo]) => { const [x, y] = wpx(la, lo, st.z); return (x - ox).toFixed(1) + ',' + (y - oy).toFixed(1); }).join(' ');
-    svg.append(sv('polyline',{points:pts, class:'halo'}), sv('polyline',{points:pts, class:'line'}));
-    const [sx, sy] = wpx(P[0][0], P[0][1], st.z), [ex, ey] = wpx(P[P.length-1][0], P[P.length-1][1], st.z);
-    svg.append(flagIcon(+(sx - ox).toFixed(1), +(sy - oy).toFixed(1), false), flagIcon(+(ex - ox).toFixed(1), +(ey - oy).toFixed(1), true));
-    lyr.style.transform = ''; lyr.replaceChildren(...imgs, svg); attr.textContent = L.attr;
+    const L = TILES[S.mapLayer], zt = Math.max(MINZ, Math.min(L.max, Math.round(st.z))), k = Math.pow(2, st.z - zt), ts = 256 * k;
+    const ox = st.cx - st.W / 2, oy = st.cy - st.H / 2, n = Math.pow(2, zt), keep = new Set();
+    for (let tx = Math.floor(ox / ts); tx <= Math.floor((ox + st.W) / ts); tx++) for (let ty = Math.floor(oy / ts); ty <= Math.floor((oy + st.H) / ts); ty++){
+      if (ty < 0 || ty >= n) continue; const wx = ((tx % n) + n) % n, key = zt + '/' + tx + '/' + ty; keep.add(key);
+      let im = tiles.get(key);
+      if (!im){ im = new Image(); im.alt = ''; im.decoding = 'async'; im.draggable = false; im.onerror = () => { im.style.visibility = 'hidden'; }; im.src = L.url(zt, wx, ty); tiles.set(key, im); lyr.insertBefore(im, svg); }
+      im.style.transform = `translate(${(tx * ts - ox).toFixed(1)}px,${(ty * ts - oy).toFixed(1)}px) scale(${k})`;
+    }
+    // mantém por baixo os mosaicos de outro nível até os novos chegarem; remove os que já não se veem
+    tiles.forEach((im, key) => { if (keep.has(key)) { im.style.zIndex = 1; return; } const zz = +key.split('/')[0]; if (zz === zt || Math.abs(zz - zt) > 1){ im.remove(); tiles.delete(key); } else { const [, X, Y] = key.split('/').map(Number), kk = Math.pow(2, st.z - zz), s2 = 256 * kk; im.style.zIndex = 0; im.style.transform = `translate(${(X * s2 - ox).toFixed(1)}px,${(Y * s2 - oy).toFixed(1)}px) scale(${kk})`; } });
+    const ns = sv('svg',{viewBox:`0 0 ${st.W} ${st.H}`});
+    const sc = Math.pow(2, st.z), pts = P.map(([la, lo]) => { const [x, y] = wpx(la, lo, 0); return (x * sc - ox).toFixed(1) + ',' + (y * sc - oy).toFixed(1); }).join(' ');
+    ns.append(sv('polyline',{points:pts, class:'halo'}), sv('polyline',{points:pts, class:'line'}));
+    const [sx, sy] = wpx(P[0][0], P[0][1], 0), [ex, ey] = wpx(P[P.length-1][0], P[P.length-1][1], 0);
+    ns.append(flagIcon(+(sx * sc - ox).toFixed(1), +(sy * sc - oy).toFixed(1), false), flagIcon(+(ex * sc - ox).toFixed(1), +(ey * sc - oy).toFixed(1), true));
+    if (svg) svg.replaceWith(ns); else lyr.append(ns); svg = ns; attr.textContent = L.attr;
   }
-  let drag = null;
-  box.addEventListener('pointerdown', e => { if (e.target.closest('button')) return; drag = {x:e.clientX, y:e.clientY, dx:0, dy:0}; box.setPointerCapture(e.pointerId); box.classList.add('drag'); });
-  box.addEventListener('pointermove', e => { if (!drag) return; drag.dx = e.clientX - drag.x; drag.dy = e.clientY - drag.y; lyr.style.transform = `translate(${drag.dx}px,${drag.dy}px)`; });
-  const end = () => { if (!drag) return; st.cx -= drag.dx; st.cy -= drag.dy; drag = null; box.classList.remove('drag'); draw(); };
-  box.addEventListener('pointerup', end); box.addEventListener('pointercancel', end);
-  box.addEventListener('wheel', e => { e.preventDefault(); zoom(e.deltaY < 0 ? 1 : -1); }, {passive:false});
-  box.addEventListener('dblclick', e => { if (!e.target.closest('button')) zoom(1); });
+  // gestos: 1 dedo arrasta, 2 dedos fazem pinça (zoom contínuo), roda do rato, duplo toque
+  const pts = new Map(); let pinch = null, lastTap = 0;
+  const rel = e => { const r = box.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  box.addEventListener('pointerdown', e => { if (e.target.closest('button')) return; box.setPointerCapture(e.pointerId); pts.set(e.pointerId, rel(e)); box.classList.add('drag');
+    if (pts.size === 2){ const [a, b] = [...pts.values()]; pinch = {d:Math.hypot(a[0]-b[0], a[1]-b[1]), m:[(a[0]+b[0])/2, (a[1]+b[1])/2]}; }
+    else if (e.pointerType !== 'mouse'){ const now = Date.now(); if (now - lastTap < 300){ const [x, y] = rel(e); let n = 0; const go = () => { zoomAt(x, y, Math.pow(2, 1/8)); if (++n < 8) requestAnimationFrame(go); }; go(); } lastTap = now; } });
+  box.addEventListener('pointermove', e => { if (!pts.has(e.pointerId)) return; const prev = pts.get(e.pointerId), cur = rel(e); pts.set(e.pointerId, cur);
+    if (pts.size >= 2 && pinch){ const [a, b] = [...pts.values()], d = Math.hypot(a[0]-b[0], a[1]-b[1]), m = [(a[0]+b[0])/2, (a[1]+b[1])/2];
+      st.cx -= m[0] - pinch.m[0]; st.cy -= m[1] - pinch.m[1]; if (pinch.d > 0) zoomAt(m[0], m[1], d / pinch.d); pinch = {d, m}; req(); }
+    else if (pts.size === 1){ st.cx -= cur[0] - prev[0]; st.cy -= cur[1] - prev[1]; req(); } });
+  const up = e => { pts.delete(e.pointerId); if (pts.size < 2) pinch = null; if (!pts.size) box.classList.remove('drag'); };
+  box.addEventListener('pointerup', up); box.addEventListener('pointercancel', up);
+  box.addEventListener('wheel', e => { e.preventDefault(); const [x, y] = rel(e); zoomAt(x, y, Math.pow(2, -e.deltaY / (e.deltaMode ? 3 : 300))); }, {passive:false});
+  box.addEventListener('dblclick', e => { if (e.target.closest('button')) return; const [x, y] = rel(e); zoomAt(x, y, 2); });
   requestAnimationFrame(() => { if (!box.isConnected) return; fit(); draw(); });
-  return h('div',{class:'tmapw'}, box, h('div',{class:'small muted'}, 'Arrasta para mover · + e − para aproximar · escolhe Terreno, Satélite ou Mapa.'));
+  window.addEventListener('resize', () => { if (!box.isConnected) return; const W = box.clientWidth, H = box.clientHeight; if (W && (W !== st.W || H !== st.H)){ st.W = W; st.H = H; req(); } });
+  return h('div',{class:'tmapw'}, box, h('div',{class:'small muted'}, 'Arrasta para mover · afasta dois dedos (ou a roda do rato) para aproximar · toca duas vezes para ampliar.'));
 }
+
 function regDoc(){
   const all = h('button',{class:'linkb', onclick:()=>{ const ds = [...box.querySelectorAll('details')]; const op = !ds.every(d => d.open); ds.forEach(d => d.open = op); all.textContent = op ? 'Fechar tudo' : 'Abrir tudo'; }}, 'Abrir tudo');
   const box = h('section',{class:'card stack', id:'regdoc', style:'gap:6px'}, h('div',{class:'row', style:'justify-content:space-between'}, h('h3',{}, 'Regulamento'), all),
@@ -1023,7 +1044,7 @@ function viewLenda(){
   pages.push(h('article',{class:'page stack'}, h('h3',{class:'crest-title', style:'font-size:1.6rem'}, 'Guardiões de Todos os Tempos'), h('p',{class:'muted', style:'margin:0;max-width:68ch'}, 'A referência histórica de cada caminho. Quem a bater rouba o bordão de sempre: +8 pontos, e passa a ser a nova lenda desse caminho.'), tbl));
   const titles = pages.map(pg => (pg.querySelector('h3') || {}).textContent || '');
   return [h('section',{class:'hero', style:'gap:6px'}, h('h2',{class:'crest-title'}, 'Guardiões da Gardunha'), h('p',{class:'when'}, `${FMT_D(cfg().from)} a ${FMT_D(cfg().to)}`)),
-    pagedTrack(pages, titles, 'lendaPg')];
+    h('div',{class:'stack', style:'gap:34px'}, ...pages)];
 
 }
 function zipStore(name, text){ // ZIP sem compressão com um só ficheiro (a descarga não aceita .gpx; o .zip abre em qualquer telemóvel)
