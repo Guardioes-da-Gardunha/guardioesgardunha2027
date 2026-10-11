@@ -7,6 +7,9 @@
 <meta name="description" content="Guardiões da Gardunha 2027 — desafio de trail na Serra da Gardunha. Inscrições, caminhos, classificações.">
 <meta property="og:title" content="Guardiões da Gardunha 2027"><meta property="og:description" content="Rouba o bordão. Desafio de trail na Serra da Gardunha.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 140'%3E%3Crect width='140' height='140' rx='24' fill='%231D0E12'/%3E%3Cg stroke='%23D8B25A' stroke-width='9' stroke-linecap='round'%3E%3Cpath d='M26 118 L114 22'/%3E%3Cpath d='M114 118 L26 22'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Guardiões">
 <title>Guardiões da Gardunha</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -133,6 +136,68 @@ details>summary{cursor:pointer;font-weight:700}
 .codebox{font-family:var(--mono);font-size:clamp(1.4rem,6vw,2rem);letter-spacing:.08em;padding:14px 16px;border:1px dashed var(--terra);border-radius:10px;background:var(--terra-soft);color:var(--terra-txt);text-align:center;user-select:all;-webkit-user-select:all;word-break:break-all}
 .linkb{background:none;border:0;padding:6px 0;color:var(--muted);font:inherit;font-size:.85rem;text-decoration:underline;cursor:pointer}
 #foot{padding-block:28px 40px;color:var(--muted)}
+
+/* navegação no telemóvel: barra de ícones em baixo + deslizar */
+.bnav{display:none}
+@keyframes inR{from{transform:translateX(36px);opacity:0}to{transform:none;opacity:1}} @keyframes inL{from{transform:translateX(-36px);opacity:0}to{transform:none;opacity:1}}
+main.in-r{animation:inR .22s ease} main.in-l{animation:inL .22s ease}
+@media (prefers-reduced-motion: reduce){ main.in-r,main.in-l{animation:none} }
+@media (max-width:760px){
+  nav#tabs button.pub{display:none} nav#tabs:not(:has(.adm)){display:none}
+  .bnav{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;left:0;right:0;bottom:0;z-index:8;background:var(--header-bg);border-top:1px solid var(--line);padding:6px 2px calc(6px + env(safe-area-inset-bottom,0px));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+  .bnav button{background:none;border:0;color:var(--muted);display:grid;justify-items:center;gap:3px;font:600 .64rem/1.1 var(--body);padding:4px 0 2px;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent}
+  .bnav button[aria-current="page"]{color:var(--terra-txt)}
+  .bnav button[aria-current="page"]::before{content:'';position:absolute;top:-7px;left:28%;right:28%;height:3px;border-radius:0 0 3px 3px;background:var(--terra)}
+  main.wrap{padding-bottom:28px} #foot{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+  .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+}
+.bnav svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#me[hidden]{display:none}
+/* início */
+.hero{display:grid;gap:12px;justify-items:start;padding-block:8px 4px}
+.hero .crest svg{width:76px;height:76px}
+.hero h2{font-size:clamp(2.3rem,9vw,4rem)}
+.hero .claim{font-family:var(--crest);font-weight:700;font-size:clamp(1.3rem,4.5vw,1.8rem);color:var(--terra-txt);letter-spacing:.03em;margin:0}
+.hero .when{font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px} .stats div{display:grid;gap:2px;border-left:2px solid var(--terra);padding-left:10px} .stats strong{font-family:var(--head);font-weight:900;font-stretch:62%;font-size:1.9rem;line-height:1} .stats span{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+@media (max-width:560px){ .stats{grid-template-columns:repeat(2,1fr)} }
+/* cartões dos caminhos */
+.carousel{display:grid;grid-auto-flow:column;grid-auto-columns:min(86%,340px);gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.carousel::-webkit-scrollbar{display:none}
+.scard{scroll-snap-align:center;text-align:left;font:inherit;color:inherit;background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:8px;align-content:start;cursor:pointer;min-width:0}
+.scard.on{border-color:var(--terra);box-shadow:0 0 0 1px var(--terra) inset}
+.scard .map{border-radius:10px}
+.scard h4{margin:0;font-family:var(--head);font-weight:900;font-stretch:62%;text-transform:uppercase;font-size:1.4rem;line-height:1;text-wrap:balance}
+.scard .meta{font-family:var(--mono);font-size:.66rem;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.scard .gd{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.8rem;border-top:1px solid var(--line);padding-top:8px}
+.scard .gd b{display:block;font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.dots{display:flex;gap:6px;justify-content:center;align-items:center;min-height:12px} .dots i{width:7px;height:7px;border-radius:4px;background:var(--line2);transition:width .2s} .dots i.on{background:var(--terra);width:20px}
+.pager{display:flex;align-items:center;justify-content:space-between;gap:10px}
+/* lenda em páginas */
+.pages{display:grid;grid-auto-flow:column;grid-auto-columns:100%;gap:28px;overflow-x:auto;overflow-y:hidden;transition:height .25s ease;scroll-snap-type:x mandatory;scrollbar-width:none;align-items:start;overscroll-behavior-x:contain}
+.pages::-webkit-scrollbar{display:none} .pages > .page{scroll-snap-align:start;min-width:0}
+/* mapa com fundo (terreno / satélite) */
+.tmapw{display:grid;gap:6px}
+.tmap{position:relative;height:300px;border-radius:12px;overflow:hidden;background:var(--mapbg);touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.tmap.drag{cursor:grabbing}
+.tmap .lyr{position:absolute;inset:0;will-change:transform}
+.tmap img{position:absolute;width:256px;height:256px;max-width:none;pointer-events:none;-webkit-user-drag:none}
+.tmap svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.tmap .halo{fill:none;stroke:#fff;stroke-opacity:.85;stroke-width:7;stroke-linejoin:round;stroke-linecap:round}
+.tmap .line{fill:none;stroke:var(--terra);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
+.tm-ctl{position:absolute;right:8px;top:8px;display:grid;gap:6px;z-index:2}
+.tm-ctl button{width:38px;height:38px;border-radius:9px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);font-size:1.25rem;line-height:1;cursor:pointer}
+.tm-lay{position:absolute;left:8px;top:8px;z-index:2;background:var(--surface)}
+.tm-lay button{padding:6px 11px;font-size:.78rem}
+.tm-attr{position:absolute;right:0;bottom:0;z-index:2;font-size:.6rem;background:rgba(255,255,255,.78);color:#222;padding:1px 6px;border-top-left-radius:6px}
+@media (min-width:761px){ .tmap{height:420px} }
+/* regulamento */
+.regart{border-top:1px solid var(--line)} .regart:last-child{border-bottom:1px solid var(--line)}
+.regart summary{cursor:pointer;font-weight:700;padding:12px 0;font-size:.98rem}
+.regbody{display:grid;gap:10px;padding:0 0 14px;color:var(--soft-text);max-width:72ch} .regbody p{margin:0} .regbody ul{margin:0;padding-left:20px;display:grid;gap:4px}
+.chk{display:flex;gap:10px;align-items:flex-start;flex-wrap:nowrap} .chk input{flex:none;width:20px;height:20px;margin:2px 0 0;accent-color:var(--terra)}
+.linkb.inl{padding:0;font-size:inherit;color:var(--terra-txt);font-weight:700}
+.howto{display:grid;gap:8px;margin:0;padding:0;list-style:none} .howto li{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dashed var(--line);padding-bottom:6px} .howto b{font-family:var(--mono);color:var(--terra-txt);white-space:nowrap}
 </style>
 
 </head>
@@ -149,6 +214,7 @@ details>summary{cursor:pointer;font-weight:700}
 </header>
 <main class="wrap" id="main"><div class="card empty">A carregar…</div></main>
 <footer class="wrap" id="foot"></footer>
+<nav class="bnav" id="bnav" aria-label="Secções"></nav>
 <div class="toast" id="toast" hidden></div>
 
 <script src="config.js"></script>
@@ -415,9 +481,12 @@ return { climbStats, classifySeg, monthKey, parseGPX, detectSegment, suggestWind
 const DEF = {open:true, periodOn:false, from:'2027-01-01', to:'2027-12-15', hide:false, R:25, podium:[8,5,3], checkin:1, checkinMax:3, halfAt:0, halfBonus:16, allAt:0, allBonus:32, treinoPts:8, treinoMax:40, stealMonth:3, stealSeason:5, stealLegend:8, podiumBy:'genero', mod:'c', maxRun:6.5};
 const S = {db:null, user:null, dl:null, uid:null, admin:false, ready:false,
   segs:[], ath:[], claims:{}, eff:{}, man:{}, cfg:Object.assign({}, DEF), rev:{ok:{}, no:{}},
-  tab:'reg', month:'all', segSel:1, fG:'M', fV:false, fMod:null, clsCat:'geral', clsG:'M', open:{},
+  tab:'home', month:'all', segSel:1, fG:'M', fV:false, fMod:null, clsCat:'geral', clsG:'M', open:{},
   pending:[], target:'self', busy:false, cut:null, profiles:{}, regs:{}, myReg:null, priv:{}, rf:{nome:'', g:'', nasc:'', contacto:'', ok:false}, na:{nome:'', g:'M', nasc:''}};
-const TABS = [['reg','Inscrição'],['sub','Carregar atividade'],['lenda','A Lenda'],['seg','Caminhos'],['cls','Classificação'],['ins','Inscrições'],['adm','Organização']];
+const TABS = [['home','Início'],['reg','Inscrição'],['sub','Carregar atividade'],['seg','Caminhos'],['cls','Classificação'],['lenda','A Lenda'],['ins','Inscrições'],['adm','Organização']];
+const PUB = ['home','reg','sub','seg','cls','lenda'];
+const NAVI = {home:['Início','M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z'], reg:['Inscrição','M15 20v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1 M13 8a4 4 0 1 1-8 0a4 4 0 1 1 8 0 M19 8v6 M16 11h6'], sub:['Carregar','M12 16V4 M7 9l5-5 5 5 M4 20h16'], seg:['Caminhos','M3 20l6-10 4 6 2-3 6 7z M14 6l1.5-2.5L17 6'], cls:['Classif.','M4 20v-7h5v7 M9 20V8h6v12 M15 20v-9h5v9'], lenda:['Lenda','M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z M5 17a3 3 0 0 1 3-3h11']};
+const REG = [{"t": "Artigo 1 — Espírito e objeto", "html": "<p>1.1. <strong>Guardiões da Gardunha<\/strong> é um desafio de corrida em trilho em 35 caminhos da Serra da Gardunha, entre 1 de janeiro e 15 de dezembro de 2027.<\/p><p>1.2. Corre-se quando se quer, sozinho ou em grupo: cada atleta escolhe os dias, os caminhos e quantas tentativas faz. Conta sempre o melhor tempo.<\/p><p>1.3. Em cada caminho há um Guardião e uma Guardiã: quem tem o melhor tempo do seu género. O objetivo é tirar-lhes a guarda, correr mais a serra e chegar à Noite dos Guardiões com histórias para contar.<\/p><p>1.4. Só contam atividades <strong>a pé<\/strong> (corrida ou caminhada). Bicicleta, e-bike ou qualquer veículo estão excluídos.<\/p>"}, {"t": "Artigo 2 — Participação e inscrições", "html": "<p>2.1. Pode participar qualquer pessoa que aceite este Regulamento, de qualquer nível. Basta um relógio ou telemóvel que grave a atividade em GPX.<\/p><p>2.2. A inscrição faz-se na página do desafio, com nome, género, data de nascimento e contacto. A Organização aprova cada inscrição. A data de nascimento e o contacto só são visíveis para a Organização.<\/p><p>2.3. As inscrições fecham a [DATA A DEFINIR]. Quem entrar mais tarde pode participar, mas só contam tentativas feitas a partir da data de inscrição.<\/p><p>2.4. Menores de 18 anos participam com autorização do encarregado de educação.<\/p><p>2.5. Cada atleta corre sob a sua responsabilidade. Os caminhos atravessam trilhos, estradões e estradas abertas ao trânsito: a Organização não fecha percursos nem garante a segurança fora dos Dias de Ataque.<\/p>"}, {"t": "Artigo 3 — Os 35 caminhos", "html": "<p>3.1. O desafio usa uma lista fechada de <strong>35 caminhos<\/strong> (Anexo), com um total de 55 km e cerca de 6100 m de desnível: estrada, estradão, calçada romana e trilho.<\/p><p>3.2. Cada caminho pertence a um perfil, que decide a classificação especial onde pontua:<\/p><div class=\"tw\"><table><thead><tr><th>Perfil<\/th><th>Caminhos<\/th><th>Classificação especial<\/th><\/tr><\/thead><tbody><tr><td>Subida<\/td><td>24<\/td><td>Rei / Rainha da Montanha<\/td><\/tr><tr><td>Descida<\/td><td>8<\/td><td>O Míssil<\/td><\/tr><tr><td>Cumeada e Loop<\/td><td>3<\/td><td>Diesel<\/td><\/tr><\/tbody><\/table><\/div><p>3.3. Cada caminho tem um traçado de referência com partida e chegada definidas pela Organização, publicado na página do desafio. É esse traçado que conta.<\/p><p>3.4. Os caminhos fazem-se no sentido indicado. Muitos têm um par no sentido contrário (d+ / d−): são caminhos diferentes, com guardiões diferentes.<\/p><p>3.5. A lista é fixa durante a época. Um caminho só sai (obras, corte de trilho, perigo) com aviso a todos e 7 dias de antecedência; os pontos já ganhos nele mantêm-se.<\/p>"}, {"t": "Artigo 4 — Como se regista uma tentativa", "html": "<p>4.1. As tentativas registam-se na página do desafio. O atleta carrega o GPX da atividade e a página deteta sozinha os caminhos percorridos e o tempo de cada tentativa.<\/p><p>4.2. O tempo vai do instante em que o atleta passa na partida do traçado ao instante em que passa na chegada. Para contar, a tentativa tem de seguir o traçado do princípio ao fim: cortar caminho anula-a.<\/p><p>4.3. Uma atividade pode ter vários caminhos e o mesmo caminho várias vezes. Todas as tentativas ficam no histórico do atleta; para cada ranking conta a melhor: a do mês no ranking mensal, a da época no bordão.<\/p><p>4.4. O GPX tem de ser o original, exportado do relógio ou da app onde a atividade foi gravada. Rotas desenhadas, ficheiros sem hora ou atividades registadas como bicicleta são recusados. O mesmo ficheiro só conta uma vez.<\/p><p>4.5. A página guarda apenas os tempos, nunca o ficheiro.<\/p><p>4.6. Quem não tiver acesso à página envia o GPX à Organização, que o submete em seu nome nas mesmas condições.<\/p><p>4.7. Uma tentativa pode ser submetida até 15 de dezembro de 2027, às 23:59, desde que a atividade tenha sido feita dentro da época.<\/p>"}, {"t": "Artigo 5 — Pontuação", "html": "<p>5.1. Em cada caminho há, todos os meses, um ranking masculino e um feminino com o melhor tempo de cada atleta nesse mês. No fim de cada mês, os três primeiros de cada ranking ganham 8, 5 e 3 pontos. Os pontos somam-se mês a mês: quem mandar num caminho em março e outra vez em outubro pontua nos dois meses.<\/p><div class=\"tw\"><table><thead><tr><th>O que conta<\/th><th>Pontos<\/th><\/tr><\/thead><tbody><tr><td>1.º lugar do mês num caminho<\/td><td>8<\/td><\/tr><tr><td>2.º lugar do mês<\/td><td>5<\/td><\/tr><tr><td>3.º lugar do mês<\/td><td>3<\/td><\/tr><tr><td>Check-in: cada vez que concluis um caminho<\/td><td>+1, até 3 por caminho por mês<\/td><\/tr><tr><td>Meio caminho: 18 dos 35 caminhos concluídos<\/td><td>+16<\/td><\/tr><tr><td>Mestre dos 35: todos os caminhos concluídos<\/td><td>+32 (substitui os 16)<\/td><\/tr><tr><td>Roubar a liderança do mês num caminho (Artigo 8)<\/td><td>+3<\/td><\/tr><tr><td>Roubar o bordão ao Guardião / Guardiã da época (Artigo 8)<\/td><td>+5<\/td><\/tr><tr><td>Bater o Guardião de Todos os Tempos (Artigo 8)<\/td><td>+8, uma vez por caminho<\/td><\/tr><tr><td>Presença num Dia de Ataque (Artigo 7)<\/td><td>+8, até 40<\/td><\/tr><\/tbody><\/table><\/div><p>5.2. O pódio do mês fecha no último dia do mês, às 23:59. Até lá é provisório: quem perder o lugar dentro do mês perde esses pontos. Depois de fechado, ninguém os tira. Dezembro fecha a 15, com o fecho de contas.<\/p><p>5.3. Cada tentativa válida num caminho dá +1 de check-in, até ao máximo de 3 pontos por caminho em cada mês. No mês seguinte o contador volta a zero.<\/p><p>5.4. A pontuação total é a soma de todas as linhas da tabela, e os pontos acumulam: uma só tentativa pode dar check-in, roubos e, no fecho do mês, pódio. A única exceção é o completismo, onde os 32 do Mestre dos 35 substituem os 16 do meio caminho.<\/p>"}, {"t": "Artigo 6 — Guardiões, bordões e o Guardião de Todos os Tempos", "html": "<p>6.1. <strong>Guardião e Guardiã:<\/strong> quem tem o melhor tempo do seu género num caminho guarda esse caminho e detém o seu bordão. Há 35 bordões masculinos e 35 femininos em jogo.<\/p><p>6.2. O bordão é de quem tem o melhor tempo da época e muda de mãos sempre que alguém o bate. Tirá-lo a outro atleta dá pontos (Artigo 8). Bater o próprio tempo não é roubo.<\/p><p>6.3. <strong>Guardião de Todos os Tempos:<\/strong> cada caminho tem uma referência histórica, masculina e feminina — o melhor tempo de sempre conhecido nesse caminho, com nome, tempo e ritmo. A Organização pesquisa e publica estas referências na página do desafio antes do arranque da época.<\/p><p>6.4. Quem bater o Guardião de Todos os Tempos de um caminho ganha +8 pontos (Artigo 8) e o seu nome passa a ser a nova referência desse caminho para as épocas seguintes.<\/p><p>6.5. Os roubos são públicos: a página mostra quem guarda cada caminho, a distância a que cada atleta está do Guardião de Todos os Tempos e o histórico de tentativas. Provocar é permitido, desde que com bom humor.<\/p>"}, {"t": "Artigo 7 — Dias de Ataque", "html": "<p>7.1. Como nos tempos antigos, em certos dias a aldeia inteira junta-se ao pé do caminho. A Organização marca <strong>5 Dias de Ataque<\/strong> (treinos oficiais) ao longo do ano, com data, ponto de encontro e caminhos-alvo anunciados com 15 dias de antecedência.<\/p><p>7.2. Cada presença vale +8 pontos, até 40 (os 5 dias). A presença é registada no local pela Organização.<\/p><p>7.4. Sai-se em grupo e ataca-se em vagas. É o melhor dia para roubar bordões à frente de testemunhas. Farnel: cada um o seu.<\/p>"}, {"t": "Artigo 8 — Roubar o bordão", "html": "<p>8.1. Em cada caminho há três guardas para tirar, e os roubos acumulam:<\/p><ul><li>Líder do mês (+3): bater o melhor tempo do mês de outro atleta nesse caminho.<\/li><li>Guardião / Guardiã da época (+5): bater o melhor tempo da época de outro atleta nesse caminho e ficar com o bordão.<\/li><li>Guardião de Todos os Tempos (+8): bater a referência histórica do caminho (Artigo 6). Conta uma vez por caminho.<\/li><\/ul><p>8.2. Uma só tentativa pode valer as três: quem bate o recorde de sempre e, com isso, o líder do mês e o Guardião da época soma +16 em roubos, além do pódio e do check-in.<\/p><p>8.3. Só se rouba a guarda a alguém. O primeiro tempo do mês num caminho não é roubo, e bater o próprio tempo também não.<\/p><p>8.4. Os pontos de roubo ficam para sempre, mesmo que a guarda volte a mudar de mãos. A página calcula-os sozinha, pela ordem em que as atividades foram feitas.<\/p>"}, {"t": "Artigo 9 — Calendário, ranking mensal e Quinzena Cega", "html": "<p>9.1. As classificações estão ao vivo na página de janeiro a novembro, com ranking da época e ranking mensal de cada caminho. A partir de 1 de dezembro corre-se às cegas.<\/p><div class=\"tw\"><table><thead><tr><th>Período<\/th><th>O que acontece<\/th><\/tr><\/thead><tbody><tr><td>1 jan – 30 nov<\/td><td>Época aberta. Rankings da época e do mês atualizados ao minuto<\/td><\/tr><tr><td>1 – 15 dez<\/td><td><strong>Quinzena Cega<\/strong>: continua-se a submeter, mas as classificações ficam escondidas<\/td><\/tr><tr><td>15 dez, 23:59<\/td><td>Fecho de contas. Nada submetido depois conta<\/td><\/tr><tr><td>16 – 18 dez<\/td><td>Revisão final da Organização e prazo de reclamações<\/td><\/tr><tr><td>[DATA A DEFINIR, dezembro]<\/td><td><strong>Noite dos Guardiões<\/strong>: revelação em direto de quem guarda a serra<\/td><\/tr><\/tbody><\/table><\/div><p>9.2. O ranking mensal mostra os pontos ganhos nesse mês: pódio do mês, check-ins e roubos. Dias de Ataque, completismo e ajustes contam apenas na época.<\/p><p>9.3. Durante a Quinzena Cega cada atleta continua a ver os seus próprios tempos, mas não os dos outros. A Organização não confirma nem desmente posições até à Noite dos Guardiões.<\/p>"}, {"t": "Artigo 10 — Fair play e validação", "html": "<p>10.1. Cada atleta tem uma única inscrição e só submete atividades feitas por si, a pé.<\/p><p>10.2. A página põe em revisão, sem contar logo, as tentativas com velocidade média acima de 23,4 km/h, com saltos de GPS ou com tempo igual ao de outro atleta. A Organização aprova-as ou rejeita-as e pode pedir o ficheiro original ou outra prova.<\/p><p>10.3. A Organização pode rejeitar qualquer tentativa suspeita e avisa o atleta. Reclamações fazem-se até 7 dias depois, ou até 18 de dezembro para tentativas de dezembro.<\/p><p>10.4. Batota comprovada — GPX alterado, atividade de outra pessoa, bicicleta ou veículo — dá desclassificação da época. Ao contrário da lenda, venenos e jeropiga oferecida também.<\/p><p>10.5. Respeita-se a serra: nada de atalhos fora do trilho, lixo, portões abertos ou corridas imprudentes em estrada. Quem põe outros em risco para ganhar um bordão perde-o.<\/p>"}, {"t": "Artigo 11 — Prémios e Noite dos Guardiões", "html": "<p>11.1. Os prémios são entregues na <strong>Noite dos Guardiões<\/strong>, em dezembro. Os que dizem “M e F” têm vencedor masculino e feminino. Um atleta pode ganhar mais do que um.<\/p><div class=\"tw\"><table><thead><tr><th>Prémio<\/th><th>Quem ganha<\/th><\/tr><\/thead><tbody><tr><td>Campeão / Campeã 2027 (M e F)<\/td><td>Mais pontos na Geral<\/td><\/tr><tr><td>Guardião / Guardiã da Serra (M e F)<\/td><td>Mais bordões guardados no fecho de contas<\/td><\/tr><tr><td>A Lenda<\/td><td>Quem bateu o Guardião de Todos os Tempos em mais caminhos<\/td><\/tr><tr><td>Ladrão de Bordões do Ano<\/td><td>Mais pontos de roubo na época (Artigo 8)<\/td><\/tr><tr><td>Rei / Rainha da Montanha (M e F)<\/td><td>Mais pontos nos 24 caminhos de Subida<\/td><\/tr><tr><td>O Míssil (M e F)<\/td><td>Mais pontos nos 8 caminhos de Descida<\/td><\/tr><tr><td>Diesel (M e F)<\/td><td>Mais pontos nos 3 caminhos de Cumeada e Loop<\/td><\/tr><tr><td>Sentinela<\/td><td>Mais caminhos concluídos; desempata quem chegou primeiro a esse número<\/td><\/tr><tr><td>Lanterna Vermelha<\/td><td>Mais check-ins entre quem nunca esteve num pódio no fecho<\/td><\/tr><tr><td>A Revelação do Ano<\/td><td>Maior subida na Geral entre 1 de junho e o fecho de contas<\/td><\/tr><tr><td>O Estratega<\/td><td>Mais pontos ganhos na Quinzena Cega<\/td><\/tr><tr><td>Campeão da Bifana<\/td><td>Mais presenças em Dias de Ataque; desempata a votação na Noite<\/td><\/tr><tr><td>Fair Play<\/td><td>Votação secreta dos atletas na Noite dos Guardiões<\/td><\/tr><\/tbody><\/table><\/div><p>11.2. <strong>Menção honrosa — Ladrão de Bordões de Todos os Tempos.<\/strong> Na Noite dos Guardiões é distinguido quem mais bordões roubou desde a primeira edição, somando todas as épocas. O registo começa em 2027 e passa de ano para ano.<\/p><p>11.3. O Guardião e a Guardiã da Serra recebem um bordão de madeira gravado com o nome e o ano.<\/p><p>11.4. Desempate na Geral, por esta ordem: mais caminhos concluídos, mais bordões guardados, mais presenças em Dias de Ataque. Se ainda houver empate, o prémio é partilhado.<\/p><p>11.5. As classificações de perfil (Montanha, Míssil, Diesel) somam os pontos dos pódios mensais e de check-in dos caminhos desse perfil.<\/p>"}, {"t": "Artigo 12 — Disposições finais", "html": "<p>12.1. Casos omissos são decididos pela Organização, com justiça e no espírito dos Guardiões.<\/p><p>12.2. O Regulamento pode mudar durante a época, com aviso a todos e 7 dias de antecedência, sem tirar pontos já validados.<\/p><p>12.3. Participar implica aceitar este Regulamento.<\/p><p>12.4. Dúvidas e reclamações: [CANAL A DEFINIR — grupo WhatsApp / e-mail].<\/p>"}, {"t": "Anexo — Os caminhos", "html": "<p>A lista oficial dos caminhos é publicada e mantida pela Organização na página do desafio, no separador Caminhos: nome, perfil, distância, desnível, dificuldade, traçado de referência e Guardião de Todos os Tempos de cada um. Essa lista faz parte deste Regulamento.<\/p>"}];
 const ADMIN_TABS = ['ins','adm'];
 const TIPO_LBL = {Subida:'Subida', Descida:'Descida', Cumeada:'Cumeada', Loop:'Loop'};
 const MOD_LBL = {b:'Bicicleta', c:'Corrida'};
@@ -567,17 +636,156 @@ function render(){ if (rq) return; rq = true; requestAnimationFrame(()=>{ rq = f
   doRender(); }); }
 document.addEventListener('focusout', ()=>{ if (deferred){ deferred = false; setTimeout(render, 50); } });
 function doRender(){
-  const tabs = document.getElementById('tabs'); tabs.replaceChildren(...TABS.filter(t => !ADMIN_TABS.includes(t[0]) || S.admin).map(([k,l]) => h('button',{role:'tab','aria-selected':String(S.tab===k), onclick:()=>{ S.tab = k; try{ localStorage.setItem('g27tab',k);}catch(e){} doRender(); window.scrollTo(0,0); }}, l)));
+  const tabs = document.getElementById('tabs'); tabs.replaceChildren(...TABS.filter(t => !ADMIN_TABS.includes(t[0]) || S.admin).map(([k,l]) => h('button',{role:'tab', class:PUB.includes(k) ? 'pub' : 'adm', 'aria-selected':String(S.tab===k), onclick:()=>goTab(k)}, l)));
+  const bn = document.getElementById('bnav'); if (bn) bn.replaceChildren(...PUB.map(k => h('button',{'aria-current': S.tab===k ? 'page' : 'false', onclick:()=>goTab(k)}, navIcon(NAVI[k][1]), h('span',{}, NAVI[k][0]))));
   const me = document.getElementById('me'); const aid = myAid();
-  me.textContent = !S.uid ? 'Visitante' : aid ? 'Inscrito como ' + athName(athById(aid)) : 'Ainda sem inscrição associada';
-  if (S.admin) me.append(h('br'), h('span',{}, 'Acesso de organização'));
+  me.replaceChildren(); if (aid) me.append(h('span',{}, athName(athById(aid)))); if (S.admin) me.append(aid ? h('br') : '', h('span',{class:'tag'}, 'Organização')); me.hidden = !aid && !S.admin;
   const sub = document.getElementById('sub'); if (sub) sub.textContent = 'Época 2027' + (S.segs.length ? ' · ' + S.segs.length + ' caminho' + (S.segs.length === 1 ? '' : 's') : '');
   orgFooter();
   const main = document.getElementById('main');
   if (!S.db){ main.replaceChildren(h('div',{class:'card notice'}, h('strong',{},'Não foi possível ligar à base de dados. '), 'Verifica a ligação à internet e recarrega a página.')); return; }
-  const v = S.tab === 'lenda' ? viewLenda() : S.tab === 'seg' ? viewSeg() : S.tab === 'cls' ? viewCls() : S.tab === 'adm' && S.admin ? viewAdm() : S.tab === 'ins' && S.admin ? viewIns() : S.tab === 'reg' ? viewReg() : viewSub();
+  const v = S.tab === 'lenda' ? viewLenda() : S.tab === 'seg' ? viewSeg() : S.tab === 'cls' ? viewCls() : S.tab === 'adm' && S.admin ? viewAdm() : S.tab === 'ins' && S.admin ? viewIns() : S.tab === 'reg' ? viewReg() : S.tab === 'sub' ? viewSub() : viewHome();
   main.replaceChildren(...[].concat(v));
 }
+
+
+/* ===== Navegação, Início, cartões, mapa, regulamento ===== */
+function navIcon(d){ return sv('svg',{viewBox:'0 0 24 24', 'aria-hidden':'true'}, ...d.split(' M').map((x, i) => sv('path',{d:(i ? 'M' : '') + x}))); }
+const FMT_D = iso => { const [y, m, d] = String(iso||'').split('-').map(Number); return d ? d + ' de ' + MESES[m-1] + (y ? ' de ' + y : '') : ''; };
+function viewHome(){
+  const c = cfg(), real = S.ath.filter(a => !a.ex), aid = myAid(), reg = S.myReg;
+  const totKm = S.segs.reduce((n, s) => n + (s.dist||0), 0), totUp = S.segs.reduce((n, s) => n + (s.tipo === 'Descida' ? 0 : Math.round(s.desn||0)), 0);
+  const crest = document.querySelector('.brand svg'); const cr = crest ? crest.cloneNode(true) : null; if (cr){ cr.removeAttribute('width'); cr.removeAttribute('height'); }
+  const out = [h('section',{class:'hero'}, cr ? h('div',{class:'crest', style:'color:var(--terra)'}, cr) : null,
+    h('p',{class:'when'}, `Serra da Gardunha · ${FMT_D(c.from).replace(/ de \d{4}$/, '')} a ${FMT_D(c.to)}`),
+    h('h2',{class:'crest-title'}, 'Guardiões da Gardunha'), h('p',{class:'claim'}, 'Rouba o bordão.'),
+    h('p',{class:'muted', style:'margin:0;max-width:60ch'}, 'Cada caminho da serra tem um Guardião e uma Guardiã: quem tem o melhor tempo. Corre quando quiseres, carrega o GPX e tira-lhes a guarda.'))];
+  out.push(h('div',{class:'stats'}, h('div',{}, h('strong',{class:'num'}, String(S.segs.length)), h('span',{}, 'caminhos')), h('div',{}, h('strong',{class:'num'}, (totKm/1000).toLocaleString('pt-PT',{maximumFractionDigits:1})), h('span',{}, 'km no total')),
+    h('div',{}, h('strong',{class:'num'}, '+' + totUp.toLocaleString('pt-PT')), h('span',{}, 'm a subir')), h('div',{}, h('strong',{class:'num'}, String(real.length)), h('span',{}, 'inscritos'))));
+  if (aid){
+    let me = null; try { me = standings('all').find(r => r.id === aid); } catch(e){}
+    out.push(h('div',{class:'card stack'}, h('h3',{}, 'Olá, ' + (athName(athById(aid)).split(' ')[0])),
+      me ? h('div',{class:'kv'}, h('div',{}, h('span',{class:'lbl'},'Pontos'), h('strong',{}, String(me.total||0))), h('div',{}, h('span',{class:'lbl'},'Bordões'), h('strong',{}, String(me.wins||0))), h('div',{}, h('span',{class:'lbl'},'Caminhos feitos'), h('strong',{}, (me.done||0) + '/' + S.segs.length))) : null,
+      h('div',{class:'row'}, h('button',{class:'b t', onclick:()=>goTab('sub')}, 'Carregar atividade'), h('button',{class:'b o', onclick:()=>goTab('cls')}, 'Ver classificação'))));
+  } else if (reg && reg.estado === 'pendente'){
+    out.push(h('div',{class:'card notice f'}, h('strong',{}, 'Inscrição enviada. '), 'Assim que a organização aprovar, os teus tempos começam a contar.', h('div',{class:'row', style:'margin-top:10px'}, h('button',{class:'b o', onclick:()=>goTab('sub')}, 'Testar um GPX'))));
+  } else {
+    out.push(h('div',{class:'row'}, h('button',{class:'b t', onclick:()=>goTab('reg')}, 'Inscrever-me'), h('button',{class:'b o', onclick:()=>goTab('seg')}, 'Ver caminhos')));
+  }
+  if (S.segs.length) out.push(h('section',{class:'stack', style:'gap:10px'}, h('div',{class:'row', style:'justify-content:space-between'}, h('h3',{}, 'Os caminhos'), h('button',{class:'linkb', onclick:()=>goTab('seg')}, 'Ver todos')), segCarousel('home')));
+  out.push(h('p',{class:'small muted', style:'margin:0'}, 'Antes de começares: ', h('button',{class:'linkb inl', onclick:()=>{ goTab('reg'); setTimeout(openReg, 60); }}, 'lê o regulamento'), '.'));
+  return out;
+}
+function guardOf(n, g){ const L = C.bestPerAthlete(effList(), n, 'all'); for (const r of L){ const a = athById(r.a); if (a && (a.g||'M') === g) return {a, r}; } return null; }
+function segCard(s, mode, onPick){
+  const gM = guardOf(s.n, 'M'), gF = guardOf(s.n, 'F'), nm = x => x ? x.a.nome.split(' ')[0] + ' · ' + C.fmtTime(x.r.t) : 'bordão livre';
+  return h('button',{class:'scard' + (mode === 'seg' && s.n === S.segSel ? ' on' : ''), 'data-n':s.n, onclick:()=>onPick(s.n)},
+    hasTrace(s) ? mapSVG([{xy:segXY(s), cls:'sel', ends:true}], {h:150, label:'Traçado de ' + s.nome}) : h('div',{class:'map empty small'}, 'traçado por publicar'),
+    h('div',{class:'meta'}, pad2(s.n) + (s.localidade ? ' · ' + s.localidade : '') + ' · ' + s.tipo),
+    h('h4',{}, s.nome),
+    h('div',{class:'row small', style:'gap:10px'}, h('span',{class:'num'}, km(s.dist)), h('span',{class:'num'}, (s.tipo === 'Descida' ? '−' : '+') + Math.round(s.desn||0) + ' m'), pips(s.nivel||3)),
+    h('div',{class:'gd'}, h('div',{}, h('b',{}, 'Guardião'), nm(gM)), h('div',{}, h('b',{}, 'Guardiã'), nm(gF))));
+}
+function segCarousel(mode, onChange){
+  const segs = S.segs, track = h('div',{class:'carousel', role:'list'}), dots = h('div',{class:'dots', 'aria-hidden':'true'}, ...segs.map(() => h('i')));
+  const count = h('span',{class:'mono small muted'});
+  const idxOf = n => Math.max(0, segs.findIndex(x => x.n === n));
+  const mark = i => { [...dots.children].forEach((d, k) => d.classList.toggle('on', k === i)); count.textContent = pad2(i+1) + ' / ' + pad2(segs.length); if (mode === 'seg') [...track.children].forEach((c, k) => c.classList.toggle('on', k === i)); };
+  const scrollToIdx = (i, smooth) => { const c = track.children[i]; if (!c) return; track.scrollTo({left: c.offsetLeft - (track.clientWidth - c.clientWidth) / 2, behavior: smooth ? 'smooth' : 'auto'}); };
+  const pick = n => { if (mode === 'home'){ S.segSel = n; goTab('seg'); return; } const i = idxOf(n); scrollToIdx(i, true); select(i); };
+  const select = i => { const s = segs[i]; if (!s) return; mark(i); if (mode === 'seg' && s.n !== S.segSel){ S.segSel = s.n; if (onChange) onChange(s.n); } };
+  segs.forEach(s => track.append(segCard(s, mode, pick)));
+  let t = null; track.addEventListener('scroll', () => { clearTimeout(t); t = setTimeout(() => { const mid = track.scrollLeft + track.clientWidth / 2; let best = 0, bd = 1e9; [...track.children].forEach((c, k) => { const d = Math.abs(c.offsetLeft + c.clientWidth / 2 - mid); if (d < bd){ bd = d; best = k; } }); if (mode === 'seg') select(best); else mark(best); }, 110); }, {passive:true});
+  const i0 = mode === 'seg' ? idxOf(S.segSel) : 0; mark(i0); requestAnimationFrame(() => scrollToIdx(i0, false));
+  const prev = h('button',{class:'b o s', 'aria-label':'Caminho anterior', onclick:()=>{ const i = Math.max(0, idxOf(S.segSel) - 1); if (mode === 'seg'){ scrollToIdx(i, true); select(i); } else scrollToIdx(Math.max(0, Math.round(track.scrollLeft / ((track.children[0]||{}).clientWidth || 1)) - 1), true); }}, '←');
+  const next = h('button',{class:'b o s', 'aria-label':'Caminho seguinte', onclick:()=>{ const i = Math.min(segs.length - 1, idxOf(S.segSel) + 1); if (mode === 'seg'){ scrollToIdx(i, true); select(i); } else scrollToIdx(Math.min(segs.length - 1, Math.round(track.scrollLeft / ((track.children[0]||{}).clientWidth || 1)) + 1), true); }}, '→');
+  return h('div',{class:'stack noswipe', style:'gap:6px'}, track, h('div',{class:'pager'}, prev, h('div',{class:'stack', style:'gap:4px;justify-items:center'}, dots, count), next));
+}
+function pagedTrack(pages, titles, key){
+  const track = h('div',{class:'pages'}, ...pages), dots = h('div',{class:'dots'}, ...pages.map(() => h('i'))), lbl = h('span',{class:'mono small muted'});
+  const fitH = i => { const pg = pages[i]; if (pg) track.style.height = pg.scrollHeight + 'px'; };
+  const mark = i => { [...dots.children].forEach((d, k) => d.classList.toggle('on', k === i)); lbl.textContent = (i+1) + ' / ' + pages.length + (titles[i] ? ' · ' + titles[i] : ''); S[key] = i; fitH(i); };
+  const go = i => { i = Math.max(0, Math.min(pages.length - 1, i)); track.scrollTo({left: pages[i].offsetLeft - track.offsetLeft - (pages[0].offsetLeft - track.offsetLeft), behavior:'smooth'}); mark(i); const top = track.getBoundingClientRect().top + window.scrollY - 90; if (window.scrollY > top) window.scrollTo({top, behavior:'smooth'}); };
+  let t = null; track.addEventListener('scroll', () => { clearTimeout(t); t = setTimeout(() => mark(Math.round(track.scrollLeft / Math.max(1, track.clientWidth))), 90); }, {passive:true});
+  const i0 = S[key] || 0; mark(i0); requestAnimationFrame(() => { track.scrollLeft = i0 * track.clientWidth; fitH(i0); });
+  const bar = () => h('div',{class:'pager'}, h('button',{class:'b o s', 'aria-label':'Página anterior', onclick:()=>go((S[key]||0) - 1)}, '←'), h('div',{class:'stack', style:'gap:4px;justify-items:center'}, dots, lbl), h('button',{class:'b o s', 'aria-label':'Página seguinte', onclick:()=>go((S[key]||0) + 1)}, '→'));
+  return h('div',{class:'stack noswipe', style:'gap:14px'}, bar(), track, h('div',{class:'pager'}, h('button',{class:'b o s', onclick:()=>go((S[key]||0) - 1)}, '← Anterior'), h('button',{class:'b o s', onclick:()=>go((S[key]||0) + 1)}, 'Seguinte →')));
+}
+const TILES = {
+  topo:{n:'Terreno', max:17, attr:'© OpenStreetMap · SRTM · © OpenTopoMap (CC-BY-SA)', url:(z,x,y)=>`https://${'abc'[(x+y)%3]}.tile.opentopomap.org/${z}/${x}/${y}.png`},
+  sat:{n:'Satélite', max:18, attr:'Imagens © Esri, Maxar, Earthstar Geographics', url:(z,x,y)=>`https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`},
+  osm:{n:'Mapa', max:19, attr:'© OpenStreetMap', url:(z,x,y)=>`https://tile.openstreetmap.org/${z}/${x}/${y}.png`}
+};
+function wpx(lat, lon, z){ const sc = 256 * Math.pow(2, z), si = Math.sin(lat * Math.PI / 180); return [(lon + 180) / 360 * sc, (0.5 - Math.log((1 + si) / (1 - si)) / (4 * Math.PI)) * sc]; }
+function tileMap(sg){
+  const f = sg.trace, P = []; for (let i = 0; i + 1 < f.length; i += 2) P.push([f[i], f[i+1]]);
+  const box = h('div',{class:'tmap noswipe', role:'img', 'aria-label':'Mapa do caminho ' + sg.nome}), lyr = h('div',{class:'lyr'}); box.append(lyr);
+  const attr = h('div',{class:'tm-attr'}); const st = {z:13, cx:0, cy:0, W:0, H:0};
+  if (!TILES[S.mapLayer]) S.mapLayer = 'topo';
+  const lays = h('div',{class:'seg tm-lay', role:'group', 'aria-label':'Fundo do mapa'}, ...Object.entries(TILES).map(([k, L]) => h('button',{'aria-pressed':String(S.mapLayer===k), onclick:e=>{ e.stopPropagation(); S.mapLayer = k; [...lays.children].forEach(b => b.setAttribute('aria-pressed', String(b.textContent === L.n))); draw(); }}, L.n)));
+  const zoom = d => { const L = TILES[S.mapLayer], z = Math.max(3, Math.min(L.max, st.z + d)); if (z === st.z) return; const k = Math.pow(2, z - st.z); st.cx *= k; st.cy *= k; st.z = z; draw(); };
+  const ctl = h('div',{class:'tm-ctl'}, h('button',{'aria-label':'Aproximar', onclick:e=>{ e.stopPropagation(); zoom(1); }}, '+'), h('button',{'aria-label':'Afastar', onclick:e=>{ e.stopPropagation(); zoom(-1); }}, '−'), h('button',{'aria-label':'Centrar no caminho', title:'Centrar', onclick:e=>{ e.stopPropagation(); fit(); draw(); }}, '⌖'));
+  box.append(lays, ctl, attr);
+  function fit(){
+    st.W = box.clientWidth || 600; st.H = box.clientHeight || 300;
+    let a = 90, b = -90, c = 180, d = -180; for (const [la, lo] of P){ if (la < a) a = la; if (la > b) b = la; if (lo < c) c = lo; if (lo > d) d = lo; }
+    let z = Math.min(17, TILES[S.mapLayer].max); for (; z > 3; z--){ const [x0, y1] = wpx(a, c, z), [x1, y0] = wpx(b, d, z); if (x1 - x0 < st.W - 90 && y1 - y0 < st.H - 110) break; }
+    const [x0, y1] = wpx(a, c, z), [x1, y0] = wpx(b, d, z); st.z = z; st.cx = (x0 + x1) / 2; st.cy = (y0 + y1) / 2 - 10;
+  }
+  function draw(){
+    const L = TILES[S.mapLayer]; if (st.z > L.max){ const k = Math.pow(2, L.max - st.z); st.cx *= k; st.cy *= k; st.z = L.max; }
+    const ox = st.cx - st.W / 2, oy = st.cy - st.H / 2, n = Math.pow(2, st.z);
+    const imgs = [];
+    for (let tx = Math.floor(ox / 256); tx <= Math.floor((ox + st.W) / 256); tx++) for (let ty = Math.floor(oy / 256); ty <= Math.floor((oy + st.H) / 256); ty++){
+      if (ty < 0 || ty >= n) continue; const wx = ((tx % n) + n) % n;
+      const im = new Image(); im.alt = ''; im.decoding = 'async'; im.referrerPolicy = 'strict-origin-when-cross-origin'; im.style.left = (tx * 256 - ox) + 'px'; im.style.top = (ty * 256 - oy) + 'px'; im.onerror = () => { im.style.visibility = 'hidden'; }; im.src = L.url(st.z, wx, ty); imgs.push(im); }
+    const svg = sv('svg',{viewBox:`0 0 ${st.W} ${st.H}`});
+    const pts = P.map(([la, lo]) => { const [x, y] = wpx(la, lo, st.z); return (x - ox).toFixed(1) + ',' + (y - oy).toFixed(1); }).join(' ');
+    svg.append(sv('polyline',{points:pts, class:'halo'}), sv('polyline',{points:pts, class:'line'}));
+    const [sx, sy] = wpx(P[0][0], P[0][1], st.z), [ex, ey] = wpx(P[P.length-1][0], P[P.length-1][1], st.z);
+    svg.append(flagIcon(+(sx - ox).toFixed(1), +(sy - oy).toFixed(1), false), flagIcon(+(ex - ox).toFixed(1), +(ey - oy).toFixed(1), true));
+    lyr.style.transform = ''; lyr.replaceChildren(...imgs, svg); attr.textContent = L.attr;
+  }
+  let drag = null;
+  box.addEventListener('pointerdown', e => { if (e.target.closest('button')) return; drag = {x:e.clientX, y:e.clientY, dx:0, dy:0}; box.setPointerCapture(e.pointerId); box.classList.add('drag'); });
+  box.addEventListener('pointermove', e => { if (!drag) return; drag.dx = e.clientX - drag.x; drag.dy = e.clientY - drag.y; lyr.style.transform = `translate(${drag.dx}px,${drag.dy}px)`; });
+  const end = () => { if (!drag) return; st.cx -= drag.dx; st.cy -= drag.dy; drag = null; box.classList.remove('drag'); draw(); };
+  box.addEventListener('pointerup', end); box.addEventListener('pointercancel', end);
+  box.addEventListener('wheel', e => { e.preventDefault(); zoom(e.deltaY < 0 ? 1 : -1); }, {passive:false});
+  box.addEventListener('dblclick', e => { if (!e.target.closest('button')) zoom(1); });
+  requestAnimationFrame(() => { if (!box.isConnected) return; fit(); draw(); });
+  return h('div',{class:'tmapw'}, box, h('div',{class:'small muted'}, 'Arrasta para mover · + e − para aproximar · escolhe Terreno, Satélite ou Mapa.'));
+}
+function regDoc(){
+  const all = h('button',{class:'linkb', onclick:()=>{ const ds = [...box.querySelectorAll('details')]; const op = !ds.every(d => d.open); ds.forEach(d => d.open = op); all.textContent = op ? 'Fechar tudo' : 'Abrir tudo'; }}, 'Abrir tudo');
+  const box = h('section',{class:'card stack', id:'regdoc', style:'gap:6px'}, h('div',{class:'row', style:'justify-content:space-between'}, h('h3',{}, 'Regulamento'), all),
+    h('p',{class:'small muted', style:'margin:0 0 6px'}, 'Toca num artigo para o abrir.'),
+    ...(typeof REG !== 'undefined' ? REG : []).map(a => { const d = h('details',{class:'regart'}, h('summary',{}, a.t)); const b = h('div',{class:'regbody'}); b.innerHTML = a.html; d.append(b); return d; }));
+  return box;
+}
+function openReg(){ const b = document.getElementById('regdoc'); if (!b) return; const d = b.querySelector('details'); if (d) d.open = true; b.scrollIntoView({behavior:'smooth', block:'start'}); }
+function howToScore(){
+  const c = cfg();
+  return h('div',{class:'card stack'}, h('h3',{}, 'Ainda sem pontos'), h('p',{class:'muted', style:'margin:0'}, `A classificação aparece quando houver tempos guardados. A época corre de ${FMT_D(c.from)} a ${FMT_D(c.to)}.`),
+    h('ul',{class:'howto'}, ...[['1.º / 2.º / 3.º do mês num caminho','8 / 5 / 3'], ['Check-in: cada caminho concluído','+1 (até 3 por mês)'], ['Roubar a liderança do mês','+3'], ['Roubar o bordão da época','+5'], ['Bater o Guardião de Todos os Tempos','+8'], ['Metade dos caminhos / todos','+16 / +32'], ['Presença num Dia de Ataque','+8 (até 40)']].map(([a, b]) => h('li',{}, h('span',{}, a), h('b',{}, b)))),
+    h('div',{class:'row'}, h('button',{class:'b t', onclick:()=>goTab('seg')}, 'Ver caminhos'), h('button',{class:'b o', onclick:()=>goTab('sub')}, 'Carregar atividade')));
+}
+/* deslizar entre secções (telemóvel) */
+(function(){
+  const main = document.getElementById('main'); let on = false, lock = null, sx = 0, sy = 0, t0 = 0, dx = 0;
+  const skip = el => !!(el.closest && el.closest('input,select,textarea,.noswipe,.tw,.zmap,.seg-form,.drop'));
+  main.addEventListener('touchstart', e => { on = false; if (e.touches.length !== 1 || window.innerWidth > 760 || skip(e.target) || !PUB.includes(S.tab)) return; on = true; lock = null; dx = 0; sx = e.touches[0].clientX; sy = e.touches[0].clientY; t0 = Date.now(); }, {passive:true});
+  main.addEventListener('touchmove', e => { if (!on) return; dx = e.touches[0].clientX - sx; const dy = e.touches[0].clientY - sy;
+    if (lock === null){ if (Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy) * 1.5) lock = 'x'; else if (Math.abs(dy) > 12){ on = false; return; } }
+    if (lock === 'x'){ const i = PUB.indexOf(S.tab), edge = (dx > 0 && i === 0) || (dx < 0 && i === PUB.length - 1); main.style.transition = 'none'; main.style.transform = `translateX(${dx * (edge ? 0.15 : 0.45)}px)`; main.style.opacity = String(1 - Math.min(0.35, Math.abs(dx) / 900)); } }, {passive:true});
+  main.addEventListener('touchend', () => { if (!on || lock !== 'x'){ on = false; return; } on = false;
+    const v = Math.abs(dx) / Math.max(1, Date.now() - t0), i = PUB.indexOf(S.tab); let j = i;
+    if (dx < -80 || (dx < -35 && v > 0.45)) j = i + 1; else if (dx > 80 || (dx > 35 && v > 0.45)) j = i - 1;
+    main.style.transition = 'transform .16s ease, opacity .16s ease'; main.style.transform = ''; main.style.opacity = '';
+    setTimeout(() => { main.style.transition = ''; }, 180);
+    if (j !== i && j >= 0 && j < PUB.length) goTab(PUB[j]); }, {passive:true});
+})();
+if ('serviceWorker' in navigator && location.protocol === 'https:') { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); }); }
 
 /* ===== Identidade: inscrição sem login, código pessoal, organizador ===== */
 let myRegUnsub = null;
@@ -616,7 +824,8 @@ function orgFooter(){
 }
 
 /* ===== Submeter ===== */
-function goTab(k){ S.tab = k; try{ localStorage.setItem('g27tab',k); }catch(e){} doRender(); window.scrollTo(0,0); }
+function goTab(k, anim){ const from = PUB.indexOf(S.tab), to = PUB.indexOf(k); S.tab = k; try{ localStorage.setItem('g27tab',k); }catch(e){} doRender(); window.scrollTo(0,0);
+  const m = document.getElementById('main'); if (from >= 0 && to >= 0 && from !== to){ m.classList.remove('in-l','in-r'); void m.offsetWidth; m.classList.add(to > from ? 'in-r' : 'in-l'); } }
 /* ===== Inscrição ===== */
 function viewReg(){
   const out = [], aid = myAid(), claim = S.claims[S.uid], reg = S.myReg;
@@ -637,7 +846,7 @@ function viewReg(){
     card.append(regForm(),
       ...(S.ath.some(a => !ownerOf(a.id) && !a.ex) ? [h('details',{}, h('summary',{}, 'A organização já te inscreveu? Escolhe o teu nome'), h('div',{style:'margin-top:10px'}, claimPicker()))] : []), loginBox());
   }
-  out.push(card);
+  out.push(card, regDoc());
   return out;
 }
 /* ===== Carregar atividade ===== */
@@ -682,7 +891,7 @@ function regForm(){
     h('div',{class:'row', style:'align-items:flex-end;gap:18px'},
       field('Género', h('select',{onchange:e=>{ set('g')(e); }}, h('option',{value:''}, 'Escolher…'), h('option',{value:'M', selected:f.g==='M'}, 'Masculino'), h('option',{value:'F', selected:f.g==='F'}, 'Feminino'))),
       field('Data de nascimento', h('input',{type:'date', value:f.nasc, max:'2017-12-31', onchange:e=>{ set('nasc')(e); doRender(); }}), age != null ? `${age} anos em 2027` : 'Só a organização vê.')),
-    h('label',{class:'row', style:'gap:8px'}, h('input',{type:'checkbox', checked:f.ok, onchange:set('ok')}), 'Li e aceito o Regulamento do Desafio Gardunha 2027.'),
+    h('label',{class:'chk'}, h('input',{type:'checkbox', checked:f.ok, onchange:set('ok')}), h('span',{}, 'Li e aceito o ', h('button',{type:'button', class:'linkb inl', onclick:e=>{ e.preventDefault(); openReg(); }}, 'Regulamento'), ' do Desafio Guardiões da Gardunha 2027.')),
     h('div',{}, h('button',{class:'b t', type:'submit'}, 'Enviar inscrição')));
   return form;
 }
@@ -793,13 +1002,20 @@ function gttCard(sg){
 function viewLenda(){
   const LENDA = [["h", "A lenda"], ["p", "Diz-se no sopé da serra que a Gardunha nunca dorme. E quem lá vive também não, porque alguém tem de ficar de olho."], ["p", "Há quem jure ter visto luzes a cruzar o céu por cima do Posto de Vigia em noites sem lua. Uns dizem que eram OVNIs; outros, que era o Ti Zé a voltar da taberna com a lanterna. Havia também os contrabandistas, que conheciam cada carreiro melhor do que o caminho de casa. Esses passavam a raia de noite e nunca, mas nunca, deixavam pegadas."], ["p", "Durante séculos, as gentes da serra fixaram-se onde o granito deixava: em Alpedrinha, Castelo Novo, Alcongosta, Souto da Casa, Louriçal do Campo, São Vicente da Beira e no Fundão. Gente honesta, lutadora e teimosa como as pedras. Confiaram a sua segurança a uns poucos vigias que, lá do alto, olhavam por todos. Durante muito tempo isso bastou."], ["p", "Até ao dia em que deixou de bastar. As cerejas desapareciam das árvores na véspera da apanha, e os ladrões só deixavam os caroços. Rebanhos inteiros sumiam na transumância, entre a serra e o vale. Ninguém sabia se a culpa era dos homens da raia ou das tais luzes no céu. Sabia-se apenas que os vigias, sentados no cume, já não chegavam. Até porque estavam sentados."], ["h", "O bordão"], ["p", "Foi então que os mais intrépidos de cada aldeia pegaram no bordão e se fizeram ao caminho. Subiram a pique pelas rampas dos castanheiros e desceram a correr pelos carreiros de pedra solta. Atravessaram a cumeada de ponta a ponta, de noite e de dia, para que nada nem ninguém passasse sem ser visto."], ["p", "Com os anos organizaram-se. Passaram a chamar-se **Guardiões da Gardunha** e reconheciam-se pelo bordão, gasto na mão de tanto subir e descer."], ["p", "Ser guardião tornou-se a maior honra das aldeias, e por isso também a mais perigosa. A inveja na Beira não grita, espera. Em Castelo Novo, um guardião bebeu um copo de jeropiga oferecido por um “amigo” e nunca mais acordou. Em Alcongosta, outro foi encontrado no fundo de uma ravina, com o bordão partido em dois e um sorriso de quem não esperava aquilo. Em São Vicente, envenenaram as cerejas do lanche de uma guardiã. Ela sobreviveu, porque tinha dado as cerejas ao cão, e o cão não. Durante anos, ninguém aceitava nada de comer de outro candidato a guardião, nem uma bifana."], ["h", "Os caminhos"], ["p", "Para acabar com a matança, as aldeias juntaram os seus decanos. Foi no adro, com vinho que cada um trazia de casa, por precaução. Durante dias ouviram o que se contava de boca em boca, de avô para neto, junto à lareira. Dessas histórias saiu uma lista de caminhos especiais, ligados às terras e à montanha, marcados pela dureza: os que separavam quem tinha pernas de quem tinha só lábia."], ["p", "Daí em diante ficou decidido: **cada caminho tem um guardião, e quem o quiser ser só tem de o bater.** Sem venenos, sem empurrões e sem jeropiga oferecida: apenas as pernas, o fôlego e a serra como testemunha. Em certos dias a aldeia inteira juntava-se ao pé do caminho para ver quem tinha coragem de tirar a guarda a quem a tinha. Levavam farnel, claro, cada um o seu."], ["h", "2027"], ["p", "A tradição adormeceu, mas a serra não esqueceu. Este ano voltamos a ela."], ["p", "São **35 caminhos**, de estrada, estradão, calçada romana e trilho, a subir, a descer e a atravessar a cumeada. Cada um tem um guardião e uma guardiã. Durante um ano inteiro, quem quiser pode tentar tirar-lhes a guarda. No fim, na Noite dos Guardiões, a serra fica a saber quem a protege."], ["end", "Pega no teu bordão.|A Gardunha está à espera."]];
   const rich = t => t.split('**').map((x, i) => i % 2 ? h('strong',{}, x) : x);
-  const art = h('article',{class:'lenda'});
-  for (const [k, t] of LENDA){ if (k === 'h') art.append(h('h3',{}, t)); else if (k === 'p') art.append(h('p',{}, rich(t))); else { const [a, b] = t.split('|'); art.append(h('p',{class:'fim'}, a, h('br'), h('strong',{}, b))); } }
+  const nS = S.segs.length;
+  const pages = []; let cur = null;
+  for (const [k, t0] of LENDA){ const t = nS && k === 'p' ? t0.replace(/\*\*35 caminhos\*\*/, `**${nS} caminho${nS === 1 ? '' : 's'}**`) : t0;
+    if (k === 'h'){ cur = h('article',{class:'page lenda'}, h('h3',{}, t)); pages.push(cur); continue; }
+    if (!cur){ cur = h('article',{class:'page lenda'}); pages.push(cur); }
+    if (k === 'p') cur.append(h('p',{}, rich(t))); else { const [a, b] = t.split('|'); cur.append(h('p',{class:'fim'}, a, h('br'), h('strong',{}, b))); } }
   const refs = S.segs.filter(s => s.gtt && ((s.gtt.M && s.gtt.M.t) || (s.gtt.F && s.gtt.F.t)));
   const tbl = refs.length ? h('div',{class:'tw'}, h('table',{}, h('thead',{}, h('tr',{}, h('th',{},'Caminho'), h('th',{},'Guardião'), h('th',{class:'r'},'Tempo'), h('th',{},'Guardiã'), h('th',{class:'r'},'Tempo'))),
       h('tbody',{}, refs.map(s => { const M = s.gtt.M || {}, F = s.gtt.F || {}; return h('tr',{}, h('td',{}, pad2(s.n) + ' · ' + s.nome), h('td',{}, M.nome || '—'), h('td',{class:'r num'}, M.t ? C.fmtTime(M.t) : '—'), h('td',{}, F.nome || '—'), h('td',{class:'r num'}, F.t ? C.fmtTime(F.t) : '—')); }))))
     : h('p',{class:'muted'}, 'Os Guardiões de Todos os Tempos de cada caminho serão publicados pela organização antes do arranque da época.');
-  return [h('h2',{class:'crest-title', style:'font-size:clamp(2.2rem,7vw,3.6rem)'}, 'Guardiões da Gardunha'), art, h('section',{class:'stack'}, h('h3',{class:'crest-title', style:'font-size:1.6rem'}, 'Guardiões de Todos os Tempos'), h('p',{class:'muted', style:'margin:0;max-width:68ch'}, 'A referência histórica de cada caminho. Quem a bater rouba o bordão de sempre: +8 pontos, e passa a ser a nova lenda desse caminho.'), tbl)];
+  pages.push(h('article',{class:'page stack'}, h('h3',{class:'crest-title', style:'font-size:1.6rem'}, 'Guardiões de Todos os Tempos'), h('p',{class:'muted', style:'margin:0;max-width:68ch'}, 'A referência histórica de cada caminho. Quem a bater rouba o bordão de sempre: +8 pontos, e passa a ser a nova lenda desse caminho.'), tbl));
+  const titles = pages.map(pg => (pg.querySelector('h3') || {}).textContent || '');
+  return [h('h2',{class:'crest-title', style:'font-size:clamp(2.2rem,7vw,3.6rem)'}, 'Guardiões da Gardunha'), pagedTrack(pages, titles, 'lendaPg')];
+
 }
 function zipStore(name, text){ // ZIP sem compressão com um só ficheiro (a descarga não aceita .gpx; o .zip abre em qualquer telemóvel)
   const enc = new TextEncoder(), nm = enc.encode(name), data = enc.encode(text);
@@ -823,20 +1039,20 @@ async function downloadGpx(sg){
   try { await S.dl.save(S.dl.native ? {filename:fn, data:xml} : {filename:fn.replace(/\.gpx$/, '.zip'), data:zipStore(fn, xml)}); } catch(e){ if (e && e.code !== 'declined') toast('Não foi possível descarregar.'); }
 }
 function viewSeg(){
-  const out = [];
   if (!S.segs.length) return [h('h2',{},'Caminhos'), h('div',{class:'card empty'},'Ainda não há caminhos publicados. A organização está a preparar a lista.')];
   const sg = segByN(S.segSel) || S.segs[0]; S.segSel = sg.n;
-  const sel = h('select',{'aria-label':'Caminho', class:'grow', onchange:e=>{ S.segSel = +e.target.value; doRender(); }},
-    ['Subida','Descida','Cumeada','Loop'].map(t => { const l = S.segs.filter(s => s.tipo === t); return l.length ? h('optgroup',{label:t}, l.map(s => h('option',{value:s.n, selected:s.n===sg.n}, pad2(s.n) + ' · ' + s.nome + (s.localidade ? ' — ' + s.localidade : '')))) : null; }));
-  const i = S.segs.indexOf(sg);
-  out.push(h('div',{class:'row', style:'flex-wrap:nowrap'}, h('button',{class:'b o s', disabled:i<=0, onclick:()=>{ S.segSel = S.segs[i-1].n; doRender(); }, 'aria-label':'Caminho anterior'}, '←'), sel, h('button',{class:'b o s', disabled:i>=S.segs.length-1, onclick:()=>{ S.segSel = S.segs[i+1].n; doRender(); }, 'aria-label':'Caminho seguinte'}, '→')));
+  const det = h('div',{id:'segdet', class:'stack', style:'gap:22px'}, ...segDetail(sg));
+  return [h('h2',{},'Caminhos'), segCarousel('seg', n => { const x = segByN(n); if (x) det.replaceChildren(...segDetail(x)); }), det];
+}
+function segDetail(sg){
+  const out = [];
   const verb = sg.tipo === 'Descida' ? 'descem' : 'sobem';
   const tagline = `${Math.round(sg.dist).toLocaleString('pt-PT')} m que ${verb} ${Math.round(sg.desn)}.` + ((sg.nivel||0) >= 4 ? ' Sem perdão.' : (sg.nivel||0) <= 2 ? ' Para abrir as pernas.' : '');
   out.push(h('section',{class:'stack seghead', style:'gap:8px'},
     h('div',{class:'row mono small muted', style:'justify-content:space-between'}, h('span',{}, `CAMINHO ${pad2(sg.n)}/${S.segs.length}${sg.localidade ? ' · ' + sg.localidade.toUpperCase() : ''} · ${sg.tipo.toUpperCase()} · ${(sg.dif||'').toUpperCase()}`), h('span',{}, `${km(sg.dist).toUpperCase()} · ${sg.tipo === 'Descida' ? '−' : '+'}${Math.round(sg.desn)} M`)),
-    h('h2',{style:'font-size:clamp(2.6rem, 9vw, 4.2rem)'}, sg.nome),
+    h('h2',{style:'font-size:clamp(1.9rem, 6vw, 3rem)'}, sg.nome),
     h('div',{class:'row', style:'justify-content:space-between'}, h('span',{class:'tagline'}, tagline))));
-  if (hasTrace(sg)) out.push(mapSVG([{xy:segXY(sg), cls:'sel', ends:true}], {h:200, label:'Traçado do caminho '+sg.nome}));
+  if (hasTrace(sg)) out.push(tileMap(sg));
   if (hasTrace(sg)) out.push(h('div',{class:'row'}, h('button',{class:'b o', onclick:()=>downloadGpx(sg)}, 'Descarregar GPX'), sg.gpxLink && /^https:\/\//i.test(sg.gpxLink) ? h('a',{class:'b o', href:sg.gpxLink, target:'_blank', rel:'noopener noreferrer'}, 'Abrir link do GPX') : null, h('span',{class:'small muted'}, (S.dl && S.dl.native ? 'Para carregares no relógio ou na app de navegação e fazeres o caminho.' : 'Descarrega um .zip com o GPX lá dentro (extrai-o antes de o enviares para o relógio).'))));
   out.push(gttCard(sg));
   if (cfg().hide && !S.admin) return out.concat(hiddenNotice());
@@ -905,7 +1121,7 @@ function viewCls(){
   out.push(h('p',{class:'small muted', style:'margin:0'}, S.month === 'all' ? cat[3] + '.' : `Ranking mensal de ${monthLbl(S.month)}: só os pontos ganhos neste mês — pódio do mês (8/5/3 por caminho), check-in e roubos. Dias de Ataque, completismo e ajustes contam apenas na época.`));
   let rows = standings(S.month).filter(r => { const a = athById(r.id); if (!a) return false; if (S.clsG !== 'all' && (a.g||'M') !== S.clsG) return false; return true; });
   rows = C.rankRows(rows, cat[2]).filter(r => r.done > 0 || r.total > 0);
-  if (!rows.length) return out.concat(h('div',{class:'card empty'}, 'Ainda sem pontuação nesta categoria.'));
+  if (!rows.length) return out.concat(howToScore());
   const body = h('tbody', {}, rows.map((r,i) => h('tr',{class:i===0?'pod1':''}, h('td',{class:'pos num'}, String(i+1)), h('td',{}, athName(athById(r.id))), h('td',{class:'r num'}, h('strong',{}, String(cat[2](r)))),
     h('td',{class:'r num'}, String(r.done)), h('td',{class:'r num'}, String(r.pod)), h('td',{class:'r num'}, String(r.chk)), h('td',{class:'r num'}, String(r.bonus)), h('td',{class:'r num'}, String(r.trn)), h('td',{class:'r num'}, String(r.stl - (r.lpts||0))), h('td',{class:'r num'}, String(r.wins)), h('td',{class:'r num'}, String(r.lpts||0)), h('td',{class:'r num'}, r.extra ? String(r.extra) : '—'))));
   out.push(h('div',{class:'tw'}, h('table',{}, h('thead',{}, h('tr',{}, h('th',{},'#'), h('th',{},'Atleta'), h('th',{class:'r'}, cat[0]==='coroas'?'Bordões':cat[0]==='ladrao'?'Roubos (pts)':cat[0]==='explorer'?'Cam.':cat[0]==='lenda'?'Lendas':'Pontos'),
@@ -1260,7 +1476,7 @@ doRender();
   const [db, user, dl] = await Promise.all([claude.use('db'), claude.use('user'), claude.use('downloads')]);
   S.db = db; S.user = user; S.dl = dl;
   if (user){ S.uid = await user.id(); S.admin = await user.canEdit(); }
-  if (ADMIN_TABS.includes(S.tab) && !S.admin) S.tab = 'sub';
+  if ((ADMIN_TABS.includes(S.tab) && !S.admin) || !TABS.some(t => t[0] === S.tab)) S.tab = 'home';
   if (!db){ doRender(); return; }
   const onErr = e => { console.error(e); if (e && e.code === 'revoked') { S.db = null; render(); } };
   db.collection('segments').onSnapshot(s => { S.segs = s.docs.map(d => Object.assign({id:d.id}, d.data())).sort((a,b)=>a.n-b.n); render(); }, onErr);
