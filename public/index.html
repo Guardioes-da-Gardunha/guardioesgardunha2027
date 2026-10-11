@@ -201,6 +201,8 @@ select option,select optgroup{background:var(--surface);color:var(--ink)}
 .pick:hover{border-color:var(--accent-line)} .pick:focus-within{border-color:var(--terra);box-shadow:0 0 0 3px var(--terra-soft)}
 .pk-l{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--terra-txt)}
 .pick select{border:0;background-color:transparent;padding:0 26px 0 0;min-height:0;border-radius:0;font-family:var(--head);font-weight:800;font-stretch:75%;font-size:1.12rem;letter-spacing:.01em;line-height:1.2;color:var(--ink);width:100%;background-position:right 0 center;text-overflow:ellipsis;white-space:nowrap;overflow:hidden}
+.isteps{margin:0;padding-left:20px;display:grid;gap:3px;color:var(--soft-text)}
+#install{max-width:560px}
 .names{display:flex;flex-wrap:wrap;gap:6px} .name{font-size:.88rem;border:1px solid var(--line2);border-radius:99px;padding:4px 12px;background:var(--surface)} .name.me{border-color:var(--terra);color:var(--terra-txt)}
 /* classificação: caixas com + */
 .pbox{border:1px solid var(--line);border-radius:12px;background:var(--glass)}
@@ -238,7 +240,7 @@ select option,select optgroup{background:var(--surface);color:var(--ink)}
   <div class="wrap"><nav id="tabs" role="tablist"></nav></div>
 </header>
 <main class="wrap" id="main"><div class="card empty">A carregar…</div></main>
-<footer class="wrap site-foot"><p class="disc">Isto é uma lenda e por isso não é um evento segurado. Cada aspirante a guardião segue por sua conta e risco.</p><div id="foot"></div></footer>
+<footer class="wrap site-foot"><p class="disc">Isto é uma lenda e por isso não é um evento segurado. Cada aspirante a guardião segue por sua conta e risco.</p><div id="install"></div><div id="foot"></div></footer>
 <nav class="bnav" id="bnav" aria-label="Secções"></nav>
 <div class="toast" id="toast" hidden></div>
 
@@ -666,7 +668,7 @@ function doRender(){
   const me = document.getElementById('me'); const aid = myAid();
   me.replaceChildren(); if (aid) me.append(h('span',{}, athName(athById(aid)))); if (S.admin) me.append(aid ? h('br') : '', h('span',{class:'tag'}, 'Organização')); me.hidden = !aid && !S.admin;
   const sub = document.getElementById('sub'); if (sub) sub.textContent = 'Época 2027' + (S.segs.length ? ' · ' + S.segs.length + ' caminho' + (S.segs.length === 1 ? '' : 's') : '');
-  orgFooter();
+  orgFooter(); installBox();
   const main = document.getElementById('main');
   if (!S.db){ main.replaceChildren(h('div',{class:'card notice'}, h('strong',{},'Não foi possível ligar à base de dados. '), 'Verifica a ligação à internet e recarrega a página.')); return; }
   const v = S.tab === 'lenda' ? viewLenda() : S.tab === 'seg' ? viewSeg() : S.tab === 'cls' ? viewCls() : S.tab === 'adm' && S.admin ? viewAdm() : S.tab === 'ins' && S.admin ? viewIns() : S.tab === 'reg' ? viewReg() : S.tab === 'sub' ? viewSub() : viewLenda();
@@ -842,6 +844,21 @@ function loginBox(){
     try { const ok = await S.user.loginCode(inp.value); if (!ok) return toast('Código inválido.'); toast('Código aceite.'); setTimeout(() => location.reload(), 500); }
     catch(e){ toast(errMsg(e, 'Não foi possível validar o código.')); } };
   return h('details',{}, h('summary',{}, 'Já me inscrevi: tenho um código'), h('div',{class:'row', style:'margin-top:10px'}, inp, h('button',{class:'b', onclick:go}, 'Entrar')));
+}
+let installEvt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; installBox(); });
+window.addEventListener('appinstalled', () => { installEvt = null; installBox(); });
+function installBox(){
+  const el = document.getElementById('install'); if (!el) return;
+  const standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone;
+  if (standalone){ el.replaceChildren(); return; }
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent), open = !!S.open.inst;
+  const steps = h('div',{class:'pbody stack', style:'gap:12px'},
+    installEvt ? h('div',{}, h('button',{class:'b t', onclick:async()=>{ const ev = installEvt; installEvt = null; ev.prompt(); try { await ev.userChoice; } catch(e){} installBox(); }}, 'Instalar agora')) : null,
+    h('div',{class:'stack', style:'gap:4px' + (ios ? ';order:-1' : '')}, h('strong',{}, 'iPhone (Safari)'), h('ol',{class:'isteps'}, h('li',{}, 'Abre o site no Safari.'), h('li',{}, 'Toca em Partilhar (o quadrado com a seta para cima).'), h('li',{}, 'Escolhe “Adicionar ao ecrã principal” e toca em Adicionar.'))),
+    h('div',{class:'stack', style:'gap:4px'}, h('strong',{}, 'Android (Chrome)'), h('ol',{class:'isteps'}, h('li',{}, 'Abre o site no Chrome.'), h('li',{}, 'Toca nos três pontos ⋮, em cima à direita.'), h('li',{}, 'Escolhe “Instalar app” ou “Adicionar ao ecrã principal”.'))),
+    h('p',{class:'small muted', style:'margin:0'}, 'Se abriste o link no WhatsApp, Instagram ou Facebook, abre-o primeiro no navegador. Depois de instalada, a app abre em ecrã inteiro com o escudo dos Guardiões.'));
+  el.replaceChildren(h('div',{class:'pbox' + (open ? ' on' : '')}, h('button',{class:'phead', 'aria-expanded':String(open), onclick:()=>{ S.open.inst = !open; installBox(); }}, h('span',{class:'pm', 'aria-hidden':'true'}, open ? '−' : '+'), h('span',{}, 'Instalar a app no telemóvel')), open ? steps : null));
 }
 function orgFooter(){
   const f = document.getElementById('foot'); if (!f) return;
