@@ -121,7 +121,8 @@ details>summary{cursor:pointer;font-weight:700}
 
 .codebox{font-family:var(--mono);font-size:clamp(1.4rem,6vw,2rem);letter-spacing:.08em;padding:14px 16px;border:1px dashed var(--terra);border-radius:10px;background:var(--terra-soft);color:var(--terra-txt);text-align:center;user-select:all;-webkit-user-select:all;word-break:break-all}
 .linkb{background:none;border:0;padding:6px 0;color:var(--muted);font:inherit;font-size:.85rem;text-decoration:underline;cursor:pointer}
-#foot{padding-block:28px 40px;color:var(--muted)}
+.site-foot{padding-block:28px 40px;color:var(--muted);display:grid;gap:10px}
+.disc{margin:0;font-family:var(--serif);font-style:italic;font-size:.95rem;line-height:1.5;color:var(--soft-text);max-width:60ch;border-left:2px solid var(--terra);padding-left:12px}
 
 /* navegação no telemóvel: barra de ícones em baixo + deslizar */
 .bnav{display:none}
@@ -134,7 +135,7 @@ main.in-r{animation:inR .22s ease} main.in-l{animation:inL .22s ease}
   .bnav button{background:none;border:0;color:var(--muted);display:grid;justify-items:center;gap:3px;font:600 .64rem/1.1 var(--body);padding:4px 0 2px;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent}
   .bnav button[aria-current="page"]{color:var(--terra-txt)}
   .bnav button[aria-current="page"]::before{content:'';position:absolute;top:-7px;left:28%;right:28%;height:3px;border-radius:0 0 3px 3px;background:var(--terra)}
-  main.wrap{padding-bottom:28px} #foot{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+  main.wrap{padding-bottom:28px} .site-foot{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
   .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 }
 .bnav svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -222,7 +223,7 @@ select option,select optgroup{background:var(--surface);color:var(--ink)}
   <div class="wrap"><nav id="tabs" role="tablist"></nav></div>
 </header>
 <main class="wrap" id="main"><div class="card empty">A carregar…</div></main>
-<footer class="wrap" id="foot"></footer>
+<footer class="wrap site-foot"><p class="disc">Isto é uma lenda e por isso não é um evento segurado. Cada aspirante a guardião segue por sua conta e risco.</p><div id="foot"></div></footer>
 <nav class="bnav" id="bnav" aria-label="Secções"></nav>
 <div class="toast" id="toast" hidden></div>
 
