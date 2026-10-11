@@ -189,6 +189,16 @@ main.in-r{animation:inR .22s ease} main.in-l{animation:inL .22s ease}
 .tm-lay button{padding:6px 11px;font-size:.78rem}
 .tm-attr{position:absolute;right:0;bottom:0;z-index:2;font-size:.6rem;background:rgba(255,255,255,.78);color:#222;padding:1px 6px;border-top-left-radius:6px}
 @media (min-width:761px){ .tmap{height:420px} }
+td.num{white-space:nowrap}
+/* listas de escolha */
+select{appearance:none;-webkit-appearance:none;padding-right:38px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23D8B25A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;cursor:pointer}
+select:focus{outline:none;border-color:var(--terra)}
+select option,select optgroup{background:var(--surface);color:var(--ink)}
+.picks{gap:10px} .picks .pick{flex:1 1 200px}
+.pick{position:relative;display:grid;gap:2px;min-width:0;max-width:100%;padding:8px 14px 9px;border:1px solid var(--line2);border-radius:14px;background:linear-gradient(180deg,var(--surface),var(--surface2));cursor:pointer;transition:border-color .15s, box-shadow .15s}
+.pick:hover{border-color:var(--accent-line)} .pick:focus-within{border-color:var(--terra);box-shadow:0 0 0 3px var(--terra-soft)}
+.pk-l{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--terra-txt)}
+.pick select{border:0;background-color:transparent;padding:0 26px 0 0;min-height:0;border-radius:0;font-family:var(--head);font-weight:800;font-stretch:75%;font-size:1.12rem;letter-spacing:.01em;line-height:1.2;color:var(--ink);width:100%;background-position:right 0 center;text-overflow:ellipsis;white-space:nowrap;overflow:hidden}
 /* classificação: caixas com + */
 .pbox{border:1px solid var(--line);border-radius:12px;background:var(--glass)}
 .phead,.crow{width:100%;display:flex;align-items:center;gap:12px;background:none;border:0;color:var(--ink);font:inherit;text-align:left;padding:12px 14px;cursor:pointer}
@@ -667,21 +677,10 @@ const FMT_D = iso => { const [y, m, d] = String(iso||'').split('-').map(Number);
 function viewHome(){
   const c = cfg(), real = S.ath.filter(a => !a.ex), aid = myAid(), reg = S.myReg;
   const totKm = S.segs.reduce((n, s) => n + (s.dist||0), 0), totUp = S.segs.reduce((n, s) => n + (s.tipo === 'Descida' ? 0 : Math.round(s.desn||0)), 0);
-  const out = [h('section',{class:'hero', style:'border-top:1px solid var(--line);padding-top:22px;margin-top:6px'}, h('p',{class:'claim'}, 'Rouba o bordão.'),
+  const out = [h('section',{class:'hero', style:'gap:8px'}, h('p',{class:'claim'}, 'Rouba o bordão.'),
     h('p',{class:'muted', style:'margin:0;max-width:60ch'}, 'Cada caminho da serra tem um Guardião e uma Guardiã: quem tem o melhor tempo. Corre quando quiseres, carrega o GPX e tira-lhes a guarda.'))];
   out.push(h('div',{class:'stats'}, h('div',{}, h('strong',{class:'num'}, String(S.segs.length)), h('span',{}, 'caminhos')), h('div',{}, h('strong',{class:'num'}, (totKm/1000).toLocaleString('pt-PT',{maximumFractionDigits:1})), h('span',{}, 'km no total')),
     h('div',{}, h('strong',{class:'num'}, '+' + totUp.toLocaleString('pt-PT')), h('span',{}, 'm a subir')), h('div',{}, h('strong',{class:'num'}, String(real.length)), h('span',{}, 'inscritos'))));
-  if (aid){
-    let me = null; try { me = standings('all').find(r => r.id === aid); } catch(e){}
-    out.push(h('div',{class:'card stack'}, h('h3',{}, 'Olá, ' + (athName(athById(aid)).split(' ')[0])),
-      me ? h('div',{class:'kv'}, h('div',{}, h('span',{class:'lbl'},'Pontos'), h('strong',{}, String(me.total||0))), h('div',{}, h('span',{class:'lbl'},'Bordões'), h('strong',{}, String(me.wins||0))), h('div',{}, h('span',{class:'lbl'},'Caminhos feitos'), h('strong',{}, (me.done||0) + '/' + S.segs.length))) : null,
-      h('div',{class:'row'}, h('button',{class:'b t', onclick:()=>goTab('sub')}, 'Carregar atividade'), h('button',{class:'b o', onclick:()=>goTab('cls')}, 'Ver classificação'))));
-  } else if (reg && reg.estado === 'pendente'){
-    out.push(h('div',{class:'card notice f'}, h('strong',{}, 'Inscrição enviada. '), 'Assim que a organização aprovar, os teus tempos começam a contar.', h('div',{class:'row', style:'margin-top:10px'}, h('button',{class:'b o', onclick:()=>goTab('sub')}, 'Testar um GPX'))));
-  } else {
-    out.push(h('div',{class:'row'}, h('button',{class:'b t', onclick:()=>goTab('reg')}, 'Inscrever-me'), h('button',{class:'b o', onclick:()=>goTab('seg')}, 'Ver caminhos')));
-  }
-  out.push(h('p',{class:'small muted', style:'margin:0'}, 'Antes de começares: ', h('button',{class:'linkb inl', onclick:()=>{ goTab('reg'); setTimeout(openReg, 60); }}, 'lê o regulamento'), '.'));
   return out;
 }
 function guardOf(n, g){ const L = C.bestPerAthlete(effList(), n, 'all'); for (const r of L){ const a = athById(r.a); if (a && (a.g||'M') === g) return {a, r}; } return null; }
@@ -837,8 +836,7 @@ function goTab(k, anim){ const from = PUB.indexOf(S.tab), to = PUB.indexOf(k); S
 /* ===== Inscrição ===== */
 function viewReg(){
   const out = [], aid = myAid(), claim = S.claims[S.uid], reg = S.myReg;
-  out.push(h('section',{class:'stack'}, h('h2',{},'Inscrição'),
-    h('p',{class:'muted', style:'margin:0;max-width:68ch'}, 'Inscreve-te no Desafio Guardiões da Gardunha 2027. Recebes um código pessoal que liga este telemóvel à tua inscrição; a organização confirma o pedido e a partir daí podes carregar as tuas atividades.')));
+  out.push(h('h2',{},'Inscrição'), regDoc(), h('div',{class:'stack', style:'gap:16px'}, ...viewHome()));
   if (S.myCode) out.push(codeCard());
   const card = h('div',{class:'card stack'});
   if (aid){
@@ -854,7 +852,7 @@ function viewReg(){
     card.append(regForm(),
       ...(S.ath.some(a => !ownerOf(a.id) && !a.ex) ? [h('details',{}, h('summary',{}, 'A organização já te inscreveu? Escolhe o teu nome'), h('div',{style:'margin-top:10px'}, claimPicker()))] : []), loginBox());
   }
-  out.push(card, regDoc());
+  out.push(card);
   return out;
 }
 /* ===== Carregar atividade ===== */
@@ -993,8 +991,10 @@ const monthOf = st => { const d = new Date(st*1000); return d.getFullYear() + '-
 const monthLbl = m => { const [y, mm] = m.split('-'); return MESES[+mm-1] + ' ' + y; };
 function monthsAvail(){ const set = new Set([monthOf(Date.now()/1000)]); for (const d of effList()) for (const x of d.h) set.add(monthOf(x.st)); return [...set].sort().reverse(); }
 function effPeriod(){ const L = effList(); if (S.month === 'all') return L; return L.map(d => Object.assign({}, d, {h:d.h.filter(x => monthOf(x.st) === S.month)})).filter(d => d.h.length); }
+function pick(label, sel){ return h('label',{class:'pick'}, h('span',{class:'pk-l'}, label), sel); }
 function monthPicker(){ const ms = monthsAvail(); if (S.month !== 'all' && !ms.includes(S.month)) ms.unshift(S.month);
-  return h('select',{'aria-label':'Período', onchange:e=>{ S.month = e.target.value; doRender(); }}, h('option',{value:'all', selected:S.month==='all'}, 'Época toda'), ms.map(m => h('option',{value:m, selected:S.month===m}, 'Mês de ' + monthLbl(m)))); }
+  return pick('Período', h('select',{onchange:e=>{ S.month = e.target.value; doRender(); }}, h('option',{value:'all', selected:S.month==='all'}, 'Época toda'), ms.map(m => h('option',{value:m, selected:S.month===m}, cap(monthLbl(m)))))); }
+const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
 function filterBar(){
   const c = cfg(), mod = S.fMod || c.mod;
   const g = h('div',{class:'seg', role:'group', 'aria-label':'Género'}, [['all','Todos'],['M','Masculino'],['F','Feminino']].map(([k,l]) => h('button',{'aria-pressed':String(S.fG===k), onclick:()=>{ S.fG = k; doRender(); }}, l)));
@@ -1023,7 +1023,7 @@ function viewLenda(){
   pages.push(h('article',{class:'page stack'}, h('h3',{class:'crest-title', style:'font-size:1.6rem'}, 'Guardiões de Todos os Tempos'), h('p',{class:'muted', style:'margin:0;max-width:68ch'}, 'A referência histórica de cada caminho. Quem a bater rouba o bordão de sempre: +8 pontos, e passa a ser a nova lenda desse caminho.'), tbl));
   const titles = pages.map(pg => (pg.querySelector('h3') || {}).textContent || '');
   return [h('section',{class:'hero', style:'gap:6px'}, h('h2',{class:'crest-title'}, 'Guardiões da Gardunha'), h('p',{class:'when'}, `${FMT_D(cfg().from)} a ${FMT_D(cfg().to)}`)),
-    pagedTrack(pages, titles, 'lendaPg'), ...viewHome()];
+    pagedTrack(pages, titles, 'lendaPg')];
 
 }
 function zipStore(name, text){ // ZIP sem compressão com um só ficheiro (a descarga não aceita .gpx; o .zip abre em qualquer telemóvel)
@@ -1139,14 +1139,16 @@ const effMonth = m => effList().map(d => Object.assign({}, d, {h:d.h.filter(x =>
 function clsBySeg(){
   const ms = monthsAvail(); if (!S.clsMonth || !ms.includes(S.clsMonth)) S.clsMonth = ms[0];
   const m = S.clsMonth, E = effMonth(m), pts = cfg().podium || [8,5,3];
-  const sel = h('select',{'aria-label':'Mês', onchange:e=>{ S.clsMonth = e.target.value; doRender(); }}, ms.map(x => h('option',{value:x, selected:x===m}, monthLbl(x))));
-  const out = [h('div',{class:'row'}, sel, h('span',{class:'small muted'}, 'O pódio de cada mês fecha no último dia às 23:59. Até lá é provisório.'))];
+  const sel = pick('Mês', h('select',{onchange:e=>{ S.clsMonth = e.target.value; doRender(); }}, ms.map(x => h('option',{value:x, selected:x===m}, cap(monthLbl(x))))));
+  if (S.clsSeg && !segByN(S.clsSeg)) S.clsSeg = 0;
+  const selC = pick('Caminho', h('select',{onchange:e=>{ S.clsSeg = +e.target.value; doRender(); }}, h('option',{value:0, selected:!S.clsSeg}, 'Todos os caminhos'), S.segs.map(x => h('option',{value:x.n, selected:S.clsSeg===x.n}, pad2(x.n) + ' · ' + x.nome))));
+  const out = [h('div',{class:'row picks'}, sel, selC), h('p',{class:'small muted', style:'margin:0'}, 'O pódio de cada mês fecha no último dia às 23:59. Até lá é provisório.')];
   if (!S.segs.length){ out.push(h('div',{class:'card empty'}, 'Ainda não há caminhos publicados.')); return out; }
   const list = h('div',{class:'clist'});
-  for (const sg of S.segs){
+  for (const sg of S.segs.filter(x => !S.clsSeg || x.n === S.clsSeg)){
     const L = C.bestPerAthlete(E, sg.n, 'all'), byG = {M:[], F:[]};
     for (const r of L){ const a = athById(r.a); if (a) (byG[a.g === 'F' ? 'F' : 'M']).push(r); }
-    const k = 'cm' + sg.n, open = !!S.open[k], lead = g => byG[g][0] ? athName(athById(byG[g][0].a)).split(' ')[0] + ' ' + C.fmtTime(byG[g][0].t) : '—';
+    const k = 'cm' + sg.n, open = !!S.open[k] || !!S.clsSeg, lead = g => byG[g][0] ? athName(athById(byG[g][0].a)).split(' ')[0] + ' ' + C.fmtTime(byG[g][0].t) : '—';
     const head = h('button',{class:'crow', 'aria-expanded':String(open), onclick:()=>{ S.open[k] = !open; doRender(); }},
       h('span',{class:'pm', 'aria-hidden':'true'}, open ? '−' : '+'),
       h('span',{class:'cn'}, h('span',{class:'mono small muted'}, pad2(sg.n) + (sg.localidade ? ' · ' + sg.localidade : '')), h('strong',{}, sg.nome)),
@@ -1166,9 +1168,9 @@ function clsBySeg(){
 function clsGeral(){
   const out = [];
   const cat = CATS.find(x => x[0] === S.clsCat) || CATS[0];
-  const sel = h('select',{'aria-label':'Categoria', onchange:e=>{ S.clsCat = e.target.value; doRender(); }}, CATS.map(x => h('option',{value:x[0], selected:x[0]===cat[0]}, x[1])));
+  const sel = pick('Categoria', h('select',{onchange:e=>{ S.clsCat = e.target.value; doRender(); }}, CATS.map(x => h('option',{value:x[0], selected:x[0]===cat[0]}, x[1]))));
   const g = h('div',{class:'seg', role:'group', 'aria-label':'Género'}, [['M','Masculina'],['F','Feminina'],['all','Todos']].map(([k,l]) => h('button',{'aria-pressed':String(S.clsG===k), onclick:()=>{ S.clsG = k; doRender(); }}, l)));
-  out.push(h('div',{class:'row'}, monthPicker(), sel, g, h('button',{class:'b o s', onclick:exportCSV, style:'margin-left:auto'}, 'Exportar CSV')));
+  out.push(h('div',{class:'row picks'}, monthPicker(), sel), h('div',{class:'row'}, g, h('button',{class:'b o s', onclick:exportCSV, style:'margin-left:auto'}, 'Exportar CSV')));
   out.push(h('p',{class:'small muted', style:'margin:0'}, S.month === 'all' ? cat[3] + '.' : `Pontos ganhos em ${monthLbl(S.month)}: pódio do mês, check-in e roubos.`));
   let rows = standings(S.month).filter(r => { const a = athById(r.id); if (!a) return false; if (S.clsG !== 'all' && (a.g||'M') !== S.clsG) return false; return true; });
   rows = C.rankRows(rows, cat[2]).filter(r => r.done > 0 || r.total > 0);
