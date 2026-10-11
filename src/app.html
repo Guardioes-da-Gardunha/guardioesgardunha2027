@@ -189,6 +189,7 @@ select option,select optgroup{background:var(--surface);color:var(--ink)}
 .pick:hover{border-color:var(--accent-line)} .pick:focus-within{border-color:var(--terra);box-shadow:0 0 0 3px var(--terra-soft)}
 .pk-l{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--terra-txt)}
 .pick select{border:0;background-color:transparent;padding:0 26px 0 0;min-height:0;border-radius:0;font-family:var(--head);font-weight:800;font-stretch:75%;font-size:1.12rem;letter-spacing:.01em;line-height:1.2;color:var(--ink);width:100%;background-position:right 0 center;text-overflow:ellipsis;white-space:nowrap;overflow:hidden}
+.names{display:flex;flex-wrap:wrap;gap:6px} .name{font-size:.88rem;border:1px solid var(--line2);border-radius:99px;padding:4px 12px;background:var(--surface)} .name.me{border-color:var(--terra);color:var(--terra-txt)}
 /* classificação: caixas com + */
 .pbox{border:1px solid var(--line);border-radius:12px;background:var(--glass)}
 .phead,.crow{width:100%;display:flex;align-items:center;gap:12px;background:none;border:0;color:var(--ink);font:inherit;text-align:left;padding:12px 14px;cursor:pointer}
@@ -605,8 +606,17 @@ function viewReg(){
     card.append(regForm(),
       ...(S.ath.some(a => !ownerOf(a.id) && !a.ex) ? [h('details',{}, h('summary',{}, 'A organização já te inscreveu? Escolhe o teu nome'), h('div',{style:'margin-top:10px'}, claimPicker()))] : []), loginBox());
   }
-  out.push(card);
+  out.push(card, aspirantes());
   return out;
+}
+function aspirantes(){
+  const real = S.ath.filter(a => !a.ex).sort((x, y) => (x.nome||'').localeCompare(y.nome||'', 'pt'));
+  const me = myAid(), grp = (g, t) => { const L = real.filter(a => (a.g === 'F' ? 'F' : 'M') === g);
+    return h('div',{class:'stack', style:'gap:8px;min-width:0'}, h('span',{class:'lbl'}, t + ' · ' + L.length),
+      L.length ? h('div',{class:'names'}, ...L.map(a => h('span',{class:'name' + (a.id === me ? ' me' : '')}, athName(a)))) : h('span',{class:'small muted'}, 'Ainda ninguém.')); };
+  return h('section',{class:'card stack'}, h('h3',{}, 'Os aspirantes a guardião'),
+    h('p',{class:'small muted', style:'margin:0'}, real.length ? `${real.length} inscrito${real.length === 1 ? '' : 's'} até agora.` : 'Ainda não há inscrições aprovadas. Sê o primeiro a pegar no bordão.'),
+    real.length ? h('div',{class:'cbody', style:'padding:0'}, grp('M','Aspirantes a Guardião'), grp('F','Aspirantes a Guardiã')) : null);
 }
 /* ===== Carregar atividade ===== */
 function viewSub(){
