@@ -398,10 +398,7 @@ const FMT_D = iso => { const [y, m, d] = String(iso||'').split('-').map(Number);
 function viewHome(){
   const c = cfg(), real = S.ath.filter(a => !a.ex), aid = myAid(), reg = S.myReg;
   const totKm = S.segs.reduce((n, s) => n + (s.dist||0), 0), totUp = S.segs.reduce((n, s) => n + (s.tipo === 'Descida' ? 0 : Math.round(s.desn||0)), 0);
-  const crest = document.querySelector('.brand svg'); const cr = crest ? crest.cloneNode(true) : null; if (cr){ cr.removeAttribute('width'); cr.removeAttribute('height'); }
-  const out = [h('section',{class:'hero'}, cr ? h('div',{class:'crest', style:'color:var(--terra)'}, cr) : null,
-    h('p',{class:'when'}, `Serra da Gardunha · ${FMT_D(c.from).replace(/ de \d{4}$/, '')} a ${FMT_D(c.to)}`),
-    h('h2',{class:'crest-title'}, 'Guardiões da Gardunha'), h('p',{class:'claim'}, 'Rouba o bordão.'),
+  const out = [h('section',{class:'hero', style:'border-top:1px solid var(--line);padding-top:22px;margin-top:6px'}, h('p',{class:'claim'}, 'Rouba o bordão.'),
     h('p',{class:'muted', style:'margin:0;max-width:60ch'}, 'Cada caminho da serra tem um Guardião e uma Guardiã: quem tem o melhor tempo. Corre quando quiseres, carrega o GPX e tira-lhes a guarda.'))];
   out.push(h('div',{class:'stats'}, h('div',{}, h('strong',{class:'num'}, String(S.segs.length)), h('span',{}, 'caminhos')), h('div',{}, h('strong',{class:'num'}, (totKm/1000).toLocaleString('pt-PT',{maximumFractionDigits:1})), h('span',{}, 'km no total')),
     h('div',{}, h('strong',{class:'num'}, '+' + totUp.toLocaleString('pt-PT')), h('span',{}, 'm a subir')), h('div',{}, h('strong',{class:'num'}, String(real.length)), h('span',{}, 'inscritos'))));
@@ -756,7 +753,8 @@ function viewLenda(){
     : h('p',{class:'muted'}, 'Os Guardiões de Todos os Tempos de cada caminho serão publicados pela organização antes do arranque da época.');
   pages.push(h('article',{class:'page stack'}, h('h3',{class:'crest-title', style:'font-size:1.6rem'}, 'Guardiões de Todos os Tempos'), h('p',{class:'muted', style:'margin:0;max-width:68ch'}, 'A referência histórica de cada caminho. Quem a bater rouba o bordão de sempre: +8 pontos, e passa a ser a nova lenda desse caminho.'), tbl));
   const titles = pages.map(pg => (pg.querySelector('h3') || {}).textContent || '');
-  return [...viewHome(), pagedTrack(pages, titles, 'lendaPg')];
+  return [h('section',{class:'hero', style:'gap:6px'}, h('h2',{class:'crest-title'}, 'Guardiões da Gardunha'), h('p',{class:'when'}, `${FMT_D(cfg().from)} a ${FMT_D(cfg().to)}`)),
+    pagedTrack(pages, titles, 'lendaPg'), ...viewHome()];
 
 }
 function zipStore(name, text){ // ZIP sem compressão com um só ficheiro (a descarga não aceita .gpx; o .zip abre em qualquer telemóvel)
