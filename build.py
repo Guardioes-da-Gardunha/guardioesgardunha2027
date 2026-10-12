@@ -40,9 +40,9 @@ for line in open('src/regulamento.md', encoding='utf-8').read().split('\n'):
 reg_js = 'const REG = ' + json.dumps([{'t': a['t'], 'html': md2html(a['lines'])} for a in REG], ensure_ascii=False).replace('</', '<\\/') + ';'
 assert src.count('/*REG*/') == 1
 src = src.replace('/*REG*/', reg_js)
-icon = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 140'%3E%3Crect width='140' height='140' rx='24' fill='%231D0E12'/%3E%3Cg stroke='%23D8B25A' stroke-width='9' stroke-linecap='round'%3E%3Cpath d='M26 118 L114 22'/%3E%3Cpath d='M114 118 L26 22'/%3E%3C/g%3E%3C/svg%3E"
+icon = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 140'%3E%3Crect width='140' height='140' rx='24' fill='%23141614'/%3E%3Cg stroke='%238FB573' stroke-width='9' stroke-linecap='round'%3E%3Cpath d='M26 118 L114 22'/%3E%3Cpath d='M114 118 L26 22'/%3E%3C/g%3E%3C/svg%3E"
 head = ('<!doctype html>\n<html lang="pt-PT">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
-        '<meta name="theme-color" content="#1D0E12">\n<meta name="description" content="Guardiões da Gardunha 2027 — desafio de trail na Serra da Gardunha. Inscrições, caminhos, classificações.">\n'
+        '<meta name="theme-color" content="#141614">\n<meta name="description" content="Guardiões da Gardunha 2027 — desafio de trail na Serra da Gardunha. Inscrições, caminhos, classificações.">\n'
         '<meta property="og:title" content="Guardiões da Gardunha 2027"><meta property="og:description" content="Rouba o bordão. Desafio de trail na Serra da Gardunha.">\n'
         '<link rel="icon" href="' + icon + '">\n<link rel="manifest" href="manifest.webmanifest">\n<link rel="apple-touch-icon" href="apple-touch-icon.png">\n'
         '<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Guardiões">\n')
