@@ -22,6 +22,116 @@ function parseGPX(text) {
   }
   return out;
 }
+/* ---------- outros formatos: TCX, FIT e ZIP ---------- */
+function mkPt(lat, lon, ele, t, hr) { const [x, y] = proj(lat, lon); return { x, y, lat, lon, ele: ele == null || !isFinite(ele) ? null : ele, t: t == null || !isFinite(t) ? null : t, hr: hr || null }; }
+function parseTCX(text) {
+  const out = { name: '', type: '', pts: [] };
+  const sp = /<Activity\b[^>]*Sport\s*=\s*["']([^"']+)["']/.exec(text); if (sp) out.type = sp[1].toLowerCase();
+  const re = /<Trackpoint>([\s\S]*?)<\/Trackpoint>/g; let m;
+  while ((m = re.exec(text))) {
+    const b = m[1], la = /<LatitudeDegrees>([-\d.eE]+)</.exec(b), lo = /<LongitudeDegrees>([-\d.eE]+)</.exec(b);
+    if (!la || !lo) continue;
+    const tm = /<Time>([^<]+)</.exec(b), el = /<AltitudeMeters>([-\d.eE]+)</.exec(b), hr = /<HeartRateBpm>\s*<Value>(\d+)</.exec(b);
+    const lat = parseFloat(la[1]), lon = parseFloat(lo[1]); if (!isFinite(lat) || !isFinite(lon)) continue;
+    out.pts.push(mkPt(lat, lon, el ? parseFloat(el[1]) : null, tm ? Date.parse(tm[1]) / 1000 : null, hr ? parseInt(hr[1], 10) : null));
+  }
+  return out;
+}
+/* FIT (ficheiro original dos relógios): lê as mensagens "record" (posição, hora, altitude, FC) e o desporto */
+function parseFIT(buf) {
+  const u8 = buf instanceof Uint8Array ? buf : new Uint8Array(buf), dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+  const out = { name: '', type: '', pts: [] };
+  if (u8.length < 14) throw new Error('FIT inválido');
+  const hs = u8[0], dataSize = dv.getUint32(4, true);
+  if (String.fromCharCode(u8[8], u8[9], u8[10], u8[11]) !== '.FIT') throw new Error('FIT inválido');
+  const end = Math.min(u8.length, hs + dataSize), defs = {}, SC = 180 / 2147483648, EPOCH = 631065600;
+  let p = hs, lastTs = null;
+  const SPORT = { 0: 'generic', 1: 'running', 2: 'cycling', 5: 'swimming', 11: 'walking', 17: 'hiking', 21: 'e_biking' };
+  const rd = (off, size, base, le) => {
+    switch (base & 0x1F) {
+      case 0: case 2: case 10: case 13: return size === 1 ? u8[off] : null;          // enum/uint8/uint8z/byte
+      case 1: return size === 1 ? dv.getInt8(off) : null;
+      case 3: return size === 2 ? dv.getInt16(off, le) : null;
+      case 4: case 11: return size === 2 ? dv.getUint16(off, le) : null;
+      case 5: return size === 4 ? dv.getInt32(off, le) : null;
+      case 6: case 12: return size === 4 ? dv.getUint32(off, le) : null;
+      default: return null;
+    }
+  };
+  while (p < end) {
+    const h = u8[p++];
+    if (h & 0x80) {                                     // cabeçalho com hora comprimida
+      const lt = (h >> 5) & 3, off = h & 0x1F, d = defs[lt]; if (!d) throw new Error('FIT: definição em falta');
+      if (lastTs != null) { let ts = (lastTs & ~0x1F) + off; if (ts < lastTs) ts += 0x20; lastTs = ts; }
+      p = readData(d, p, lastTs); continue;
+    }
+    const lt = h & 0x0F;
+    if (h & 0x40) {                                     // definição
+      const le = u8[p + 1] === 0, gm = le ? dv.getUint16(p + 2, true) : dv.getUint16(p + 2, false), nf = u8[p + 4]; p += 5;
+      const fields = []; let size = 0;
+      for (let i = 0; i < nf; i++) { fields.push({ n: u8[p], s: u8[p + 1], b: u8[p + 2], o: size }); size += u8[p + 1]; p += 3; }
+      if (h & 0x20) { const nd = u8[p++]; for (let i = 0; i < nd; i++) { size += u8[p + 1]; p += 3; } }
+      defs[lt] = { le, gm, fields, size };
+    } else {
+      const d = defs[lt]; if (!d) throw new Error('FIT: definição em falta');
+      p = readData(d, p, null);
+    }
+  }
+  function readData(d, at, compTs) {
+    if (d.gm === 20 || d.gm === 18 || d.gm === 12) {
+      const v = {};
+      for (const f of d.fields) v[f.n] = rd(at + f.o, f.s, f.b, d.le);
+      if (d.gm === 20) {
+        let ts = v[253]; if (ts != null && ts !== 0xFFFFFFFF) lastTs = ts; else ts = compTs;
+        const la = v[0], lo = v[1];
+        if (la != null && lo != null && la !== 0x7FFFFFFF && lo !== 0x7FFFFFFF && ts != null) {
+          let ele = null; if (v[78] != null && v[78] !== 0xFFFFFFFF) ele = v[78] / 5 - 500; else if (v[2] != null && v[2] !== 0xFFFF) ele = v[2] / 5 - 500;
+          const hr = v[3] != null && v[3] !== 0xFF ? v[3] : null;
+          out.pts.push(mkPt(la * SC, lo * SC, ele, ts + EPOCH, hr));
+        }
+      } else if (v[253] != null && v[253] !== 0xFFFFFFFF) lastTs = v[253];
+      const sp = d.gm === 18 ? v[5] : d.gm === 12 ? v[0] : null;
+      if (sp != null && sp !== 0xFF && !out.type) out.type = SPORT[sp] || ('sport' + sp);
+    } else {
+      for (const f of d.fields) if (f.n === 253 && f.s === 4) { const t = d.le ? dv.getUint32(at + f.o, true) : dv.getUint32(at + f.o, false); if (t !== 0xFFFFFFFF) lastTs = t; }
+    }
+    return at + d.size;
+  }
+  return out;
+}
+/* ZIP: devolve a lista de ficheiros {name, method, data} (comprimidos); a descompressão é feita por quem chama */
+function zipEntries(buf) {
+  const u8 = buf instanceof Uint8Array ? buf : new Uint8Array(buf), dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+  let e = -1; for (let i = u8.length - 22; i >= Math.max(0, u8.length - 65557); i--) if (dv.getUint32(i, true) === 0x06054b50) { e = i; break; }
+  if (e < 0) throw new Error('ZIP inválido');
+  const n = dv.getUint16(e + 10, true); let p = dv.getUint32(e + 16, true); const out = [];
+  for (let k = 0; k < n; k++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) break;
+    const method = dv.getUint16(p + 10, true), csize = dv.getUint32(p + 20, true), nl = dv.getUint16(p + 28, true), xl = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true), lo = dv.getUint32(p + 42, true);
+    const name = new TextDecoder().decode(u8.subarray(p + 46, p + 46 + nl));
+    const ds = lo + 30 + dv.getUint16(lo + 26, true) + dv.getUint16(lo + 28, true);
+    out.push({ name, method, data: u8.subarray(ds, ds + csize) });
+    p += 46 + nl + xl + cl;
+  }
+  return out;
+}
+const isZip = u8 => u8.length > 4 && u8[0] === 0x50 && u8[1] === 0x4B && u8[2] === 3 && u8[3] === 4;
+const isFit = u8 => u8.length > 12 && u8[8] === 0x2E && u8[9] === 0x46 && u8[10] === 0x49 && u8[11] === 0x54;
+/* lê qualquer ficheiro de atividade (GPX, TCX, FIT ou ZIP com um destes). inflateRaw(bytes) -> Promise<Uint8Array> */
+async function parseActivity(buf, inflateRaw) {
+  let u8 = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
+  if (isZip(u8)) {
+    const es = zipEntries(u8).filter(x => /\.(fit|gpx|tcx)$/i.test(x.name));
+    if (!es.length) throw new Error('O ZIP não tem nenhum ficheiro de atividade (.fit, .gpx ou .tcx).');
+    const en = es.find(x => /\.fit$/i.test(x.name)) || es[0];
+    u8 = en.method === 0 ? en.data : en.method === 8 ? await inflateRaw(en.data) : null;
+    if (!u8) throw new Error('Este ZIP usa uma compressão que a página não conhece.');
+  }
+  if (isFit(u8)) return parseFIT(u8);
+  const text = new TextDecoder().decode(u8);
+  if (/<TrainingCenterDatabase/i.test(text)) return parseTCX(text);
+  return parseGPX(text);
+}
 function cumDist(pts) { const c = [0]; for (let i = 1; i < pts.length; i++) c.push(c[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y)); return c; }
 
 /* ponto a segmento: devolve {d, f} (distância e fração ao longo de a->b) */
@@ -247,4 +357,4 @@ function classifySeg(L, up, dn, gap) {
 /* desempate (Art. 9.2): pontos, segmentos concluídos, coroas, presenças em treinos */
 function rankRows(rows, key) { const k = key || (r => r.total); return rows.slice().sort((a, b) => k(b) - k(a) || b.done - a.done || b.wins - a.wins || b.treinos - a.treinos); }
 function fmtTime(s) { s = Math.round(s * 10) / 10; const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s - h * 3600 - m * 60; const ss = (sec < 10 ? '0' : '') + sec.toFixed(sec % 1 ? 1 : 0); return h ? `${h}:${String(m).padStart(2, '0')}:${ss}` : `${m}:${ss}`; }
-if (typeof module !== 'undefined') module.exports = { climbStats, classifySeg, monthKey, parseGPX, detectSegment, suggestWindows, sliceToTrace, proj, unproj, bestPerAthlete, computePoints, rankRows, suspicion, fmtTime, tracePoly, polyLen };
+if (typeof module !== 'undefined') module.exports = { parseActivity, parseFIT, parseTCX, zipEntries, climbStats, classifySeg, monthKey, parseGPX, detectSegment, suggestWindows, sliceToTrace, proj, unproj, bestPerAthlete, computePoints, rankRows, suspicion, fmtTime, tracePoly, polyLen };

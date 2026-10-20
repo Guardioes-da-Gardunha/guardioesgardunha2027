@@ -701,10 +701,10 @@ function viewSub(){
     else out.push(whoCard());
   }
   if (!c.open && !S.admin){ out.push(h('div',{class:'card notice'}, 'O carregamento de atividades está fechado pela organização.')); return out; }
-  const inp = h('input',{type:'file', accept:'.gpx,application/gpx+xml', multiple:true, class:'sr', id:'gpxin', onchange:e=>handleFiles(e.target.files)});
+  const inp = h('input',{type:'file', accept:'.gpx,.tcx,.fit,.zip,application/gpx+xml,application/zip', multiple:true, class:'sr', id:'gpxin', onchange:e=>handleFiles(e.target.files)});
   const drop = h('div',{class:'drop', ondragover:e=>{ e.preventDefault(); drop.classList.add('on'); }, ondragleave:()=>drop.classList.remove('on'), ondrop:e=>{ e.preventDefault(); drop.classList.remove('on'); handleFiles(e.dataTransfer.files); }},
-    h('div',{class:'big'}, 'GPX'), h('div',{}, 'Arrasta os ficheiros para aqui ou'), h('label',{class:'b t', for:'gpxin'}, 'Escolher ficheiros'), inp,
-    h('div',{class:'small muted'}, 'Exporta o GPX original da atividade na app do teu relógio. No Garmin Connect: ⚙ → Exportar para GPX.'));
+    h('div',{class:'big'}, 'GPX · FIT'), h('div',{}, 'Arrasta os ficheiros para aqui ou'), h('label',{class:'b t', for:'gpxin'}, 'Escolher ficheiros'), inp,
+    h('div',{class:'small muted'}, 'Serve GPX, FIT, TCX ou o ZIP do “Exportar original” do Garmin. No Garmin Connect (site): atividade → ⚙ → Exportar para GPX ou Exportar original.'));
   out.push(h('div',{class:'card stack'}, h('h3',{},'Carregar GPX de corrida'), drop, S.busy ? h('p',{class:'muted'},'A analisar…') : null, pendingView(target)));
   if (target) out.push(myTimes(target));
   return out;
@@ -742,6 +742,11 @@ function claimPicker(){
   return h('div',{class:'row'}, sel, h('button',{class:'b', onclick:async()=>{ if (!sel.value) return toast('Escolhe o teu nome.');
     await safe(async()=>{ await ensureMe(); await S.db.doc('claims/' + S.uid).set({aid:sel.value, at:Date.now()}); }, 'Pedido registado.'); }}, 'Sou eu'));
 }
+async function inflateRaw(u8){
+  if (typeof DecompressionStream === 'undefined') throw new Error('Este navegador não abre ficheiros ZIP. Extrai o .fit do ZIP ou exporta em GPX.');
+  const ds = new DecompressionStream('deflate-raw'); const out = new Response(new Blob([u8]).stream().pipeThrough(ds)); return new Uint8Array(await out.arrayBuffer());
+}
+async function readActivity(f){ return C.parseActivity(await f.arrayBuffer(), inflateRaw); }
 async function handleFiles(files){
   if (!files || !files.length) return; S.busy = true; doRender();
   const c = cfg(), segs = S.segs.filter(hasTrace), res = [], tgt = currentTarget();
@@ -749,7 +754,7 @@ async function handleFiles(files){
   for (const f of files){
     const item = {f:f.name, rows:[], err:null};
     try {
-      const txt = await f.text(); const act = C.parseGPX(txt);
+      const act = await readActivity(f);
       if (act.pts.length < 10) item.err = 'Não foi possível ler pontos neste ficheiro.';
       else if (act.pts.some(p => p.t == null)) item.err = 'O GPX não tem horas nos pontos — exporta a atividade original (não uma rota).';
       else {
@@ -769,7 +774,7 @@ async function handleFiles(files){
           }
         }
       }
-    } catch(e){ console.error(e); item.err = 'Ficheiro inválido.'; }
+    } catch(e){ console.error(e); item.err = e && e.message && /ZIP|navegador|FIT|compressão/.test(e.message) ? e.message : 'Ficheiro inválido.'; }
     res.push(item);
   }
   S.pending = res.concat(S.pending); S.busy = false; doRender();
@@ -1085,9 +1090,7 @@ function segAdminCard(){
 async function loadSegGpx(E, f){
   E.msg = 'A ler ' + f.name + '…'; E.msgOk = true; E.cut = null; doRender();
   try {
-    const txt = await f.text();
-    if (!/<gpx[\s>]/i.test(txt)) throw new Error(/<TrainingCenterDatabase/i.test(txt) ? 'Este ficheiro é TCX. Exporta a atividade em GPX.' : 'Este ficheiro não parece ser um GPX.');
-    const act = C.parseGPX(txt);
+    const act = await readActivity(f);
     if (act.pts.length < 10) throw new Error('Não encontrei pontos de percurso neste GPX.');
     const cut = Object.assign(prepCut(act), {file:f.name, i:0, j:act.pts.length-1, mode:'i', view:null});
     E.cut = cut; E.tipoOv = ''; E.nivelOv = '';
@@ -1144,7 +1147,7 @@ function zoomMap(cut, onPick){
 function segForm(E){
   const err = h('span',{class:'small', style:'color:var(--bad)'});
   const sg = E.n ? segByN(E.n) : null, cut = E.cut && E.cut.act ? E.cut : null;
-  const fileIn = h('input',{type:'file', accept:'.gpx,application/gpx+xml,application/xml,text/xml', class:'sr', id:'seggpx', onchange:e=>{ const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) loadSegGpx(E, f); }});
+  const fileIn = h('input',{type:'file', accept:'.gpx,.tcx,.fit,.zip,application/gpx+xml,application/xml,text/xml,application/zip', class:'sr', id:'seggpx', onchange:e=>{ const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) loadSegGpx(E, f); }});
   const box = h('div',{class:'stack seg-form', style:'gap:14px'},
     h('div',{class:'lbl'}, E.n ? 'Editar caminho ' + pad2(E.n) : 'Novo caminho'),
     field('Nome', h('input',{type:'text', maxlength:80, value:E.nome||'', placeholder:'ex.: Rampa dos Castanheiros', style:'width:100%', oninput:e=>{ E.nome = e.target.value; }})),
@@ -1252,9 +1255,7 @@ function prepCut(act){
 async function loadRef(cut, sg, f){
   cut.msg = 'A ler ' + f.name + '…'; cut.msgOk = true; delete cut.act; doRender();
   try {
-    const txt = await f.text();
-    if (!/<gpx[\s>]/i.test(txt)) throw new Error(/<TrainingCenterDatabase/i.test(txt) ? 'Este ficheiro é TCX. Exporta a atividade em GPX.' : 'Este ficheiro não parece ser um GPX (os ficheiros .fit originais não são aceites — usa “Exportar GPX”).');
-    const act = C.parseGPX(txt);
+    const act = await readActivity(f);
     if (act.pts.length < 10) throw new Error('Não encontrei pontos de percurso neste GPX.');
     await new Promise(r => setTimeout(r, 30));
     Object.assign(cut, prepCut(act), {file:f.name});
@@ -1271,7 +1272,7 @@ function traceCard(){
   const cut = S.cut || (S.cut = {seg: (S.segs.find(s => !hasTrace(s)) || S.segs[0] || {}).n});
   const sg = segByN(cut.seg);
   const sel = h('select',{onchange:e=>{ S.cut = {seg:+e.target.value}; doRender(); }}, S.segs.map(s => h('option',{value:s.n, selected:s.n===cut.seg}, (hasTrace(s) ? '✓ ' : '○ ') + pad2(s.n) + ' · ' + s.nome)));
-  const inp = h('input',{type:'file', accept:'.gpx,application/gpx+xml,application/xml,text/xml', class:'sr', id:'refin', onchange:e=>{ const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) loadRef(cut, sg, f); }});
+  const inp = h('input',{type:'file', accept:'.gpx,.tcx,.fit,.zip,application/gpx+xml,application/xml,text/xml,application/zip', class:'sr', id:'refin', onchange:e=>{ const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) loadRef(cut, sg, f); }});
   card.append(h('div',{class:'row'}, sel, h('label',{class:'b o', for:'refin'}, 'Carregar GPX de referência'), inp, sg && hasTrace(sg) ? h('button',{class:'b o s', onclick:()=>safe(()=>S.db.doc('segments/s'+pad2(sg.n)).update({trace:null}), 'Traçado removido.')}, 'Remover traçado atual') : null));
   if (!sg) return card;
   if (cut.msg) card.append(h('div',{class:'notice ' + (cut.msgOk ? 'f' : '')}, cut.msg));
