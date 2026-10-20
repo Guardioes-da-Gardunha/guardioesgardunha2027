@@ -262,6 +262,26 @@ function sliceToTrace(pts, i, j, step) {
   return flat;
 }
 
+/* altitude ao longo de um traçado (lat/lon planos): para cada ponto, a altitude do ponto mais próximo da atividade.
+   devolve {ele:[m inteiros], cov: distância média ao ponto usado} ou null se a atividade não tiver altitude */
+function traceEle(flat, pts) {
+  const P = pts.filter(p => p.ele != null); if (P.length < 2 || !flat || flat.length < 4) return null;
+  const cum = [0]; for (let k = 1; k < P.length; k++) cum.push(cum[k - 1] + Math.hypot(P[k].x - P[k - 1].x, P[k].y - P[k - 1].y));
+  const near = (x, y, lo, hi) => { let best = Infinity, bk = lo; for (let k = lo; k < hi; k++) { const d = (P[k].x - x) ** 2 + (P[k].y - y) ** 2; if (d < best) { best = d; bk = k; } } return [bk, Math.sqrt(best)]; };
+  const raw = [], ds = []; let k0 = -1, px = 0, py = 0;
+  for (let i = 0; i + 1 < flat.length; i += 2) {
+    const [x, y] = proj(flat[i], flat[i + 1]); let r;
+    if (k0 < 0) r = near(x, y, 0, P.length);
+    else { // segue a atividade para a frente: não salta para outra volta que passe perto
+      const reach = Math.hypot(x - px, y - py) * 3 + 60; let hi = k0; while (hi < P.length - 1 && cum[hi] - cum[k0] <= reach) hi++;
+      r = near(x, y, k0, hi + 1); if (r[1] > 60) { const g = near(x, y, 0, P.length); if (g[1] < r[1]) r = g; }
+    }
+    k0 = r[0]; px = x; py = y; raw.push(P[k0].ele); ds.push(r[1]);
+  }
+  const n = raw.length, ele = raw.map((_, i) => { let s = 0, c = 0; for (let k = Math.max(0, i - 2); k <= Math.min(n - 1, i + 2); k++) { s += raw[k]; c++; } return Math.round(s / c); });
+  return { ele, cov: ds.reduce((a, b) => a + b, 0) / n };
+}
+
 /* ===== Rankings e pontos ===== */
 const RATE = { c: 'corrida', b: 'bicicleta' };
 function attemptValid(a) { return !a.fl || a.ap; }
@@ -357,4 +377,4 @@ function classifySeg(L, up, dn, gap) {
 /* desempate (Art. 9.2): pontos, segmentos concluídos, coroas, presenças em treinos */
 function rankRows(rows, key) { const k = key || (r => r.total); return rows.slice().sort((a, b) => k(b) - k(a) || b.done - a.done || b.wins - a.wins || b.treinos - a.treinos); }
 function fmtTime(s) { s = Math.round(s * 10) / 10; const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s - h * 3600 - m * 60; const ss = (sec < 10 ? '0' : '') + sec.toFixed(sec % 1 ? 1 : 0); return h ? `${h}:${String(m).padStart(2, '0')}:${ss}` : `${m}:${ss}`; }
-if (typeof module !== 'undefined') module.exports = { parseActivity, parseFIT, parseTCX, zipEntries, climbStats, classifySeg, monthKey, parseGPX, detectSegment, suggestWindows, sliceToTrace, proj, unproj, bestPerAthlete, computePoints, rankRows, suspicion, fmtTime, tracePoly, polyLen };
+if (typeof module !== 'undefined') module.exports = { traceEle, parseActivity, parseFIT, parseTCX, zipEntries, climbStats, classifySeg, monthKey, parseGPX, detectSegment, suggestWindows, sliceToTrace, proj, unproj, bestPerAthlete, computePoints, rankRows, suspicion, fmtTime, tracePoly, polyLen };
