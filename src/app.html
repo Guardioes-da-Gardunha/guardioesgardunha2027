@@ -36,7 +36,7 @@ button.b.t,label.b.t{background:var(--terra);border-color:var(--terra);color:var
 button.b.o,label.b.o{background:transparent;color:var(--ink);border-color:var(--line2)}
 button.b.s{padding:5px 12px;font-size:.8rem;min-height:32px}
 button.b:disabled{opacity:.45;cursor:not-allowed}
-select,input[type=text],input[type=number],input[type=date]{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line2);border-radius:10px;padding:8px 12px;min-height:40px;min-width:0;max-width:100%}
+select,input[type=text],input[type=number],input[type=date],input[type=password]{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line2);border-radius:10px;padding:8px 12px;min-height:40px;min-width:0;max-width:100%}
 input[type=number]{width:6em}
 input[type=checkbox]{accent-color:var(--terra);width:18px;height:18px}
 input[type=range]{accent-color:var(--terra)}
@@ -180,6 +180,10 @@ main.in-r{animation:inR .22s ease} main.in-l{animation:inL .22s ease}
 .tm-attr{position:absolute;right:0;bottom:0;z-index:2;font-size:.6rem;background:rgba(255,255,255,.78);color:#222;padding:1px 6px;border-top-left-radius:6px}
 @media (min-width:761px){ .tmap{height:420px} }
 td.num{white-space:nowrap}
+.cmb{position:relative} .cmb input{width:100%;padding-left:38px;font-size:1rem;min-height:46px;border-radius:12px;background:var(--surface)} .cmb-ic{position:absolute;left:13px;top:12px;color:var(--terra-txt);font-size:1.1rem;pointer-events:none}
+.cmb-list{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:5;background:var(--surface);border:1px solid var(--line2);border-radius:12px;box-shadow:0 12px 28px rgba(0,0,0,.45);max-height:320px;overflow:auto;padding:4px}
+.cmb-opt{display:block;width:100%;text-align:left;background:none;border:0;color:var(--ink);font:inherit;padding:10px 12px;border-radius:8px;cursor:pointer} .cmb-opt:hover,.cmb-opt:focus{background:var(--surface2);outline:none}
+.name small{color:var(--muted)}
 /* listas de escolha */
 select{appearance:none;-webkit-appearance:none;padding-right:38px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%238FB573' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;cursor:pointer}
 select:focus{outline:none;border-color:var(--terra)}
@@ -240,7 +244,7 @@ const DEF = {open:true, periodOn:false, from:'2027-01-01', to:'2027-12-15', hide
 const S = {db:null, user:null, dl:null, uid:null, admin:false, ready:false,
   segs:[], ath:[], claims:{}, eff:{}, man:{}, cfg:Object.assign({}, DEF), rev:{ok:{}, no:{}},
   tab:'lenda', month:'all', segSel:1, fG:'M', fV:false, fMod:null, clsCat:'geral', clsG:'M', open:{},
-  pending:[], target:'self', busy:false, cut:null, profiles:{}, regs:{}, myReg:null, priv:{}, rf:{nome:'', g:'', nasc:'', contacto:'', ok:false}, na:{nome:'', g:'M', nasc:''}};
+  pending:[], target:'self', busy:false, cut:null, profiles:{}, regs:{}, myReg:null, priv:{}, rf:{nome:'', g:'', nasc:'', contacto:'', loc:'', pin:'', pin2:'', ok:false}, na:{nome:'', g:'M', nasc:''}};
 const TABS = [['lenda','A Lenda'],['reg','Inscrição'],['sub','Carregar atividade'],['seg','Caminhos'],['cls','Classificação'],['ins','Inscrições'],['adm','Organização']];
 const PUB = ['lenda','reg','sub','seg','cls'];
 const NAVI = {home:['Início','M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z'], reg:['Inscrição','M15 20v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1 M13 8a4 4 0 1 1-8 0a4 4 0 1 1 8 0 M19 8v6 M16 11h6'], sub:['Carregar','M12 16V4 M7 9l5-5 5 5 M4 20h16'], seg:['Caminhos','M3 20l6-10 4 6 2-3 6 7z M14 6l1.5-2.5L17 6'], cls:['Classif.','M4 20v-7h5v7 M9 20V8h6v12 M15 20v-9h5v9'], lenda:['Lenda','M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z M5 17a3 3 0 0 1 3-3h11']};
@@ -294,6 +298,9 @@ function pips(n){ return h('span',{class:'pips', title:'Nível '+n+' de 5'}, [1,
 const cfg = () => Object.assign({}, DEF, S.cfg, {mod:'c'}); // o desafio é só de corrida
 const athById = id => S.ath.find(a => a.id === id);
 const athName = a => a ? (a.nome || a.id) + (a.ex ? ' (exemplo)' : '') : '—';
+const athLabel = a => a ? athName(a) + (a.loc ? ' · ' + a.loc : '') : '—';
+const LOCS = ['Alcongosta','Alpedrinha','Castelo Novo','Fundão','Louriçal do Campo','São Vicente da Beira','Souto da Casa'];
+const norm = t => String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 const segByN = n => S.segs.find(s => s.n === n);
 const hasTrace = s => Array.isArray(s.trace) && s.trace.length >= 4;
 function ownerOf(aid){ // dono efetivo de uma inscrição: confirmado pela organização, senão o primeiro pedido não rejeitado
@@ -604,17 +611,52 @@ function orgFooter(){
 /* ===== Submeter ===== */
 function goTab(k, anim){ const from = PUB.indexOf(S.tab), to = PUB.indexOf(k); S.tab = k; try{ localStorage.setItem('g27tab',k); }catch(e){} doRender(); window.scrollTo(0,0);
   const m = document.getElementById('main'); if (from >= 0 && to >= 0 && from !== to){ m.classList.remove('in-l','in-r'); void m.offsetWidth; m.classList.add(to > from ? 'in-r' : 'in-l'); } }
+/* ===== Quem está a carregar: nome (com pesquisa) + PIN ===== */
+function whoCard(){
+  const real = S.ath.filter(a => !a.ex && a.uid);
+  const card = h('div',{class:'card stack'}, h('h3',{}, 'Quem és?'), h('p',{class:'small muted', style:'margin:0'}, 'Procura o teu nome, escreve o teu PIN e o telemóvel fica a lembrar-se de ti.'));
+  if (!real.length){ card.append(h('p',{class:'muted', style:'margin:0'}, 'Ainda não há inscrições aprovadas. ', h('button',{class:'linkb', onclick:()=>goTab('reg')}, 'Fazer a inscrição'))); return card; }
+  const sel = S.who ? athById(S.who) : null;
+  const inp = h('input',{type:'text', placeholder:'Escreve o teu nome…', autocomplete:'off', spellcheck:false, value: sel ? athLabel(sel) : '', 'aria-label':'O teu nome'});
+  const list = h('div',{class:'cmb-list', role:'listbox', hidden:true});
+  const show = () => { const q = norm(inp.value).trim(); const L = real.filter(a => !q || norm(athLabel(a)).includes(q)).slice(0, 8);
+    list.replaceChildren(...(L.length ? L.map(a => h('button',{type:'button', role:'option', class:'cmb-opt', onmousedown:e=>e.preventDefault(), onclick:()=>{ S.who = a.id; S.whoSt = null; list.hidden = true; doRender(); }}, h('strong',{}, athName(a)), a.loc ? h('span',{class:'small muted'}, ' · ' + a.loc) : null)) : [h('div',{class:'small muted', style:'padding:10px 12px'}, 'Nenhum nome encontrado. Já fizeste a inscrição?')]));
+    list.hidden = false; };
+  inp.addEventListener('focus', () => { if (sel){ inp.select(); } show(); }); inp.addEventListener('input', () => { if (S.who){ S.who = null; } show(); });
+  inp.addEventListener('blur', () => setTimeout(() => { list.hidden = true; }, 150));
+  card.append(h('div',{class:'cmb'}, inp, h('span',{class:'cmb-ic', 'aria-hidden':'true'}, '⌕'), list));
+  if (sel){
+    if (!S.whoSt){ S.whoSt = '…'; S.user.pinStatus(sel.id).then(v => { S.whoSt = v; doRender(); }).catch(() => { S.whoSt = 'erro'; doRender(); }); }
+    const st = S.whoSt;
+    const pin = h('input',{type:'password', inputmode:'numeric', pattern:'[0-9]*', maxlength:5, autocomplete:'current-password', placeholder:'•••••', style:'width:8em;letter-spacing:.3em', oninput:e=>{ e.target.value = e.target.value.replace(/\D/g,'').slice(0,5); }});
+    if (st === 'definido'){
+      const go = async () => { if (!/^\d{5}$/.test(pin.value)) return toast('O PIN tem 5 algarismos.');
+        try { const ok = await S.user.pinLogin(sel.id, pin.value); if (!ok){ pin.value = ''; return toast('PIN errado.'); } toast('Olá, ' + sel.nome.split(' ')[0] + '!'); setTimeout(() => location.reload(), 400); }
+        catch(e){ toast(errMsg(e, 'Não foi possível entrar.')); } };
+      pin.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+      card.append(field('PIN', h('div',{class:'row', style:'flex-wrap:nowrap'}, pin, h('button',{class:'b t', onclick:go}, 'Entrar'))), h('p',{class:'small muted', style:'margin:0'}, 'Esqueceste-te do PIN? Pede um novo à organização.'));
+    } else if (st === 'criar'){
+      pin.setAttribute('autocomplete', 'new-password');
+      const pin2 = h('input',{type:'password', inputmode:'numeric', pattern:'[0-9]*', maxlength:5, autocomplete:'new-password', placeholder:'•••••', style:'width:8em;letter-spacing:.3em', oninput:e=>{ e.target.value = e.target.value.replace(/\D/g,'').slice(0,5); }});
+      card.append(h('div',{class:'notice f'}, 'Ainda não tens PIN. Escolhe agora 5 algarismos: vais usá-los sempre que carregares atividades.'),
+        h('div',{class:'row'}, field('PIN novo', pin), field('Repete', pin2), h('button',{class:'b t', style:'align-self:flex-end', onclick:async()=>{ if (!/^\d{5}$/.test(pin.value)) return toast('O PIN tem 5 algarismos.'); if (pin.value !== pin2.value) return toast('Os dois PIN não são iguais.');
+          await safe(async()=>{ await S.user.setPin(pin.value); await S.user.pinLogin(sel.id, pin.value); }, 'PIN guardado.'); setTimeout(() => location.reload(), 400); }}, 'Guardar PIN')));
+    } else if (st === 'sem_pin' || st === 'sem_conta'){
+      card.append(h('div',{class:'notice w'}, 'Esta inscrição ainda não tem PIN. Abre a página no telemóvel onde te inscreveste para o criares, ou pede um PIN à organização.'));
+    } else card.append(h('p',{class:'small muted', style:'margin:0'}, 'A verificar…'));
+  }
+  return card;
+}
 /* ===== Inscrição ===== */
 function viewReg(){
   const out = [], aid = myAid(), claim = S.claims[S.uid], reg = S.myReg;
   out.push(h('h2',{},'Inscrição'), regDoc(), h('div',{class:'stack', style:'gap:16px'}, ...viewHome()));
-  if (S.myCode) out.push(codeCard());
   const card = h('div',{class:'card stack'});
   if (aid){
     card.append(h('h3',{}, 'Estás inscrito'), h('div',{class:'notice f'}, 'Inscrição confirmada como ', h('strong',{}, athName(athById(aid))), '. Já podes carregar atividades.'),
-      h('div',{class:'row'}, h('button',{class:'b t', onclick:()=>goTab('sub')}, 'Carregar atividade')), codeActions());
+      h('div',{class:'row'}, h('button',{class:'b t', onclick:()=>goTab('sub')}, 'Carregar atividade')));
   } else if (reg && reg.estado === 'pendente'){
-    card.append(h('h3',{}, 'A tua inscrição'), h('div',{class:'notice f'}, h('strong',{}, 'Inscrição enviada. '), `Pedido de ${reg.nome} recebido a ${fmtDate(Math.round(reg.at/1000))}. Quando a organização aprovar, podes guardar os tempos das tuas atividades.`), codeActions());
+    card.append(h('h3',{}, 'A tua inscrição'), h('div',{class:'notice f'}, h('strong',{}, 'Inscrição enviada. '), `Pedido de ${reg.nome} recebido a ${fmtDate(Math.round(reg.at/1000))}. Quando a organização aprovar, podes guardar os tempos das tuas atividades.`));
   } else if (claim && athById(claim.aid)){
     card.append(h('h3',{}, 'A tua inscrição'), h('div',{class:'notice w'}, 'Pediste a inscrição de ', h('strong',{}, athName(athById(claim.aid))), ', mas ela está associada a outra pessoa. Fala com a organização.'), claimPicker());
   } else {
@@ -630,7 +672,7 @@ function aspirantes(){
   const real = S.ath.filter(a => !a.ex).sort((x, y) => (x.nome||'').localeCompare(y.nome||'', 'pt'));
   const me = myAid(), grp = (g, t) => { const L = real.filter(a => (a.g === 'F' ? 'F' : 'M') === g);
     return h('div',{class:'stack', style:'gap:8px;min-width:0'}, h('span',{class:'lbl'}, t + ' · ' + L.length),
-      L.length ? h('div',{class:'names'}, ...L.map(a => h('span',{class:'name' + (a.id === me ? ' me' : '')}, athName(a)))) : h('span',{class:'small muted'}, 'Ainda ninguém.')); };
+      L.length ? h('div',{class:'names'}, ...L.map(a => h('span',{class:'name' + (a.id === me ? ' me' : '')}, athName(a), a.loc ? h('small',{}, ' · ' + a.loc) : null))) : h('span',{class:'small muted'}, 'Ainda ninguém.')); };
   return h('section',{class:'card stack'}, h('h3',{}, 'Os aspirantes a guardião'),
     h('p',{class:'small muted', style:'margin:0'}, real.length ? `${real.length} inscrito${real.length === 1 ? '' : 's'} até agora.` : 'Ainda não há inscrições aprovadas. Sê o primeiro a pegar no bordão.'),
     real.length ? h('div',{class:'cbody', style:'padding:0'}, grp('M','Aspirantes a Guardião'), grp('F','Aspirantes a Guardiã')) : null);
@@ -644,16 +686,19 @@ function viewSub(){
   if (S.admin){
     const sel = h('select',{onchange:e=>{ S.target = e.target.value; S.pending = []; doRender(); }},
       h('option',{value:'self', selected:S.target==='self'}, 'A minha própria inscrição'),
-      S.ath.map(a => h('option',{value:'m:'+a.id, selected:S.target==='m:'+a.id}, 'Em nome de: ' + athName(a))));
+      S.ath.map(a => h('option',{value:'m:'+a.id, selected:S.target==='m:'+a.id}, 'Em nome de: ' + athLabel(a))));
     out.push(h('div',{class:'card stack'}, h('div',{class:'row'}, h('span',{class:'lbl'},'Organização · carregar para'), sel), h('p',{class:'small muted', style:'margin:0'}, 'Em nome de um atleta serve para quem não consegue carregar por si: os tempos ficam associados a essa inscrição.')));
   }
   const target = S.target === 'self' ? (aid ? {kind:'u', uid:S.uid, aid} : null) : {kind:'m', aid:S.target.slice(2)};
-  if (S.target === 'self' && aid) out.push(h('div',{class:'card row', style:'justify-content:space-between'}, h('span',{}, 'A carregar como ', h('strong',{}, athName(athById(aid)))), h('span',{class:'tag ok'}, 'inscrição confirmada')));
+  if (S.target === 'self' && aid) out.push(h('div',{class:'card row', style:'justify-content:space-between'}, h('span',{}, 'A carregar como ', h('strong',{}, athLabel(athById(aid)))), h('button',{class:'linkb', onclick:async()=>{ await S.user.signOut(); location.reload(); }}, 'Não és tu? Trocar')));
+  if (S.target === 'self' && aid && S.user.pinStatus){
+    if (S.myPinSt === undefined){ S.myPinSt = null; S.user.pinStatus(aid).then(v => { S.myPinSt = v; doRender(); }).catch(() => { S.myPinSt = 'erro'; }); }
+    if (S.myPinSt === 'criar'){ S.who = aid; S.whoSt = 'criar'; out.push(whoCard()); return out; }
+  }
   else if (S.target === 'self'){
     const reg = S.myReg;
-    out.push(h('div',{class:'card notice w'}, h('strong',{}, reg && reg.estado === 'pendente' ? 'Inscrição à espera de aprovação. ' : 'Ainda não estás inscrito. '),
-      reg && reg.estado === 'pendente' ? 'Podes já testar os teus GPX; os tempos só ficam guardados depois de a organização aprovar.' : 'Podes testar os teus GPX, mas para guardar tempos tens de te inscrever primeiro. ',
-      reg && reg.estado === 'pendente' ? null : h('button',{class:'linkb', onclick:()=>goTab('reg')}, 'Fazer a inscrição')));
+    if (reg && reg.estado === 'pendente') out.push(h('div',{class:'card notice w'}, h('strong',{}, 'Inscrição à espera de aprovação. '), 'Podes já testar os teus GPX; os tempos só ficam guardados depois de a organização aprovar.'));
+    else out.push(whoCard());
   }
   if (!c.open && !S.admin){ out.push(h('div',{class:'card notice'}, 'O carregamento de atividades está fechado pela organização.')); return out; }
   const inp = h('input',{type:'file', accept:'.gpx,application/gpx+xml', multiple:true, class:'sr', id:'gpxin', onchange:e=>handleFiles(e.target.files)});
@@ -669,14 +714,22 @@ function regForm(){
   const age = ageIn2027(f.nasc);
   const form = h('form',{class:'stack', onsubmit:async e=>{ e.preventDefault();
       const nome = f.nome.trim(); if (nome.length < 3) return toast('Escreve o teu nome completo.'); if (!f.g) return toast('Indica o género.');
-      if (!f.nasc || ageIn2027(f.nasc) == null || ageIn2027(f.nasc) < 10) return toast('Indica a data de nascimento.'); if (!f.ok) return toast('Tens de aceitar o Regulamento.');
-      await safe(async()=>{ await ensureMe(); await S.db.doc('regs/' + S.uid).set({nome, g:f.g, nasc:f.nasc, contacto:f.contacto.trim().slice(0,80), at:Date.now(), estado:'pendente'}); S.myCode = await S.user.newCode(); doRender(); }, 'Inscrição enviada.'); }},
+      if (!f.nasc || ageIn2027(f.nasc) == null || ageIn2027(f.nasc) < 10) return toast('Indica a data de nascimento.');
+      const loc = f.loc.trim(); if (loc.length < 2) return toast('Indica a tua localidade.');
+      if (!/^\d{5}$/.test(f.pin)) return toast('O PIN tem de ter 5 algarismos.'); if (f.pin !== f.pin2) return toast('Os dois PIN não são iguais.');
+      if (!f.ok) return toast('Tens de aceitar o Regulamento.');
+      await safe(async()=>{ await ensureMe(); await S.db.doc('regs/' + S.uid).set({nome, g:f.g, nasc:f.nasc, loc:loc.slice(0,60), contacto:f.contacto.trim().slice(0,80), at:Date.now(), estado:'pendente'}); await S.user.setPin(f.pin); f.pin = f.pin2 = ''; doRender(); }, 'Inscrição enviada. Guarda o teu PIN.'); }},
     h('div',{class:'grid2'},
       field('Nome completo', h('input',{type:'text', value:f.nome, maxlength:60, autocomplete:'name', oninput:set('nome')})),
       field('Contacto (telemóvel ou e-mail)', h('input',{type:'text', value:f.contacto, maxlength:80, oninput:set('contacto')}), 'Só a organização vê.')),
     h('div',{class:'row', style:'align-items:flex-end;gap:18px'},
       field('Género', h('select',{onchange:e=>{ set('g')(e); }}, h('option',{value:''}, 'Escolher…'), h('option',{value:'M', selected:f.g==='M'}, 'Masculino'), h('option',{value:'F', selected:f.g==='F'}, 'Feminino'))),
       field('Data de nascimento', h('input',{type:'date', value:f.nasc, max:'2017-12-31', onchange:e=>{ set('nasc')(e); doRender(); }}), age != null ? `${age} anos em 2027` : 'Só a organização vê.')),
+    field('Localidade', h('input',{type:'text', value:f.loc, maxlength:60, list:'locs', autocomplete:'address-level2', placeholder:'ex.: Alpedrinha', oninput:set('loc')}), 'Aparece junto ao teu nome, para não haver confusões com nomes iguais.'),
+    h('datalist',{id:'locs'}, LOCS.map(v => h('option',{value:v}))),
+    h('div',{class:'grid2'},
+      field('PIN (5 algarismos)', h('input',{type:'password', inputmode:'numeric', pattern:'[0-9]*', maxlength:5, autocomplete:'new-password', value:f.pin, oninput:e=>{ e.target.value = e.target.value.replace(/\D/g,'').slice(0,5); f.pin = e.target.value; }}), 'Vais usá-lo para carregar as tuas atividades.'),
+      field('Repete o PIN', h('input',{type:'password', inputmode:'numeric', pattern:'[0-9]*', maxlength:5, autocomplete:'new-password', value:f.pin2, oninput:e=>{ e.target.value = e.target.value.replace(/\D/g,'').slice(0,5); f.pin2 = e.target.value; }}))),
     h('label',{class:'chk'}, h('input',{type:'checkbox', checked:f.ok, onchange:set('ok')}), h('span',{}, 'Li e aceito o ', h('button',{type:'button', class:'linkb inl', onclick:e=>{ e.preventDefault(); openReg(); }}, 'Regulamento'), ' do Desafio Guardiões da Gardunha 2027.')),
     h('div',{}, h('button',{class:'b t', type:'submit'}, 'Enviar inscrição')));
   return form;
@@ -685,7 +738,7 @@ function claimPicker(){
   const taken = new Set(S.ath.filter(a => ownerOf(a.id)).map(a => a.id));
   const free = S.ath.filter(a => !taken.has(a.id));
   if (!free.length) return h('p',{class:'muted'}, 'Não há inscrições livres. Fala com a organização.');
-  const sel = h('select',{}, h('option',{value:''}, 'Escolher…'), free.map(a => h('option',{value:a.id}, athName(a))));
+  const sel = h('select',{}, h('option',{value:''}, 'Escolher…'), free.map(a => h('option',{value:a.id}, athLabel(a))));
   return h('div',{class:'row'}, sel, h('button',{class:'b', onclick:async()=>{ if (!sel.value) return toast('Escolhe o teu nome.');
     await safe(async()=>{ await ensureMe(); await S.db.doc('claims/' + S.uid).set({aid:sel.value, at:Date.now()}); }, 'Pedido registado.'); }}, 'Sou eu'));
 }
@@ -993,11 +1046,11 @@ function viewIns(){
   if (!pend.length) pc.append(h('p',{class:'muted', style:'margin:0'}, 'Sem pedidos por aprovar. Os atletas inscrevem-se no separador Submeter.'));
   else pc.append(h('div',{class:'tw'}, h('table',{}, h('thead',{}, h('tr',{}, h('th',{},'Nome'), h('th',{},'Género'), h('th',{},'Nascimento'), h('th',{class:'r'},'Idade 2027'), h('th',{},'Escalão'), h('th',{},'Contacto'), h('th',{},'Pedido'), h('th',{},''))),
     h('tbody',{}, pend.map(([u,r]) => { const age = ageIn2027(r.nasc);
-      return h('tr',{}, h('td',{}, h('strong',{}, r.nome)), h('td',{}, r.g === 'F' ? 'Feminino' : 'Masculino'), h('td',{class:'num'}, fmtNasc(r.nasc)), h('td',{class:'r num'}, age != null ? String(age) : '—'),
+      return h('tr',{}, h('td',{}, h('strong',{}, r.nome), r.loc ? h('div',{class:'small muted'}, r.loc) : null), h('td',{}, r.g === 'F' ? 'Feminino' : 'Masculino'), h('td',{class:'num'}, fmtNasc(r.nasc)), h('td',{class:'r num'}, age != null ? String(age) : '—'),
         h('td',{}, h('span',{class:'tag'}, 'Geral ' + (r.g||'M'))), h('td',{class:'small'}, r.contacto || '—'), h('td',{class:'small num'}, fmtDate(Math.round(r.at/1000))),
         h('td',{}, h('div',{class:'row', style:'flex-wrap:nowrap;gap:6px'},
           h('button',{class:'b s', onclick:()=>safe(async()=>{ const id = 'a' + Date.now().toString(36);
-              await S.db.doc('athletes/'+id).set({nome:r.nome, g:r.g||'M', vet:isVet(r.nasc), uid:u, treinos:0, extra:0});
+              await S.db.doc('athletes/'+id).set({nome:r.nome, g:r.g||'M', loc:r.loc||'', vet:isVet(r.nasc), uid:u, treinos:0, extra:0});
               await S.db.doc('private/'+id).set({nasc:r.nasc||'', contacto:r.contacto||''});
               await S.db.doc('regs/'+u).update({estado:'aprovada', aid:id}); }, 'Inscrição aprovada: ' + r.nome + '.')}, 'Aprovar'),
           h('button',{class:'b o s', onclick:()=>safe(()=>S.db.doc('regs/'+u).update({estado:'rejeitada'}), 'Pedido rejeitado.')}, 'Rejeitar')))); })))));
@@ -1278,7 +1331,7 @@ function athCard(){
       h('td',{}, h('span',{class:'tag'}, 'Geral ' + (a.g||'M'))),
       h('td',{}, h('input',{type:'number', min:0, max:5, value:a.treinos||0, 'aria-label':'Treinos', style:'width:4.5em', onchange:e=>upd(a,{treinos:+e.target.value})})),
       h('td',{}, h('input',{type:'number', value:a.extra||0, 'aria-label':'Ajuste', style:'width:5em', onchange:e=>upd(a,{extra:+e.target.value})})),
-      h('td',{}, own ? h('div',{}, h('span',{class:'tag ' + (a.uid ? 'ok' : 'warn')}, a.uid ? 'confirmada' : 'por confirmar'), ' ', h('span',{class:'small'}, who), a.uid ? h('div',{}, h('button',{class:'b o s', onclick:()=>safe(async()=>{ S.codeShown = {nome:a.nome, code:await S.user.adminNewCode(a.uid)}; doRender(); })}, 'Novo código')) : null) : h('span',{class:'small muted'}, a.ex ? 'exemplo' : 'livre'),
+      h('td',{}, own ? h('div',{}, h('span',{class:'tag ' + (a.uid ? 'ok' : 'warn')}, a.uid ? 'confirmada' : 'por confirmar'), ' ', h('span',{class:'small'}, who), a.uid ? h('div',{class:'row', style:'gap:6px;margin-top:4px;flex-wrap:nowrap'}, (()=>{ const i = h('input',{type:'text', inputmode:'numeric', maxlength:5, placeholder:'PIN novo', style:'width:7em', oninput:e=>{ e.target.value = e.target.value.replace(/\D/g,'').slice(0,5); }}); return [i, h('button',{class:'b o s', onclick:()=>{ if (!/^\d{5}$/.test(i.value)) return toast('O PIN tem 5 algarismos.'); safe(()=>S.user.adminSetPin(a.uid, i.value), 'PIN de ' + a.nome + ' alterado.'); }}, 'Definir PIN')]; })()) : null) : h('span',{class:'small muted'}, a.ex ? 'exemplo' : 'livre'),
         reqs.length > 1 ? h('div',{class:'small muted'}, reqs.length + ' pedidos') : null),
       h('td',{}, h('div',{class:'row', style:'flex-wrap:nowrap;gap:6px'},
         own && !a.uid ? h('button',{class:'b s', onclick:()=>upd(a,{uid:own}, 'Inscrição confirmada.')}, 'Confirmar') : null,

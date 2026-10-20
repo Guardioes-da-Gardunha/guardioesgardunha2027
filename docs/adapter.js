@@ -60,7 +60,7 @@
     var r = await fetch(BASE + '/rest/v1/' + path, { method: method, headers: h, body: opt.body !== undefined ? JSON.stringify(opt.body) : undefined });
     var txt = await r.text(), j = null; try { j = txt ? JSON.parse(txt) : null; } catch (e) {}
     if (!r.ok) {
-      var code = j && j.code === '42501' ? 'permission_denied' : j && j.message && /demasiadas_tentativas/.test(j.message) ? 'rate_limited' : j && j.message && /sem_inscricao/.test(j.message) ? 'no_registration' : (j && j.code) || 'http_' + r.status;
+      var code = j && j.code === '42501' ? 'permission_denied' : j && j.message && /demasiadas_tentativas/.test(j.message) ? 'rate_limited' : j && j.message && /sem_inscricao/.test(j.message) ? 'no_registration' : j && j.message && /pin_invalido/.test(j.message) ? 'pin_invalid' : (j && j.code) || 'http_' + r.status;
       throw err(code, (j && (j.message || j.hint)) || ('Erro ' + r.status), j);
     }
     return j;
@@ -196,6 +196,10 @@
     loginCode: async function (code) { await user.ensure(); var m = await rpc('login_code', { p_code: code }); if (!m) return false; resetCache(); await loadWho(); return true; },
     claimAdmin: async function (secret) { await user.ensure(); var ok = await rpc('claim_admin', { p_secret: secret }); if (!ok) return false; resetCache(); await loadWho(); return true; },
     leaveAdmin: async function () { await rpc('leave_admin'); resetCache(); await loadWho(); },
+    pinStatus: async function (aid) { await user.ensure(); return rpc('pin_status', { p_aid: aid }); },
+    setPin: async function (pin) { await user.ensure(); return rpc('set_pin', { p_pin: pin }); },
+    pinLogin: async function (aid, pin) { await user.ensure(); var m = await rpc('pin_login', { p_aid: aid, p_pin: pin }); if (!m) return false; resetCache(); await loadWho(); return true; },
+    adminSetPin: function (member, pin) { return rpc('admin_set_pin', { p_member: member, p_pin: pin }); },
     signOut: async function () { saveSess(null); lsDel('g27-who'); who = { member: null, admin: false }; resetCache(); }
   };
 

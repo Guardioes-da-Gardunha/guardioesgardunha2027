@@ -15,7 +15,8 @@ Site do desafio de trail: inscrição sem login (código pessoal), caminhos com 
 1. Abre o projeto no Supabase → **SQL Editor** → **New query**.
 2. Cola o conteúdo de `supabase/schema.sql` e carrega em **Run**. Deve dizer "Success".
 3. **Authentication → Sign In / Providers → Allow anonymous sign-ins**: ligado.
-4. Define a frase secreta da organização (só tu a sabes; mínimo 12 caracteres). Num novo query:
+4. Cola também `supabase/pin.sql` (PIN de 5 dígitos por atleta) e carrega em **Run**.
+5. Define a frase secreta da organização (só tu a sabes; mínimo 12 caracteres). Num novo query:
 
    ```sql
    select set_admin_secret('escolhe-uma-frase-longa-e-so-tua');
