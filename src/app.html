@@ -292,6 +292,9 @@ select option,select optgroup{background:var(--surface);color:var(--ink)}
 .calc-res{display:flex;flex-wrap:wrap;gap:10px 26px;align-items:flex-end}
 .calc-k{display:grid;gap:2px} .calc-k strong{font-family:var(--mono);font-weight:600;font-size:1.1rem} .calc-k.hi strong{color:var(--terra-txt)}
 .calc-msg{flex-basis:100%;margin:0;padding:10px 12px;border-radius:10px;background:var(--surface2);font-size:.92rem} .calc-msg.hi{background:var(--terra-soft);color:var(--terra-txt);font-weight:700}
+.qa-b.on{border-color:var(--terra);background:var(--terra-soft)} .lcap{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.lread .lenda h3{margin-top:0} .lread{scroll-margin-top:16px}
+@media (max-width:420px){ .lcap .qa-b{flex-direction:row;align-items:center} .lcap{grid-template-columns:1fr} }
 </style>
 
 <aside class="side" id="side" aria-label="Menu"></aside>
@@ -961,9 +964,19 @@ function viewLenda(){
       h('tbody',{}, refs.map(s => { const M = s.gtt.M || {}, F = s.gtt.F || {}; return h('tr',{}, h('td',{}, pad2(s.n) + ' · ' + s.nome), h('td',{}, M.nome || '—'), h('td',{class:'r num'}, M.t ? C.fmtTime(M.t) : '—'), h('td',{}, F.nome || '—'), h('td',{class:'r num'}, F.t ? C.fmtTime(F.t) : '—')); }))))
     : h('p',{class:'muted'}, 'Os Guardiões de Todos os Tempos de cada caminho serão publicados pela organização antes do arranque da época.');
   pages.push(h('article',{class:'page stack'}, h('h3',{class:'crest-title', style:'font-size:1.6rem'}, 'Guardiões de Todos os Tempos'), h('p',{class:'muted', style:'margin:0;max-width:68ch'}, 'A referência histórica de cada caminho. Quem a bater rouba o bordão de sempre: +8 pontos, e passa a ser a nova lenda desse caminho.'), tbl));
+  // capítulos em cartões, como as Ações rápidas; toca para ler
+  const CAP = [['A serra que nunca dorme', 'M3 20l6-10 4 6 2-3 6 7z M17 4.5a1.5 1.5 0 1 0 0.01 0'], ['Os primeiros guardiões', 'M6 21L18 3 M15 3h3v3'], ['O pacto das aldeias', 'M4 18c4-1 5-6 8-6s4 5 8 6 M7 8h.01 M12 5h.01 M17 8h.01'],
+    ['Chegou a tua vez', 'M5 21V4 M5 4h11l-2 4 2 4H5'], ['A referência de cada caminho', 'M12 3l7 3v5c0 5-3 8-7 10c-4-2-7-5-7-10V6z']];
   const titles = pages.map(pg => (pg.querySelector('h3') || {}).textContent || '');
-  return [h('section',{class:'hero', style:'gap:6px'}, h('h2',{class:'crest-title'}, 'Guardiões da Gardunha'), h('p',{class:'when'}, `${FMT_D(cfg().from)} a ${FMT_D(cfg().to)}`)),
-    h('div',{class:'stack', style:'gap:34px'}, ...pages)];
+  const sel = S.lendaCap == null ? -1 : Math.min(S.lendaCap, pages.length - 1);
+  const go = i => { S.lendaCap = i; doRender(); const r = document.getElementById('lendaread'); if (r) r.scrollIntoView({behavior:'smooth', block:'start'}); };
+  const cards = h('div',{class:'qa lcap'}, ...pages.map((pg, i) => h('button',{class:'qa-b' + (i === sel ? ' on' : ''), 'aria-expanded':String(i === sel), onclick:()=>{ if (i === sel){ S.lendaCap = null; doRender(); } else go(i); }},
+    h('span',{class:'qa-i'}, navIcon((CAP[i] || CAP[0])[1])), h('span',{class:'qa-t'}, h('strong',{}, titles[i] || 'Capítulo ' + (i + 1)), h('small',{}, (CAP[i] || ['', ''])[0])))));
+  const out = [h('section',{class:'hero', style:'gap:6px'}, h('h2',{class:'crest-title'}, 'Guardiões da Gardunha'), h('p',{class:'when'}, `${FMT_D(cfg().from)} a ${FMT_D(cfg().to)}`)),
+    h('section',{class:'stack', style:'gap:10px'}, h('h3',{}, 'A lenda'), h('p',{class:'small muted', style:'margin:0'}, 'Toca num capítulo para o leres.'), cards)];
+  if (sel >= 0) out.push(h('section',{class:'card stack lread', id:'lendaread', style:'gap:18px'}, pages[sel],
+    h('div',{class:'pager'}, sel > 0 ? h('button',{class:'b o s', onclick:()=>go(sel - 1)}, '← ' + titles[sel - 1]) : h('span'), sel < pages.length - 1 ? h('button',{class:'b t s', onclick:()=>go(sel + 1)}, titles[sel + 1] + ' →') : h('button',{class:'b o s', onclick:()=>{ S.lendaCap = null; doRender(); window.scrollTo(0, 0); }}, 'Fechar'))));
+  return out;
 
 }
 function zipStore(name, text){ // ZIP sem compressão com um só ficheiro (a descarga não aceita .gpx; o .zip abre em qualquer telemóvel)
