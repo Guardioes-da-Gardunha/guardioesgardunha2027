@@ -6,6 +6,9 @@ core = open('src/core.js', encoding='utf-8').read()
 names = re.search(r"module\.exports = \{([^}]*)\}", core).group(1)
 wrapped = "const C = (function(){\n" + core + "\nreturn {" + names + "};\n})();"
 src = open('src/app.html', encoding='utf-8').read().replace('/*CORE*/', wrapped)
+# animação do "Como funciona" (gerada por anim/gen.py)
+import json as _j
+src = src.replace('/*ANIMCSS*/', open('anim/anim.css', encoding='utf-8').read()).replace('/*ANIM*/', 'const ANIM_SVG = ' + _j.dumps(open('anim/anim.svg', encoding='utf-8').read(), ensure_ascii=False) + ';')
 
 # regulamento: src/regulamento.md -> const REG = [{t, html}]
 import html as H, json
