@@ -1,6 +1,6 @@
 # Gera a animação "Como funciona" (SVG + CSS, 15 s em ciclo). Saída: anim/anim.svg.html (fragmento) e anim/anim.css
-T = 20
-SC1 = 8.0
+T = 17
+SC1 = 5.0
 def M(p): return ((p / 20 * SC1) if p <= 20 else (SC1 + (p - 20) / 80 * 12)) / T * 100   # p = escala antiga (0-100, cenas de 20)
 K = []   # keyframes
 R = []   # regras css
@@ -45,7 +45,7 @@ for i in range(5):
     S.append('<rect class="pp%d" x="%d" y="86" width="52" height="10" rx="5" fill="var(--ga-terra)"/>' % (i, 1180 + i * 64)); vis('pp%d' % i, i * 20, i * 20 + 20, .6)
 
 
-# ---- cena 1: montanha — a subir, a direito, a descer, e depois o percurso todo ----
+# ---- cena 1: montanha — a subir, a direito, a descer ----
 PROF = [(130, 700), (600, 450), (1000, 450), (1470, 700)]      # partida, topo da subida, fim do plano, chegada
 LAB = [('a subir', 0, 'start', 150), ('a direito', 1, 'middle', 800), ('a descer', 2, 'end', 1450)]
 def lerp(A, B, t): return (A[0] + (B[0] - A[0]) * t, A[1] + (B[1] - A[1]) * t)
@@ -54,26 +54,15 @@ S.append('<g class="mtn"><path d="M0 760 L260 520 L420 600 L640 330 L800 430 L10
          '<path d="M%d %d L%d %d L%d %d L%d %d L%d 760 L%d 760 Z" fill="var(--ga-s2)"/>' % (PROF[0][0], PROF[0][1], PROF[1][0], PROF[1][1], PROF[2][0], PROF[2][1], PROF[3][0], PROF[3][1], PROF[3][0], PROF[0][0]) +
          '<path d="%s" fill="none" stroke="var(--ga-line2)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></g>' % PPATH)
 vis('mtn', 0, 20, .15)
-# 3 segmentos (1,6 s cada) — a figura percorre cada um e o troço acende
+# 3 segmentos (1,7 s cada) — a figura percorre cada um e o troço acende
 for i, (lbl, k, anc, lx) in enumerate(LAB):
-    A, B = PROF[k], PROF[k + 1]; a0, b0 = i * 4.5, (i + 1) * 4.5
+    A, B = PROF[k], PROF[k + 1]; a0, b0 = i * 20 / 3, (i + 1) * 20 / 3
     S.append('<g class="sl%d"><path d="M%d %d L%d %d" stroke="var(--ga-terra)" stroke-width="14" stroke-linecap="round"/>'
              '<text x="%d" y="205" text-anchor="%s" class="ga-head" font-size="110" fill="var(--ga-terra)">%s</text>'
              '<g class="mv%d"><g transform="scale(1.2)">%s</g></g></g>' % (i, A[0], A[1], B[0], B[1], lx, anc, lbl.upper(), i, runner()))
     vis('sl%d' % i, a0, b0, .15)
     p0, p1 = lerp(A, B, .1), lerp(A, B, .9)
     kf('mv%d' % i, [(0, 'transform:translate(%gpx,%gpx)' % (p0[0], p0[1] - 6)), (a0 + .2, 'transform:translate(%gpx,%gpx)' % (p0[0], p0[1] - 6)), (b0 - .2, 'transform:translate(%gpx,%gpx)' % (p1[0], p1[1] - 6)), (100, 'transform:translate(%gpx,%gpx)' % (p1[0], p1[1] - 6))])
-# percurso completo (subida + plano + descida): meta axadrezada e partida, a figura corre tudo
-FLAG = lambda x, y: '<g class="fl0"><path d="M%d %d v-86" stroke="var(--ga-ink)" stroke-width="6" stroke-linecap="round"/><path d="M%d %d h58 l-14 18 l14 18 h-58 Z" fill="var(--ga-terra)"/></g>' % (x, y, x, y - 86)
-CHK = lambda x, y: '<g class="fl1"><path d="M%d %d v-100" stroke="var(--ga-ink)" stroke-width="6" stroke-linecap="round"/>' % (x, y) + ''.join('<rect x="%d" y="%d" width="20" height="20" fill="%s"/>' % (x + c * 20, y - 100 + r * 20, 'var(--ga-ink)' if (r + c) % 2 == 0 else 'var(--ga-bg)') for r in range(2) for c in range(3)) + '<rect x="%d" y="%d" width="60" height="40" fill="none" stroke="var(--ga-ink)" stroke-width="3"/></g>' % (x, y - 100)
-S.append('<g class="rt"><path d="%s" fill="none" stroke="var(--ga-terra)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>' % PPATH +
-         '<path d="%s" fill="none" stroke="var(--ga-ink)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" pathLength="1000" class="rdone"/>' % PPATH +
-         FLAG(*PROF[0]) + CHK(*PROF[3]) +
-         '<text x="800" y="205" text-anchor="middle" class="ga-head" font-size="110" fill="var(--ga-terra)">O PERCURSO</text>' +
-         '<g class="rr"><animateMotion dur="%ss" repeatCount="indefinite" path="%s" keyPoints="0;0;1;1" keyTimes="0;%.4f;%.4f;1" calcMode="linear"/><g transform="translate(0 -6) scale(1.1)">%s</g></g></g>' % (T, PPATH, M(13.9)/100, M(19.2)/100, runner()))
-vis('rt', 13.5, 20, .2)
-kf('rdone', [(0, 'stroke-dasharray:1000;stroke-dashoffset:1000'), (13.9, 'stroke-dashoffset:1000'), (19.2, 'stroke-dashoffset:0'), (100, 'stroke-dasharray:1000;stroke-dashoffset:0')])
-R.append('.ga .rr{opacity:1}')
 
 # ---- cenas 1–2: mapa ----
 m = ['<g class="map">',
@@ -167,6 +156,6 @@ css = ('.ga{display:block;width:100%;height:100%;--ga-bg:var(--bg,#141614);--ga-
        '--ga-line:var(--line,#2C302B);--ga-line2:var(--line2,#3D433B);--ga-terra:var(--terra,#8FB573);--ga-cont:#2A2E29}'
        '.ga .ga-head{font-family:var(--head,Archivo),sans-serif;font-weight:900;font-stretch:62%}.ga .ga-mono{font-family:var(--mono,"JetBrains Mono"),monospace}.ga .ga-body{font-family:var(--body,Archivo),sans-serif}'
        + ''.join(K) + ''.join(R) +
-       '@media (prefers-reduced-motion: reduce){.ga *{animation-delay:-19.9s!important;animation-play-state:paused!important}}')
+       '@media (prefers-reduced-motion: reduce){.ga *{animation-delay:-16.9s!important;animation-play-state:paused!important}}')
 open('anim/anim.svg', 'w').write(svg); open('anim/anim.css', 'w').write(css)
 print(len(svg), len(css))
