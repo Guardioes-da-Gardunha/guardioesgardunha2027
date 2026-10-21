@@ -15,6 +15,22 @@ def pop(name, a, origin='center'):
     R.append('.ga .%s{transform-box:fill-box;transform-origin:%s}' % (name, origin))
 def appear(name, a, b=100, f=.8): vis(name, a, b, f)
 
+
+# ---- figura humana com bordão (pés na origem) ----
+INK = 'var(--ga-ink)'
+def limb(d, w=14): return '<path d="%s" fill="none" stroke="%s" stroke-width="%d" stroke-linecap="round" stroke-linejoin="round"/>' % (d, INK, w)
+def staff(x1, y1, x2, y2): return ('<path d="M%g %g L%g %g" stroke="var(--ga-terra)" stroke-width="9" stroke-linecap="round"/><circle cx="%g" cy="%g" r="8" fill="var(--ga-terra)"/>' % (x1, y1, x2, y2, x1, y1))
+def runner():
+    base = staff(22, -170, 46, -4) + limb('M4 -112 L-6 -62', 17) + '<circle cx="10" cy="-131" r="16" fill="%s"/>' % INK + limb('M2 -104 L22 -88 L33 -99')
+    a = '<g class="pa">' + limb('M-6 -62 L14 -36 L32 -10') + limb('M-6 -62 L-22 -36 L-40 -24') + limb('M2 -104 L-16 -88 L-30 -74') + '</g>'
+    b = '<g class="pb">' + limb('M-6 -62 L6 -32 L0 0') + limb('M-6 -62 L-12 -34 L-2 -14') + limb('M2 -104 L-4 -84 L10 -72') + '</g>'
+    return '<g transform="rotate(7)">' + staff(22, -170, 46, -4) + a + b + base + '</g>'
+def victor():
+    return (staff(34, -250, 30, -60) + limb('M0 -64 L-16 0') + limb('M0 -64 L16 0') + limb('M0 -116 L0 -64', 17) + '<circle cx="0" cy="-136" r="16" fill="%s"/>' % INK
+            + limb('M0 -108 L22 -132 L31 -160') + limb('M0 -108 L-24 -130 L-34 -156'))
+R.append('@keyframes ga-stA{0%{opacity:1}50%{opacity:0}100%{opacity:0}}@keyframes ga-stB{0%{opacity:0}50%{opacity:1}100%{opacity:1}}')
+R.append('.ga .pa{animation:ga-stA .36s steps(1) infinite}.ga .pb{animation:ga-stB .36s steps(1) infinite}')
+
 TRACE = "M300 640 C 380 620 420 585 470 560 S 560 540 600 500 S 640 430 700 420 S 800 400 830 350 S 880 280 960 262 S 1040 250 1090 228"
 SHIELD = '<g stroke="currentColor" stroke-width="7" stroke-linecap="round"><path d="M14 132 L126 10"/><path d="M126 132 L14 10"/></g><circle cx="126" cy="10" r="6" fill="currentColor"/><circle cx="14" cy="10" r="6" fill="currentColor"/><path d="M70 20 L118 34 V72 C118 102 97 121 70 132 C43 121 22 102 22 72 V34 Z" fill="var(--ga-bg)" stroke="currentColor" stroke-width="8" stroke-linejoin="round"/><path d="M36 102 L56 68 L66 83 L78 59 L104 102 Z" fill="currentColor"/>'
 S = []
@@ -26,6 +42,19 @@ for i in range(5):
     S.append('<rect x="%d" y="86" width="52" height="10" rx="5" fill="var(--ga-line)"/>' % (1180 + i * 64))
     S.append('<rect class="pp%d" x="%d" y="86" width="52" height="10" rx="5" fill="var(--ga-terra)"/>' % (i, 1180 + i * 64)); vis('pp%d' % i, i * 20, i * 20 + 20, .6)
 
+
+# ---- cena 1: sequência rápida — a subir, a direito, a descer ----
+SL = [('a subir', (240, 700), (1360, 330), 'start', 110), ('a direito', (240, 560), (1360, 560), 'start', 110), ('a descer', (240, 330), (1360, 700), 'end', 1490)]
+for i, (lbl, A, B, anc, lx) in enumerate(SL):
+    a0, b0 = i * 20 / 3, (i + 1) * 20 / 3
+    S.append('<g class="sl%d"><path d="M%d %d L%d %d L%d 745 L%d 745 Z" fill="var(--ga-s2)" opacity=".8"/><path d="M%d %d L%d %d" stroke="var(--ga-terra)" stroke-width="12" stroke-linecap="round"/>'
+             '<text x="%d" y="250" text-anchor="%s" class="ga-head" font-size="120" fill="var(--ga-terra)">%s</text>'
+             '<g class="mv%d"><g transform="scale(1.55)">%s</g></g></g>' % (i, A[0], A[1], B[0], B[1], B[0], A[0], A[0], A[1], B[0], B[1], lx, anc, lbl.upper(), i, runner()))
+    vis('sl%d' % i, a0, b0, .15)
+    f = lambda t: (A[0] + (B[0] - A[0]) * t, A[1] + (B[1] - A[1]) * t - 6)
+    p0, p1 = f(.12), f(.88)
+    kf('mv%d' % i, [(0, 'transform:translate(%gpx,%gpx)' % p0), (a0 + .3, 'transform:translate(%gpx,%gpx)' % p0), (b0 - .3, 'transform:translate(%gpx,%gpx)' % p1), (100, 'transform:translate(%gpx,%gpx)' % p1)])
+
 # ---- cenas 1–2: mapa ----
 m = ['<g class="map">',
      '<path d="M140 760 L330 560 L430 610 L600 400 L720 470 L880 260 L1000 330 L1120 280 L1240 760 Z" fill="var(--ga-s2)" opacity=".75"/>',
@@ -34,12 +63,12 @@ m = ['<g class="map">',
      '<path d="%s" fill="none" stroke="var(--ga-ink)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" class="done" pathLength="1000"/>' % TRACE,
      '<g class="fst"><path d="M300 640 V560" stroke="var(--ga-ink)" stroke-width="6" stroke-linecap="round"/><path d="M300 562 h58 l-14 18 l14 18 h-58 Z" fill="var(--ga-terra)"/></g>',
      '<g class="ffi"><path d="M1090 228 V140" stroke="var(--ga-ink)" stroke-width="6" stroke-linecap="round"/>' + ''.join('<rect x="%d" y="%d" width="20" height="20" fill="%s"/>' % (1090 + c * 20, 142 + r * 20, 'var(--ga-ink)' if (r + c) % 2 == 0 else 'var(--ga-bg)') for r in range(2) for c in range(3)) + '<rect x="1090" y="142" width="60" height="40" fill="none" stroke="var(--ga-ink)" stroke-width="3"/></g>',
-     '<circle r="17" fill="var(--ga-ink)" stroke="var(--ga-terra)" stroke-width="6" class="run"><animateMotion dur="%ss" repeatCount="indefinite" path="%s" keyPoints="0;0;1;1" keyTimes="0;0.21;0.37;1" calcMode="linear"/></circle>' % (T, TRACE),
+     '<g class="run"><animateMotion dur="%ss" repeatCount="indefinite" path="%s" keyPoints="0;0;1;1" keyTimes="0;0.25;0.385;1" calcMode="linear"/><g transform="scale(.72)">%s</g></g>' % (T, TRACE, runner()),
      '</g>']
 S += m
-vis('map', 0, 40); kf('draw', [(0, 'stroke-dasharray:1000;stroke-dashoffset:1000'), (3, 'stroke-dashoffset:1000'), (14, 'stroke-dashoffset:0'), (100, 'stroke-dasharray:1000;stroke-dashoffset:0')])
-kf('done', [(0, 'stroke-dasharray:1000;stroke-dashoffset:1000'), (21, 'stroke-dashoffset:1000'), (37, 'stroke-dashoffset:0'), (100, 'stroke-dasharray:1000;stroke-dashoffset:0')])
-pop('fst', 3, 'left bottom'); pop('ffi', 14, 'left bottom'); vis('run', 20, 40, .8)
+vis('map', 20, 40); kf('draw', [(0, 'stroke-dasharray:1000;stroke-dashoffset:1000'), (20.5, 'stroke-dashoffset:1000'), (25, 'stroke-dashoffset:0'), (100, 'stroke-dasharray:1000;stroke-dashoffset:0')])
+kf('done', [(0, 'stroke-dasharray:1000;stroke-dashoffset:1000'), (25, 'stroke-dashoffset:1000'), (38.5, 'stroke-dashoffset:0'), (100, 'stroke-dasharray:1000;stroke-dashoffset:0')])
+pop('fst', 20.5, 'left bottom'); pop('ffi', 24.5, 'left bottom'); vis('run', 24.5, 40, .8)
 
 # ---- cenas 2–3: relógio ----
 w = ['<g class="watch">',
@@ -47,13 +76,13 @@ w = ['<g class="watch">',
      '<circle cx="1310" cy="430" r="150" fill="var(--ga-s1)" stroke="var(--ga-line2)" stroke-width="8"/>',
      '<circle cx="1310" cy="430" r="128" fill="none" stroke="var(--ga-line)" stroke-width="12"/>',
      '<circle cx="1310" cy="430" r="128" fill="none" stroke="var(--ga-terra)" stroke-width="12" stroke-linecap="round" pathLength="1000" class="ring" transform="rotate(-90 1310 430)"/>']
-for i, (t, a, b) in enumerate([('0:00', 20, 24), ('4:21', 24, 28.5), ('8:47', 28.5, 33), ('12:34', 33, 60)]):
+for i, (t, a, b) in enumerate([('0:00', 20, 27.5), ('4:21', 27.5, 31), ('8:47', 31, 35), ('12:34', 35, 60)]):
     w.append('<text x="1310" y="448" text-anchor="middle" class="ga-mono wt%d" font-size="62" font-weight="700" fill="var(--ga-ink)">%s</text>' % (i, t)); appear('wt%d' % i, a, b, .3)
 w.append('<g class="rec"><circle cx="1268" cy="500" r="9" fill="#E58A78"/><text x="1286" y="510" class="ga-mono" font-size="28" fill="var(--ga-muted)">REC</text></g>')
 w.append('</g>')
 S += w
-vis('watch', 20, 60); kf('ring', [(0, 'stroke-dasharray:1000;stroke-dashoffset:1000'), (21, 'stroke-dashoffset:1000'), (37, 'stroke-dashoffset:0'), (100, 'stroke-dasharray:1000;stroke-dashoffset:0')])
-kf('rec', [(0, 'opacity:1'), (20, 'opacity:1'), (21.5, 'opacity:.15'), (23, 'opacity:1'), (24.5, 'opacity:.15'), (26, 'opacity:1'), (27.5, 'opacity:.15'), (29, 'opacity:1'), (30.5, 'opacity:.15'), (32, 'opacity:1'), (33.5, 'opacity:.15'), (35, 'opacity:1'), (36.5, 'opacity:.15'), (37, 'opacity:0'), (100, 'opacity:0')])
+vis('watch', 20, 60); kf('ring', [(0, 'stroke-dasharray:1000;stroke-dashoffset:1000'), (25, 'stroke-dashoffset:1000'), (38.5, 'stroke-dashoffset:0'), (100, 'stroke-dasharray:1000;stroke-dashoffset:0')])
+kf('rec', [(0, 'opacity:1'), (25, 'opacity:1'), (26.5, 'opacity:.15'), (28, 'opacity:1'), (29.5, 'opacity:.15'), (31, 'opacity:1'), (32.5, 'opacity:.15'), (34, 'opacity:1'), (35.5, 'opacity:.15'), (37, 'opacity:1'), (38.5, 'opacity:0'), (100, 'opacity:0')])
 
 # ---- cena 3: ficheiro ----
 S.append('<g class="tray"><path d="M720 660 v70 h320 v-70" fill="none" stroke="var(--ga-terra)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></g>')
@@ -95,7 +124,7 @@ q = ['<g class="pod">',
      '<g class="p2"><rect x="240" y="530" width="160" height="170" rx="10" fill="var(--ga-ink)"/><text x="320" y="650" text-anchor="middle" class="ga-head" font-size="100" fill="var(--ga-bg)">2</text></g>',
      '<g class="p1"><rect x="420" y="450" width="160" height="250" rx="10" fill="var(--ga-terra)"/><text x="500" y="610" text-anchor="middle" class="ga-head" font-size="130" fill="var(--ga-bg)">1</text></g>',
      '<g class="p3"><rect x="600" y="590" width="160" height="110" rx="10" fill="var(--ga-line2)"/><text x="680" y="680" text-anchor="middle" class="ga-head" font-size="80" fill="var(--ga-ink)">3</text></g>',
-     '<g class="crest" style="color:var(--ga-terra)"><g transform="translate(425 286) scale(1.07)">' + SHIELD + '</g></g>',
+     '<g class="crest"><g transform="translate(500 450) scale(1.25)">' + victor() + '</g></g>',
      '<text x="880" y="420" class="ga-head h1" font-size="118" fill="var(--ga-ink)">ROUBASTE</text>',
      '<text x="880" y="530" class="ga-head h1" font-size="118" fill="var(--ga-ink)">O BORDÃO.</text>',
      '<text x="880" y="660" class="ga-head h2" font-size="118" fill="var(--ga-terra)">ÉS GUARDIÃO.</text>',
