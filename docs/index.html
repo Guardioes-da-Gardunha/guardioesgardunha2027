@@ -1015,13 +1015,20 @@ function tileMap(sg){
 }
 
 function regDoc(){
-  const all = h('button',{class:'linkb', onclick:()=>{ const ds = [...box.querySelectorAll('details')]; const op = !ds.every(d => d.open); ds.forEach(d => d.open = op); all.textContent = op ? 'Fechar tudo' : 'Abrir tudo'; }}, 'Abrir tudo');
-  const box = h('section',{class:'card stack', id:'regdoc', style:'gap:6px'}, h('div',{class:'row', style:'justify-content:space-between'}, h('h3',{}, 'Regulamento'), all),
-    h('p',{class:'small muted', style:'margin:0 0 6px'}, 'Toca num artigo para o abrir.'),
-    ...(typeof REG !== 'undefined' ? REG : []).map(a => { const d = h('details',{class:'regart'}, h('summary',{}, a.t)); const b = h('div',{class:'regbody'}); b.innerHTML = a.html; d.append(b); return d; }));
+  const open = !!S.open.reg, n = (typeof REG !== 'undefined' ? REG : []).length;
+  const box = h('section',{class:'pbox' + (open ? ' on' : ''), id:'regdoc'},
+    h('button',{class:'phead', 'aria-expanded':String(open), onclick:()=>{ S.open.reg = !open; doRender(); }}, h('span',{class:'pm', 'aria-hidden':'true'}, open ? '−' : '+'),
+      h('span',{class:'stack', style:'gap:0'}, h('span',{}, 'Regulamento'), h('span',{class:'small muted', style:'font-weight:400'}, n + ' artigos · toca para ' + (open ? 'fechar' : 'abrir')))));
+  if (open){
+    const body = h('div',{class:'pbody stack', style:'gap:6px'});
+    const all = h('button',{class:'linkb', onclick:()=>{ const ds = [...body.querySelectorAll('details')]; const op = !ds.every(d => d.open); ds.forEach(d => d.open = op); all.textContent = op ? 'Fechar os artigos' : 'Abrir os artigos'; }}, 'Abrir os artigos');
+    body.append(h('div',{class:'row', style:'justify-content:space-between'}, h('span',{class:'small muted'}, 'Toca num artigo para o abrir.'), all),
+      ...(typeof REG !== 'undefined' ? REG : []).map(x => { const d = h('details',{class:'regart'}, h('summary',{}, x.t)); const bb = h('div',{class:'regbody'}); bb.innerHTML = x.html; d.append(bb); return d; }));
+    box.append(body);
+  }
   return box;
 }
-function openReg(){ const b = document.getElementById('regdoc'); if (!b) return; const d = b.querySelector('details'); if (d) d.open = true; b.scrollIntoView({behavior:'smooth', block:'start'}); }
+function openReg(){ S.open.reg = true; doRender(); const b = document.getElementById('regdoc'); if (b) b.scrollIntoView({behavior:'smooth', block:'start'}); }
 function howToScore(){
   const c = cfg();
   return h('div',{class:'card stack'}, h('h3',{}, 'Ainda sem pontos'), h('p',{class:'muted', style:'margin:0'}, `A classificação aparece quando houver tempos guardados. A época corre de ${FMT_D(c.from)} a ${FMT_D(c.to)}.`),
