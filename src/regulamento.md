@@ -24,7 +24,7 @@
 | Juvenis (Sub 18) | 16-17 anos |
 | Juniores (Sub 20) | 18-19 anos |
 | Sub 23 | 20-22 anos |
-| Seniores | 23-34 anos |
+| SEN | 23-34 anos |
 | M35 / F35 | 35-39 anos |
 | M40 / F40 | 40-44 anos |
 | M45 / F45 | 45-49 anos |

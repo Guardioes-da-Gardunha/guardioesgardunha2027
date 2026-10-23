@@ -96,5 +96,5 @@ const ec = n => C.escalaoOf(n, 2027);
 ok(ec('2011-06-01') === 'JUV' && ec('2010-12-31') === 'JUV' && ec('2009-01-01') === 'JUN' && ec('2008-05-05') === 'JUN' && ec('2007-01-01') === 'S23' && ec('2005-12-31') === 'S23' && ec('2004-01-01') === 'SEN' && ec('1993-01-01') === 'SEN', 'escalões jovens e seniores nas fronteiras');
 ok(ec('1992-12-31') === 'V35' && ec('1988-01-01') === 'V35' && ec('1987-06-06') === 'V40' && ec('1977-01-01') === 'V50' && ec('1957-01-01') === 'V70' && ec('1953-12-31') === 'V70', 'escalões de veteranos nas fronteiras');
 ok(ec('2012-01-01') === null && ec('1952-12-31') === null && ec('') === null && ec(null) === null, 'fora de 16–74 anos: sem escalão');
-ok(C.escLabel('V45', 'F') === 'F45' && C.escLabel('V45', 'M') === 'M45' && C.escLabel('SEN', 'F') === 'Seniores' && C.escLabel('JUV', 'M') === 'Juvenis (Sub 18)', 'nomes dos escalões');
+ok(C.escLabel('V45', 'F') === 'F45' && C.escLabel('V45', 'M') === 'M45' && C.escLabel('SEN', 'F') === 'SEN' && C.escLabel('JUV', 'M') === 'Juvenis (Sub 18)', 'nomes dos escalões');
 console.log(fails ? `${fails} falha(s)` : 'todos os testes passaram'); process.exit(fails ? 1 : 0);
