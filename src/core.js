@@ -377,4 +377,13 @@ function classifySeg(L, up, dn, gap) {
 /* desempate (Art. 9.2): pontos, segmentos concluídos, coroas, presenças em treinos */
 function rankRows(rows, key) { const k = key || (r => r.total); return rows.slice().sort((a, b) => k(b) - k(a) || b.done - a.done || b.wins - a.wins || b.treinos - a.treinos); }
 function fmtTime(s) { s = Math.round(s * 10) / 10; const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s - h * 3600 - m * 60; const ss = (sec < 10 ? '0' : '') + sec.toFixed(sec % 1 ? 1 : 0); return h ? `${h}:${String(m).padStart(2, '0')}:${ss}` : `${m}:${ss}`; }
-if (typeof module !== 'undefined') module.exports = { traceEle, parseActivity, parseFIT, parseTCX, zipEntries, climbStats, classifySeg, monthKey, parseGPX, detectSegment, suggestWindows, sliceToTrace, proj, unproj, bestPerAthlete, computePoints, rankRows, suspicion, fmtTime, tracePoly, polyLen };
+/* escalões: idade a 31/12 do ano da época (ano da época − ano de nascimento). Os escalões de Juvenis a Seniores são mistos (género filtra-se à parte);
+   dos 35 em diante há M35/F35 … M70/F70. Fora de 16–74 anos: sem escalão (só Geral). */
+const ESCALOES = [
+  {k:'JUV', nome:'Juvenis (Sub 18)', min:16, max:17}, {k:'JUN', nome:'Juniores (Sub 20)', min:18, max:19}, {k:'S23', nome:'Sub 23', min:20, max:22}, {k:'SEN', nome:'Seniores', min:23, max:34},
+  {k:'V35', min:35, max:39}, {k:'V40', min:40, max:44}, {k:'V45', min:45, max:49}, {k:'V50', min:50, max:54}, {k:'V55', min:55, max:59}, {k:'V60', min:60, max:64}, {k:'V65', min:65, max:69}, {k:'V70', min:70, max:74}];
+function idadeEpoca(nasc, ano) { const y = parseInt(String(nasc || '').slice(0, 4), 10); return isFinite(y) && y > 1900 ? (ano || 2027) - y : null; }
+function escalaoOf(nasc, ano) { const a = idadeEpoca(nasc, ano); if (a == null) return null; const e = ESCALOES.find(x => a >= x.min && a <= x.max); return e ? e.k : null; }
+function escLabel(k, g) { const e = ESCALOES.find(x => x.k === k); if (!e) return ''; return e.nome || ((g === 'F' ? 'F' : 'M') + e.min); }
+function escOptLabel(e) { return e.nome || ('M' + e.min + ' / F' + e.min); }
+if (typeof module !== 'undefined') module.exports = { ESCALOES, idadeEpoca, escalaoOf, escLabel, escOptLabel, traceEle, parseActivity, parseFIT, parseTCX, zipEntries, climbStats, classifySeg, monthKey, parseGPX, detectSegment, suggestWindows, sliceToTrace, proj, unproj, bestPerAthlete, computePoints, rankRows, suspicion, fmtTime, tracePoly, polyLen };

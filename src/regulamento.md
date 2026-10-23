@@ -18,6 +18,24 @@
 
 2.5. Cada atleta corre sob a sua responsabilidade. Os caminhos atravessam trilhos, estradões e estradas abertas ao trânsito: a Organização não fecha percursos nem garante a segurança fora dos Dias de Ataque.
 
+2.6. Cada atleta compete num **escalão**, que depende da idade a 31 de dezembro do ano da época (2027 menos o ano de nascimento). Os escalões de Juvenis a Seniores são mistos e têm classificação masculina e feminina; a partir dos 35 anos há escalões M e F. A página mostra a Classificação geral por escalão.
+
+| Escalão | Idade em 31/12 do ano da época |
+| Juvenis (Sub 18) | 16-17 anos |
+| Juniores (Sub 20) | 18-19 anos |
+| Sub 23 | 20-22 anos |
+| Seniores | 23-34 anos |
+| M35 / F35 | 35-39 anos |
+| M40 / F40 | 40-44 anos |
+| M45 / F45 | 45-49 anos |
+| M50 / F50 | 50-54 anos |
+| M55 / F55 | 55-59 anos |
+| M60 / F60 | 60-64 anos |
+| M65 / F65 | 65-69 anos |
+| M70 / F70 | 70-74 anos |
+
+2.7. Quem tiver menos de 16 ou mais de 74 anos nessa data participa na Classificação geral, sem escalão.
+
 ## Artigo 3 — Os 35 caminhos
 3.1. O desafio usa uma lista fechada de **35 caminhos** (Anexo), com um total de 55 km e cerca de 6100 m de desnível: estrada, estradão, calçada romana e trilho.
 

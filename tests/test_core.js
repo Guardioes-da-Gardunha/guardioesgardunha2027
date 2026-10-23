@@ -91,4 +91,10 @@ ok(cs(1193, 3, 146).tipo === 'Descida' && cs(1193, 3, 146).nivel === 2 && cs(297
 ok(cs(2500, 120, 110).tipo === 'Cumeada' && cs(2500, 120, 120, 20).tipo === 'Loop', 'cumeada e loop');
 const st = C.climbStats([100, 101, 100, 101, 105, 110, 108, 109, 104], 0, 8, 3); ok(st.up === 10 && st.dn === 6, `histerese na altimetria (${st.up}/${st.dn})`);
 ok(C.fmtTime(75.4) === '1:15.4' && C.fmtTime(3725) === '1:02:05', 'formato de tempo');
+// escalões: idade a 31/12 de 2027 (2027 − ano de nascimento)
+const ec = n => C.escalaoOf(n, 2027);
+ok(ec('2011-06-01') === 'JUV' && ec('2010-12-31') === 'JUV' && ec('2009-01-01') === 'JUN' && ec('2008-05-05') === 'JUN' && ec('2007-01-01') === 'S23' && ec('2005-12-31') === 'S23' && ec('2004-01-01') === 'SEN' && ec('1993-01-01') === 'SEN', 'escalões jovens e seniores nas fronteiras');
+ok(ec('1992-12-31') === 'V35' && ec('1988-01-01') === 'V35' && ec('1987-06-06') === 'V40' && ec('1977-01-01') === 'V50' && ec('1957-01-01') === 'V70' && ec('1953-12-31') === 'V70', 'escalões de veteranos nas fronteiras');
+ok(ec('2012-01-01') === null && ec('1952-12-31') === null && ec('') === null && ec(null) === null, 'fora de 16–74 anos: sem escalão');
+ok(C.escLabel('V45', 'F') === 'F45' && C.escLabel('V45', 'M') === 'M45' && C.escLabel('SEN', 'F') === 'Seniores' && C.escLabel('JUV', 'M') === 'Juvenis (Sub 18)', 'nomes dos escalões');
 console.log(fails ? `${fails} falha(s)` : 'todos os testes passaram'); process.exit(fails ? 1 : 0);

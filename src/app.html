@@ -364,6 +364,8 @@ let toastT; function toast(m){ const t = document.getElementById('toast'); t.tex
 const pad2 = n => String(n).padStart(2,'0');
 const ageIn2027 = nasc => { const y = parseInt(String(nasc||'').slice(0,4), 10); return isFinite(y) && y > 1900 ? 2027 - y : null; };
 const isVet = nasc => { const a = ageIn2027(nasc); return a != null && a > 50; };
+const escOf = nasc => C.escalaoOf(nasc, 2027) || null;
+const escName = (k, g) => k ? C.escLabel(k, g || 'M') : '';
 const fmtNasc = n => n ? n.split('-').reverse().join('/') : '—';
 function fpOf(act){ // impressão digital da atividade: o mesmo ficheiro dá sempre o mesmo valor
   const P = act.pts, a = P[0], b = P[P.length-1], m = P[P.length>>1];
@@ -840,7 +842,7 @@ function regForm(){
       field('Contacto (telemóvel ou e-mail)', h('input',{type:'text', value:f.contacto, maxlength:80, oninput:set('contacto')}), 'Só a organização vê.')),
     h('div',{class:'row', style:'align-items:flex-end;gap:18px'},
       field('Género', h('select',{onchange:e=>{ set('g')(e); }}, h('option',{value:''}, 'Escolher…'), h('option',{value:'M', selected:f.g==='M'}, 'Masculino'), h('option',{value:'F', selected:f.g==='F'}, 'Feminino'))),
-      field('Data de nascimento', h('input',{type:'date', value:f.nasc, max:'2017-12-31', onchange:e=>{ set('nasc')(e); doRender(); }}), age != null ? `${age} anos em 2027` : 'Só a organização vê.')),
+      field('Data de nascimento', h('input',{type:'date', value:f.nasc, max:'2017-12-31', onchange:e=>{ set('nasc')(e); doRender(); }}), age != null ? `${age} anos em 2027 · ` + (escOf(f.nasc) ? 'escalão ' + escName(escOf(f.nasc), f.g) : 'sem escalão (só Geral)') + '. A data só a organização vê.' : 'Só a organização vê.')),
     field('Localidade', h('input',{type:'text', value:f.loc, maxlength:60, list:'locs', autocomplete:'address-level2', placeholder:'ex.: Alpedrinha', oninput:set('loc')}), 'Aparece junto ao teu nome, para não haver confusões com nomes iguais.'),
     h('datalist',{id:'locs'}, LOCS.map(v => h('option',{value:v}))),
     h('div',{class:'grid2'},
@@ -1216,7 +1218,7 @@ function viewEu(){
   const a = athById(aid), st = myStats(aid), blind = cfg().hide && !S.admin, N = S.segs.length, F = st.g === 'F';
   const title = !blind && st.r.wins ? (F ? 'Guardiã' : 'Guardião') + ' de ' + st.r.wins + ' caminho' + (st.r.wins === 1 ? '' : 's') : F ? 'Aspirante a Guardiã' : 'Aspirante a Guardião';
   out.push(h('section',{class:'eu-hero'}, avatar(a, 'lg'), h('div',{class:'stack', style:'gap:6px;min-width:0'}, h('span',{class:'nc-k'}, title), h('h2',{}, 'Olá, ' + String(a.nome||'').split(' ')[0]),
-    h('span',{class:'muted'}, [a.loc, 'Época 2027'].filter(Boolean).join(' · '), ' · ', h('button',{class:'linkb', style:'padding:0', onclick:async()=>{ await S.user.signOut(); location.reload(); }}, 'Não és tu?')))));
+    h('span',{class:'muted'}, [a.loc, a.esc ? escName(a.esc, a.g) : '', 'Época 2027'].filter(Boolean).join(' · '), ' · ', h('button',{class:'linkb', style:'padding:0', onclick:async()=>{ await S.user.signOut(); location.reload(); }}, 'Não és tu?')))));
   const done = Math.min(st.r.done || 0, N), bar = h('div',{class:'bar'}, h('i',{style:`width:${N ? done / N * 100 : 0}%`}));
   out.push(h('div',{class:'tiles'}, tile('Pontos', blind ? '—' : String(st.r.total||0), 'na época'), tile('Posição', blind || !st.pos ? '—' : st.pos + '.º', blind ? 'Quinzena Cega' : st.pos ? 'de ' + st.of + (F ? ' guardiãs' : ' guardiões') : 'ainda sem pontos'),
     tile('Bordões', blind ? '—' : String(st.r.wins||0), 'caminhos que guardas'), tile('Caminhos', done + '/' + N, 'concluídos', bar)));
@@ -1293,17 +1295,19 @@ function clsGeral(){
   const out = [];
   const cat = CATS.find(x => x[0] === S.clsCat) || CATS[0];
   const sel = pick('Categoria', h('select',{onchange:e=>{ S.clsCat = e.target.value; doRender(); }}, CATS.map(x => h('option',{value:x[0], selected:x[0]===cat[0]}, x[1]))));
+  const esc = S.clsEsc || 'all';
+  const selE = pick('Escalão', h('select',{onchange:e=>{ S.clsEsc = e.target.value; doRender(); }}, h('option',{value:'all', selected:esc==='all'}, 'Todos os escalões'), ...C.ESCALOES.map(x => h('option',{value:x.k, selected:x.k===esc}, C.escOptLabel(x) + ' · ' + x.min + '–' + x.max + ' anos'))));
   const g = h('div',{class:'seg', role:'group', 'aria-label':'Género'}, [['M','Masculina'],['F','Feminina'],['all','Todos']].map(([k,l]) => h('button',{'aria-pressed':String(S.clsG===k), onclick:()=>{ S.clsG = k; doRender(); }}, l)));
-  out.push(h('div',{class:'row picks'}, monthPicker(), sel), h('div',{class:'row'}, g, h('button',{class:'b o s', onclick:exportCSV, style:'margin-left:auto'}, 'Exportar CSV')));
+  out.push(h('div',{class:'row picks'}, monthPicker(), sel, selE), h('div',{class:'row'}, g, h('button',{class:'b o s', onclick:exportCSV, style:'margin-left:auto'}, 'Exportar CSV')));
   out.push(h('p',{class:'small muted', style:'margin:0'}, S.month === 'all' ? cat[3] + '.' : `Pontos ganhos em ${monthLbl(S.month)}: pódio do mês, check-in e roubos.`));
-  let rows = standings(S.month).filter(r => { const a = athById(r.id); if (!a) return false; if (S.clsG !== 'all' && (a.g||'M') !== S.clsG) return false; return true; });
+  let rows = standings(S.month).filter(r => { const a = athById(r.id); if (!a) return false; if (S.clsG !== 'all' && (a.g||'M') !== S.clsG) return false; if (esc !== 'all' && a.esc !== esc) return false; return true; });
   rows = C.rankRows(rows, cat[2]).filter(r => r.done > 0 || r.total > 0);
-  if (!rows.length){ out.push(h('div',{class:'card empty'}, 'Ainda sem pontos nesta categoria. A época corre de ' + FMT_D(cfg().from) + ' a ' + FMT_D(cfg().to) + '.')); return out; }
+  if (!rows.length){ out.push(h('div',{class:'card empty'}, (esc !== 'all' ? 'Ainda sem pontos neste escalão. ' : 'Ainda sem pontos nesta categoria. ') + 'A época corre de ' + FMT_D(cfg().from) + ' a ' + FMT_D(cfg().to) + '.')); return out; }
   const unit = cat[0]==='coroas' ? 'bordões' : cat[0]==='explorer' ? 'caminhos' : cat[0]==='lenda' ? 'lendas' : 'pts';
   const body = h('tbody');
   rows.forEach((r, i) => { const k = 'g' + r.id, open = !!S.open[k], mine = r.id === myAid();
     body.append(h('tr',{class:'click' + (i===0 ? ' pod1' : '') + (mine ? ' me' : ''), 'aria-expanded':String(open), onclick:()=>{ S.open[k] = !open; doRender(); }},
-      h('td',{class:'pos num'}, String(i+1)), h('td',{}, h('strong',{}, athName(athById(r.id)))), h('td',{class:'r num'}, h('strong',{}, String(cat[2](r))), h('span',{class:'small muted'}, ' ' + unit)), h('td',{class:'r'}, h('span',{class:'pm sm', 'aria-hidden':'true'}, open ? '−' : '+'))));
+      h('td',{class:'pos num'}, String(i+1)), h('td',{}, h('strong',{}, athName(athById(r.id))), (athById(r.id)||{}).esc ? h('span',{class:'small muted'}, ' · ' + escName(athById(r.id).esc, athById(r.id).g)) : null), h('td',{class:'r num'}, h('strong',{}, String(cat[2](r))), h('span',{class:'small muted'}, ' ' + unit)), h('td',{class:'r'}, h('span',{class:'pm sm', 'aria-hidden':'true'}, open ? '−' : '+'))));
     if (open) body.append(h('tr',{class:'hist'}, h('td',{}), h('td',{colspan:3}, h('div',{class:'chips'}, ...[['Pódios', r.pod], ['Check-in', r.chk], ['Roubos', r.stl - (r.lpts||0)], ['Lenda', r.lpts||0], ['Completismo', r.bonus], ['Dias de Ataque', r.trn], ['Ajuste', r.extra||0], ['Bordões', r.wins], ['Caminhos', r.done]].map(([a, b]) => h('span',{class:'chip'}, h('b',{}, String(b)), ' ' + a))))));
   });
   out.push(h('div',{class:'tw'}, h('table',{}, h('thead',{}, h('tr',{}, h('th',{},'#'), h('th',{},'Atleta'), h('th',{class:'r'}, cat[1] === 'Geral' ? 'Pontos' : cat[1]), h('th',{}, ''))), body)));
@@ -1312,8 +1316,8 @@ function clsGeral(){
 }
 async function exportCSV(){
   const rows = C.rankRows(standings()); const q = v => '"' + String(v).replace(/"/g,'""') + '"';
-  const lines = [['Posicao','Atleta','Genero','Pontos','Caminhos','Podio','Checkin','Completismo','Treinos','Roubos','Bordoes','Lenda','Montanha','Missil','Diesel','Ajuste'].join(';')];
-  rows.forEach((r,i) => { const a = athById(r.id)||{}; lines.push([i+1, q(athName(a)), a.g||'M', r.total, r.done, r.pod, r.chk, r.bonus, r.trn, r.stl - (r.lpts||0), r.wins, r.lpts||0, r.byTipo.Subida||0, r.byTipo.Descida||0, (r.byTipo.Cumeada||0)+(r.byTipo.Loop||0), r.extra].join(';')); });
+  const lines = [['Posicao','Atleta','Genero','Escalao','Pontos','Caminhos','Podio','Checkin','Completismo','Treinos','Roubos','Bordoes','Lenda','Montanha','Missil','Diesel','Ajuste'].join(';')];
+  rows.forEach((r,i) => { const a = athById(r.id)||{}; lines.push([i+1, q(athName(a)), a.g||'M', a.esc ? escName(a.esc, a.g) : '', r.total, r.done, r.pod, r.chk, r.bonus, r.trn, r.stl - (r.lpts||0), r.wins, r.lpts||0, r.byTipo.Subida||0, r.byTipo.Descida||0, (r.byTipo.Cumeada||0)+(r.byTipo.Loop||0), r.extra].join(';')); });
   const all = effList(); const L2 = ['Caminho;Nome;Posicao;Atleta;Tempo_s;Tempo;Data'];
   for (const sg of S.segs) C.bestPerAthlete(all, sg.n, 'all').forEach((r,i) => L2.push([sg.n, q(sg.nome), i+1, q(athName(athById(r.a))), r.t, C.fmtTime(r.t), fmtDate(r.st)].join(';')));
   if (!S.dl) return toast('A exportação não está disponível nesta vista.');
@@ -1338,10 +1342,10 @@ function viewIns(){
   else pc.append(h('div',{class:'tw'}, h('table',{}, h('thead',{}, h('tr',{}, h('th',{},'Nome'), h('th',{},'Género'), h('th',{},'Nascimento'), h('th',{class:'r'},'Idade 2027'), h('th',{},'Escalão'), h('th',{},'Contacto'), h('th',{},'Pedido'), h('th',{},''))),
     h('tbody',{}, pend.map(([u,r]) => { const age = ageIn2027(r.nasc);
       return h('tr',{}, h('td',{}, h('strong',{}, r.nome), r.loc ? h('div',{class:'small muted'}, r.loc) : null), h('td',{}, r.g === 'F' ? 'Feminino' : 'Masculino'), h('td',{class:'num'}, fmtNasc(r.nasc)), h('td',{class:'r num'}, age != null ? String(age) : '—'),
-        h('td',{}, h('span',{class:'tag'}, 'Geral ' + (r.g||'M'))), h('td',{class:'small'}, r.contacto || '—'), h('td',{class:'small num'}, fmtDate(Math.round(r.at/1000))),
+        h('td',{}, h('span',{class:'tag'}, escOf(r.nasc) ? escName(escOf(r.nasc), r.g) : 'sem escalão')), h('td',{class:'small'}, r.contacto || '—'), h('td',{class:'small num'}, fmtDate(Math.round(r.at/1000))),
         h('td',{}, h('div',{class:'row', style:'flex-wrap:nowrap;gap:6px'},
           h('button',{class:'b s', onclick:()=>safe(async()=>{ const id = 'a' + Date.now().toString(36);
-              await S.db.doc('athletes/'+id).set({nome:r.nome, g:r.g||'M', loc:r.loc||'', vet:isVet(r.nasc), uid:u, treinos:0, extra:0});
+              await S.db.doc('athletes/'+id).set({nome:r.nome, g:r.g||'M', loc:r.loc||'', vet:isVet(r.nasc), esc:escOf(r.nasc), uid:u, treinos:0, extra:0});
               await S.db.doc('private/'+id).set({nasc:r.nasc||'', contacto:r.contacto||''});
               await S.db.doc('regs/'+u).update({estado:'aprovada', aid:id}); }, 'Inscrição aprovada: ' + r.nome + '.')}, 'Aprovar'),
           h('button',{class:'b o s', onclick:()=>safe(()=>S.db.doc('regs/'+u).update({estado:'rejeitada'}), 'Pedido rejeitado.')}, 'Rejeitar')))); })))));
@@ -1624,9 +1628,9 @@ function athCard(){
     const who = own ? (S.profiles[own] || 'conta associada') : '';
     return h('tr',{}, h('td',{}, h('input',{type:'text', value:a.nome||'', 'aria-label':'Nome', onchange:e=>upd(a,{nome:e.target.value.trim()})})),
       h('td',{}, h('select',{'aria-label':'Género', onchange:e=>upd(a,{g:e.target.value})}, h('option',{value:'M', selected:(a.g||'M')==='M'},'M'), h('option',{value:'F', selected:a.g==='F'},'F'))),
-      h('td',{}, h('input',{type:'date', value:(S.priv[a.id]||{}).nasc||'', 'aria-label':'Data de nascimento', onchange:e=>{ const v = e.target.value; safe(async()=>{ await S.db.doc('private/'+a.id).set(Object.assign({}, S.priv[a.id]||{}, {nasc:v})); await S.db.doc('athletes/'+a.id).update({vet:isVet(v)}); }); }})),
+      h('td',{}, h('input',{type:'date', value:(S.priv[a.id]||{}).nasc||'', 'aria-label':'Data de nascimento', onchange:e=>{ const v = e.target.value; safe(async()=>{ await S.db.doc('private/'+a.id).set(Object.assign({}, S.priv[a.id]||{}, {nasc:v})); await S.db.doc('athletes/'+a.id).update({vet:isVet(v), esc:escOf(v)}); }); }})),
       h('td',{class:'r num'}, (()=>{ const n = (S.priv[a.id]||{}).nasc, ag = ageIn2027(n); return ag != null ? String(ag) : '—'; })()),
-      h('td',{}, h('span',{class:'tag'}, 'Geral ' + (a.g||'M'))),
+      h('td',{}, (()=>{ const n = (S.priv[a.id]||{}).nasc, k = n ? escOf(n) : (a.esc || null); return h('span',{class:'tag' + (n && k !== (a.esc||null) ? ' warn' : '')}, k ? escName(k, a.g) : 'sem escalão'); })()),
       h('td',{}, h('input',{type:'number', min:0, max:5, value:a.treinos||0, 'aria-label':'Treinos', style:'width:4.5em', onchange:e=>upd(a,{treinos:+e.target.value})})),
       h('td',{}, h('input',{type:'number', value:a.extra||0, 'aria-label':'Ajuste', style:'width:5em', onchange:e=>upd(a,{extra:+e.target.value})})),
       h('td',{}, own ? h('div',{}, h('span',{class:'tag ' + (a.uid ? 'ok' : 'warn')}, a.uid ? 'confirmada' : 'por confirmar'), ' ', h('span',{class:'small'}, who), a.uid ? h('div',{class:'row', style:'gap:6px;margin-top:4px;flex-wrap:nowrap'}, (()=>{ const i = h('input',{type:'text', inputmode:'numeric', maxlength:5, placeholder:'PIN novo', style:'width:7em', oninput:e=>{ e.target.value = e.target.value.replace(/\D/g,'').slice(0,5); }}); return [i, h('button',{class:'b o s', onclick:()=>{ if (!/^\d{5}$/.test(i.value)) return toast('O PIN tem 5 algarismos.'); safe(()=>S.user.adminSetPin(a.uid, i.value), 'PIN de ' + a.nome + ' alterado.'); }}, 'Definir PIN')]; })()) : null) : h('span',{class:'small muted'}, a.ex ? 'exemplo' : 'livre'),
@@ -1637,13 +1641,15 @@ function athCard(){
         h('button',{class:'b o s', onclick:()=>{ if (S.confirmDel !== a.id){ S.confirmDel = a.id; doRender(); return; } S.confirmDel = null; safe(()=>S.db.doc('athletes/'+a.id).delete(), 'Atleta removido.'); }}, S.confirmDel === a.id ? 'Confirmar remoção' : 'Remover'))));
   }));
   card.append(h('div',{class:'tw'}, h('table',{}, h('thead',{}, h('tr',{}, h('th',{},'Nome'), h('th',{},'Gén.'), h('th',{},'Nascimento'), h('th',{class:'r'},'Idade'), h('th',{},'Escalão'), h('th',{},'Treinos'), h('th',{},'Ajuste'), h('th',{},'Conta'), h('th',{},''))), body)));
+  const stale = S.ath.filter(a => { const n = (S.priv[a.id]||{}).nasc; return n && escOf(n) !== (a.esc || null); });
+  if (stale.length) card.append(h('div',{class:'notice f row'}, h('span',{}, stale.length + ' atleta' + (stale.length === 1 ? '' : 's') + ' com o escalão por atualizar.'), h('button',{class:'b s', onclick:()=>safe(async()=>{ for (const a of stale) await S.db.doc('athletes/'+a.id).update({esc:escOf((S.priv[a.id]||{}).nasc)}); }, 'Escalões atualizados.')}, 'Atualizar escalões')));
   const na = S.na;
   const nm = h('input',{type:'text', placeholder:'Nome do atleta', value:na.nome, 'aria-label':'Nome do novo atleta', oninput:e=>na.nome = e.target.value}),
     gs = h('select',{'aria-label':'Género', onchange:e=>na.g = e.target.value}, h('option',{value:'M', selected:na.g==='M'},'M'), h('option',{value:'F', selected:na.g==='F'},'F')),
     nd = h('input',{type:'date', value:na.nasc, 'aria-label':'Data de nascimento', onchange:e=>na.nasc = e.target.value});
   card.append(h('div',{class:'row'}, h('span',{class:'lbl'},'Inscrever diretamente'), nm, gs, nd, h('button',{class:'b', onclick:async()=>{ const v = na.nome.trim(); if (!v) return toast('Escreve o nome.');
     const id = 'a' + Date.now().toString(36);
-    const ok = await safe(async()=>{ await S.db.doc('athletes/'+id).set({nome:v, g:na.g, vet:isVet(na.nasc), treinos:0, extra:0}); if (na.nasc) await S.db.doc('private/'+id).set({nasc:na.nasc, contacto:''}); }, 'Atleta inscrito.');
+    const ok = await safe(async()=>{ await S.db.doc('athletes/'+id).set({nome:v, g:na.g, vet:isVet(na.nasc), esc:escOf(na.nasc), treinos:0, extra:0}); if (na.nasc) await S.db.doc('private/'+id).set({nasc:na.nasc, contacto:''}); }, 'Atleta inscrito.');
     if (ok) { S.na = {nome:'', g:'M', nasc:''}; doRender(); } }}, 'Inscrever')));
   return card;
 }
