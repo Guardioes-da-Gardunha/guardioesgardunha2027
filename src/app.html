@@ -159,7 +159,7 @@ main.in-r{animation:inR .22s ease} main.in-l{animation:inL .22s ease}
 .scard .meta{font-family:var(--mono);font-size:.75rem;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
 .scard .gd{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.84rem;border-top:1px solid var(--line);padding-top:8px}
 .scard .gd b{display:block;font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
-.dots{display:flex;gap:6px;justify-content:center;align-items:center;min-height:12px} .dots i{width:7px;height:7px;border-radius:4px;background:var(--line2);transition:width .2s} .dots i.on{background:var(--terra);width:20px}
+.stack>*,.pager>*{min-width:0} .dots{max-width:100%;overflow:hidden;display:flex;gap:6px;justify-content:center;align-items:center;min-height:12px} .dots i{width:7px;height:7px;border-radius:4px;background:var(--line2);transition:width .2s} .dots i.on{background:var(--terra);width:20px}
 .pager{display:flex;align-items:center;justify-content:space-between;gap:10px}
 /* lenda em páginas */
 .pages{display:grid;grid-auto-flow:column;grid-auto-columns:100%;gap:28px;overflow-x:auto;overflow-y:hidden;transition:height .25s ease;scroll-snap-type:x mandatory;scrollbar-width:none;align-items:start;overscroll-behavior-x:contain}
@@ -553,7 +553,7 @@ function segCard(s, mode, onPick){
     h('div',{class:'gd'}, h('div',{}, h('b',{}, 'Guardião'), nm(gM)), h('div',{}, h('b',{}, 'Guardiã'), nm(gF))));
 }
 function segCarousel(mode, onChange){
-  const segs = S.segs, track = h('div',{class:'carousel', role:'list'}), dots = h('div',{class:'dots', 'aria-hidden':'true'}, ...segs.map(() => h('i')));
+  const segs = S.segs, track = h('div',{class:'carousel', role:'list'}), dots = h('div',{class:'dots', 'aria-hidden':'true', hidden:segs.length > 9}, ...segs.map(() => h('i')));
   const count = h('span',{class:'mono small muted'});
   const idxOf = n => Math.max(0, segs.findIndex(x => x.n === n));
   const mark = i => { [...dots.children].forEach((d, k) => d.classList.toggle('on', k === i)); count.textContent = pad2(i+1) + ' / ' + pad2(segs.length); if (mode === 'seg') [...track.children].forEach((c, k) => c.classList.toggle('on', k === i)); };
