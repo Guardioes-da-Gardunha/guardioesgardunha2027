@@ -265,7 +265,7 @@ select option,select optgroup{background:var(--surface);color:var(--ink)}
 .nc-t{font-size:clamp(1.9rem,5vw,2.6rem);font-stretch:62%;font-weight:900}
 .nc-kv{display:flex;flex-wrap:wrap;gap:8px 22px} .nc-kv div{display:grid;gap:2px} .nc-kv strong{font-family:var(--mono);font-weight:600}
 .nc-art{display:grid;align-content:center;gap:0;background:var(--mapbg);border-left:1px solid var(--line);min-width:0}
-.nc-art .map{border-radius:0} .nc-art .spark{height:64px}
+.nc-art .map{border-radius:0;display:block;width:100%;height:auto;max-height:260px} .nc-art .spark{height:56px;display:block;width:100%} .nc-prof{display:grid;gap:4px;padding:10px 14px 12px;border-top:1px solid var(--line);background:var(--surface)} .nc-ph{display:flex;justify-content:space-between;gap:8px}
 @media (max-width:700px){ .nc{grid-template-columns:1fr} .nc-art{order:-1;border-left:0;border-bottom:1px solid var(--line)} }
 .qa{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .qa-b{display:flex;align-items:center;gap:12px;text-align:left;background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:14px;color:var(--ink);font:inherit;cursor:pointer;min-width:0}
@@ -1267,7 +1267,8 @@ function challengeCard(nc, blind){
       h('div',{class:'nc-kv'}, kv('Distância', km(s.dist)), kv('Desnível', (s.tipo === 'Descida' ? '−' : '+') + Math.round(s.desn||0) + ' m'), blind ? null : kv('Bordão', lead ? C.fmtTime(lead.t) : 'livre')),
       blind ? null : h('p',{class:'small', style:'margin:0;color:var(--soft-text)'}, nc.why),
       h('div',{class:'row'}, h('button',{class:'b t', onclick:()=>{ S.segSel = s.n; S.segOpen = true; S.segKeep = true; goTab('seg'); }}, 'Ver caminho'), h('button',{class:'b o', onclick:()=>downloadGpx(s)}, 'Descarregar GPX'))),
-    h('div',{class:'nc-art'}, mapSVG([{xy:segXY(s), cls:'sel', ends:true}], {h:190, label:'Traçado de ' + s.nome}), P ? sparkline(P, 64) : null));
+    h('div',{class:'nc-art'}, mapSVG([{xy:segXY(s), cls:'sel', ends:true}], {w:400, h:250, label:'Traçado de ' + s.nome}),
+      P ? h('div',{class:'nc-prof'}, h('div',{class:'nc-ph'}, h('span',{class:'lbl'}, 'Perfil de altitude'), h('span',{class:'mono small muted'}, Math.round(Math.min(...P.e)) + ' → ' + Math.round(Math.max(...P.e)) + ' m')), sparkline(P, 56), h('div',{class:'nc-ph'}, h('span',{class:'mono small muted'}, '0'), h('span',{class:'mono small muted'}, km(s.dist)))) : null));
 }
 function quickActions(){
   const c = cfg(), ct = String(c.contacto || '').trim();
