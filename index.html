@@ -1792,7 +1792,7 @@ function viewEu(){
   const done = Math.min(st.r.done || 0, N), bar = h('div',{class:'bar'}, h('i',{style:`width:${N ? done / N * 100 : 0}%`}));
   out.push(h('div',{class:'tiles'}, tile('Pontos', blind ? '—' : String(st.r.total||0), 'na época'), tile('Posição', blind || !st.pos ? '—' : st.pos + '.º', blind ? 'Quinzena Cega' : st.pos ? 'de ' + st.of + (F ? ' guardiãs' : ' guardiões') + (st.posEsc ? ' · ' + st.posEsc + '.º em ' + escName(a.esc, a.g) : '') : 'ainda sem pontos'),
     tile('Bordões', blind ? '—' : String(st.r.wins||0), 'caminhos que guardas'), tile('Caminhos', done + '/' + N, nextMilestone(done, N), bar)));
-  const nc = nextChallenge(aid, st.g); if (nc) out.push(challengeCard(nc, blind));
+  
   out.push(...resultCards(aid, st, blind), myTimes({kind:'u', uid:S.uid, aid}), evolution(aid, st, blind), uploadHistory(aid), quickActions());
   out.push(h('div',{class:'sticky-up'}, h('button',{class:'b t', onclick:()=>goTab('sub')}, 'Carregar atividade')));
   out.push(h('div',{class:'row', style:'justify-content:center;padding:8px 0 4px'}, h('button',{class:'b o', onclick:async()=>{ await S.user.signOut(); location.reload(); }}, 'Sair desta conta'), h('span',{class:'small muted'}, 'Para voltar a entrar precisas do nome e do PIN.')));
