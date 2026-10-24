@@ -228,6 +228,10 @@ select option,select optgroup{background:var(--surface);color:var(--ink)}
 .fchips{display:flex;flex-wrap:wrap;gap:6px} .fchip{font:600 .85rem/1 var(--body);border:1px solid var(--line2);border-radius:99px;background:transparent;color:var(--muted);padding:9px 14px;cursor:pointer} .fchip[aria-pressed=true]{background:var(--terra);border-color:var(--terra);color:var(--on-terra)} .fsel{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px} @media (max-width:560px){ .fsel{grid-template-columns:1fr 1fr} .fsel>:first-child{grid-column:1/-1} }
 .sticky-up{position:sticky;bottom:calc(78px + env(safe-area-inset-bottom,0px));z-index:6;display:flex;justify-content:center;pointer-events:none;padding-top:8px} .sticky-up button{pointer-events:auto;box-shadow:0 8px 24px rgba(0,0,0,.55);padding:14px 26px;font-size:1rem} @media (min-width:1000px){ .sticky-up{bottom:18px} }
 .alertbar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;border:1px solid var(--warn);background:var(--warn-soft);border-radius:12px;padding:10px 14px;color:var(--ink)}
+.cmap{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px} .cmap button{font:700 .9rem/1 var(--mono);border:1px solid var(--line2);border-radius:8px;background:transparent;color:var(--muted);min-height:44px;cursor:pointer} .cmap button.d{background:var(--terra-soft);border-color:var(--accent-line);color:var(--terra-txt)} .cmap button.g{background:var(--terra);border-color:var(--terra);color:var(--on-terra)}
+.cmap-k{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;color:var(--muted)} .cmap-k i{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid var(--line2);vertical-align:-1px;margin-right:6px} .cmap-k i.d{background:var(--terra-soft);border-color:var(--accent-line)} .cmap-k i.g{background:var(--terra);border-color:var(--terra)}
+.up-g{border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden} .up-h{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;text-align:left;background:none;border:0;color:var(--ink);font:inherit;padding:12px 14px;cursor:pointer} .up-h small{display:block;color:var(--muted);font-size:.85rem;overflow-wrap:anywhere} .up-b{display:grid;gap:0;border-top:1px solid var(--line)} .up-r{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line)} .up-r:last-child{border-bottom:0}
+.rv{display:grid;gap:8px} .rv-r{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:10px 14px;cursor:pointer;text-align:left;width:100%;color:var(--ink);font:inherit} .rv-r strong{overflow-wrap:anywhere} .rv-r small{display:block;color:var(--muted);font-size:.85rem}
 .mechip{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line2);border-radius:99px;padding:3px 12px 3px 3px;color:var(--ink);font:600 .85rem/1 var(--body);cursor:pointer}
 .mechip.on{border-color:var(--terra)} .me{display:flex;align-items:center;gap:8px}
 .side{display:none}
@@ -1242,7 +1246,8 @@ function avatar(a, size){ return a ? h('span',{class:'av' + (size ? ' ' + size :
 function myStats(aid){
   const a = athById(aid), g = gOf(a), rows = standings('all'), r = rows.find(x => x.id === aid) || {total:0, wins:0, done:0};
   const same = C.rankRows(rows.filter(x => { const b = athById(x.id); return b && !b.ex && gOf(b) === g && (x.done > 0 || x.total > 0); }));
-  return {g, r, pos:same.findIndex(x => x.id === aid) + 1, of:same.length};
+  const se = a && a.esc ? same.filter(x => (athById(x.id) || {}).esc === a.esc) : [];
+  return {g, r, pos:same.findIndex(x => x.id === aid) + 1, of:same.length, posEsc:se.findIndex(x => x.id === aid) + 1, ofEsc:se.length};
 }
 function nextChallenge(aid, g){
   const T = S.segs.filter(hasTrace); if (!T.length) return null;
@@ -1271,6 +1276,56 @@ function quickActions(){
   return h('section',{class:'stack', style:'gap:10px'}, h('h3',{}, 'Ações rápidas'), h('div',{class:'qa'}, ...A.map(([t, s, ic, fn]) => h('button',{class:'qa-b', onclick:fn}, h('span',{class:'qa-i'}, navIcon(ic)), h('span',{class:'qa-t'}, h('strong',{}, t), h('small',{}, s))))));
 }
 function tile(l, v, sub, extra){ return h('div',{class:'tile'}, h('span',{class:'lbl'}, l), h('strong',{class:'tile-v num'}, v), sub ? h('span',{class:'small muted'}, sub) : null, extra || null); }
+/* ===== A minha área: cartões de resultados e histórico de carregamentos ===== */
+function myStanding(aid, g, blind){
+  const N = S.segs.length, mine = [], reach = [];
+  for (const sg of S.segs){ const ss = segStand(sg.n, aid, g); if (!ss.me) continue;
+    if (ss.i === 0){ const nx = ss.L[1]; mine.push({sg, t:ss.me.t, rival:nx ? athName(athById(nx.a)).split(' ')[0] : null, margin:nx ? nx.t - ss.me.t : null}); }
+    else reach.push({sg, gap:ss.me.t - ss.lead.t, pct:(ss.me.t - ss.lead.t) / ss.lead.t, lead:athName(athById(ss.lead.a)).split(' ')[0], pos:ss.i + 1}); }
+  mine.sort((x, y) => (x.margin == null ? 1e9 : x.margin) - (y.margin == null ? 1e9 : y.margin));
+  reach.sort((x, y) => x.pct - y.pct);
+  return {N, mine, reach};
+}
+function nextMilestone(done, N){
+  const c = cfg(), half = c.halfAt || Math.ceil(N / 2), all = c.allAt || N;
+  if (!N) return 'concluídos';
+  if (done >= all) return 'Mestre dos ' + N + '!';
+  if (done >= half) return `faltam ${all - done} para o Mestre dos ${N} (+${c.allBonus != null ? c.allBonus : 32})`;
+  return `faltam ${half - done} para o meio caminho (+${c.halfBonus != null ? c.halfBonus : 16})`;
+}
+function resultCards(aid, st, blind){
+  const out = [], g = st.g, S2 = myStanding(aid, g, blind), done = new Set(effList().filter(d => d.a === aid && d.h.length).map(d => d.s));
+  if (!blind){
+    if (S2.mine.length) out.push(h('section',{class:'stack', style:'gap:10px'}, h('div',{class:'row', style:'justify-content:space-between'}, h('h3',{}, 'As tuas guardas'), h('span',{class:'lbl'}, S2.mine.length + (S2.mine.length === 1 ? ' bordão' : ' bordões'))),
+      h('div',{class:'rv'}, S2.mine.map(m => h('button',{class:'rv-r', onclick:()=>{ S.segSel = m.sg.n; S.segOpen = true; S.segKeep = true; goTab('seg'); }}, h('span',{class:'srow-n num'}, pad2(m.sg.n)),
+        h('span',{}, h('strong',{}, m.sg.nome), h('small',{}, m.rival ? (m.margin < 10 ? 'Em risco: ' : '') + m.rival + ' está a ' + gapTxt(m.margin) + ' de ti' : 'Ninguém te ameaça por agora')), h('span',{class:'num'}, C.fmtTime(m.t)))))));
+    const near = S2.reach.slice(0, 3);
+    if (near.length) out.push(h('section',{class:'stack', style:'gap:10px'}, h('h3',{}, 'Ao teu alcance'), h('div',{class:'rv'}, near.map(m => h('button',{class:'rv-r', onclick:()=>{ S.segSel = m.sg.n; S.segOpen = true; S.segKeep = true; goTab('seg'); }}, h('span',{class:'srow-n num'}, pad2(m.sg.n)),
+      h('span',{}, h('strong',{}, m.sg.nome), h('small',{}, `${m.pos}.º · a ${gapTxt(m.gap)} de ${m.lead}`)), h('span',{class:'tag'}, '−' + gapTxt(m.gap)))))));
+  }
+  if (S2.N){ const mineSet = new Set(S2.mine.map(m => m.sg.n));
+    out.push(h('section',{class:'stack', style:'gap:10px'}, h('div',{class:'row', style:'justify-content:space-between'}, h('h3',{}, 'Mapa de conquistas'), h('span',{class:'lbl'}, done.size + ' de ' + S2.N)),
+      h('div',{class:'cmap'}, S.segs.map(sg => h('button',{class:(!blind && mineSet.has(sg.n) ? 'g' : done.has(sg.n) ? 'd' : ''), 'aria-label':'Caminho ' + sg.n + (done.has(sg.n) ? ', concluído' : ', por fazer'), onclick:()=>{ S.segSel = sg.n; S.segOpen = true; S.segKeep = true; goTab('seg'); }}, pad2(sg.n)))),
+      h('div',{class:'cmap-k'}, blind ? null : h('span',{}, h('i',{class:'g'}), 'Guardas'), h('span',{}, h('i',{class:'d'}), 'Concluído'), h('span',{}, h('i',{}), 'Por fazer'))));
+  }
+  return out;
+}
+function uploadHistory(aid){
+  const L = effList().filter(d => d.a === aid), groups = {};
+  for (const d of L) for (const x of d.all){ const up = x.up || 0, key = (up ? Math.floor(up / 120) : 'x' + Math.floor(x.st / 86400)) + '|' + (x.f || ''); const G = groups[key] = groups[key] || {key, up:up || x.st, f:x.f || '', items:[]}; G.up = Math.max(G.up, up || 0) || x.st; G.items.push({d, x}); }
+  const G = Object.values(groups).sort((a, b) => b.up - a.up);
+  const wrap = h('section',{class:'stack', style:'gap:10px'}, h('div',{class:'row', style:'justify-content:space-between'}, h('h3',{}, 'Histórico de carregamentos'), G.length ? h('span',{class:'lbl'}, G.length + (G.length === 1 ? ' carregamento' : ' carregamentos')) : null));
+  if (!G.length){ wrap.append(h('div',{class:'card empty'}, 'Ainda não carregaste nenhuma atividade.')); return wrap; }
+  const show = S.open.upAll ? G : G.slice(0, 6);
+  wrap.append(...show.map(g => { const k = 'up' + g.key, open = !!S.open[k], best = g.items.length;
+    const card = h('div',{class:'up-g'}, h('button',{class:'up-h', 'aria-expanded':String(open), onclick:()=>{ S.open[k] = !open; doRender(); }},
+      h('span',{}, h('strong',{}, fmtDT(g.up)), h('small',{}, (g.f || 'Atividade sem nome') + ' · ' + best + ' tentativa' + (best === 1 ? '' : 's') + ' detetada' + (best === 1 ? '' : 's'))), h('span',{class:'pm sm', 'aria-hidden':'true'}, open ? '−' : '+')));
+    if (open) card.append(h('div',{class:'up-b'}, g.items.sort((a, b) => a.x.st - b.x.st).map(({d, x}) => { const sg = segByN(d.s), stt = status(x), mine = x.src === 'u:' + S.uid;
+      return h('div',{class:'up-r'}, h('span',{}, h('strong',{}, pad2(d.s) + ' · ' + (sg ? sg.nome : 'Caminho')), h('small',{class:'small muted', style:'display:block'}, fmtDT(x.st))), h('span',{class:'num'}, C.fmtTime(x.t)), stt ? h('span',{class:'tag ' + stt[0]}, stt[1]) : (mine ? h('button',{class:'b o s', onclick:async()=>{ await safe(()=>deleteAttempt(x.src, String(d.s), x.st), 'Tentativa apagada.'); }}, 'Apagar') : h('span'))); })));
+    return card; }));
+  if (G.length > 6) wrap.append(h('button',{class:'b o s', style:'justify-self:start', onclick:()=>{ S.open.upAll = !S.open.upAll; doRender(); }}, S.open.upAll ? 'Mostrar menos' : 'Ver todos os ' + G.length));
+  return wrap;
+}
 function viewEu(){
   const aid = myAid(), out = [];
   if (!aid){
@@ -1285,10 +1340,10 @@ function viewEu(){
   out.push(h('section',{class:'eu-hero'}, avatar(a, 'lg'), h('div',{class:'stack', style:'gap:6px;min-width:0'}, h('span',{class:'nc-k'}, title), h('h2',{}, 'Olá, ' + String(a.nome||'').split(' ')[0]),
     h('span',{class:'muted'}, [a.loc, a.esc ? escName(a.esc, a.g) : '', 'Época 2027'].filter(Boolean).join(' · '), ' · ', h('button',{class:'linkb', style:'padding:0', onclick:async()=>{ await S.user.signOut(); location.reload(); }}, 'Sair')))));
   const done = Math.min(st.r.done || 0, N), bar = h('div',{class:'bar'}, h('i',{style:`width:${N ? done / N * 100 : 0}%`}));
-  out.push(h('div',{class:'tiles'}, tile('Pontos', blind ? '—' : String(st.r.total||0), 'na época'), tile('Posição', blind || !st.pos ? '—' : st.pos + '.º', blind ? 'Quinzena Cega' : st.pos ? 'de ' + st.of + (F ? ' guardiãs' : ' guardiões') : 'ainda sem pontos'),
-    tile('Bordões', blind ? '—' : String(st.r.wins||0), 'caminhos que guardas'), tile('Caminhos', done + '/' + N, 'concluídos', bar)));
+  out.push(h('div',{class:'tiles'}, tile('Pontos', blind ? '—' : String(st.r.total||0), 'na época'), tile('Posição', blind || !st.pos ? '—' : st.pos + '.º', blind ? 'Quinzena Cega' : st.pos ? 'de ' + st.of + (F ? ' guardiãs' : ' guardiões') + (st.posEsc ? ' · ' + st.posEsc + '.º em ' + escName(a.esc, a.g) : '') : 'ainda sem pontos'),
+    tile('Bordões', blind ? '—' : String(st.r.wins||0), 'caminhos que guardas'), tile('Caminhos', done + '/' + N, nextMilestone(done, N), bar)));
   const nc = nextChallenge(aid, st.g); if (nc) out.push(challengeCard(nc, blind));
-  out.push(quickActions(), myTimes({kind:'u', uid:S.uid, aid}));
+  out.push(...resultCards(aid, st, blind), myTimes({kind:'u', uid:S.uid, aid}), uploadHistory(aid), quickActions());
   out.push(h('div',{class:'sticky-up'}, h('button',{class:'b t', onclick:()=>goTab('sub')}, 'Carregar atividade')));
   out.push(h('div',{class:'row', style:'justify-content:center;padding:8px 0 4px'}, h('button',{class:'b o', onclick:async()=>{ await S.user.signOut(); location.reload(); }}, 'Sair desta conta'), h('span',{class:'small muted'}, 'Para voltar a entrar precisas do nome e do PIN.')));
   return out;
