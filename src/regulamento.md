@@ -10,7 +10,7 @@
 ## Artigo 2 — Participação e inscrições
 2.1. Pode participar qualquer pessoa que aceite este Regulamento, de qualquer nível. Basta um relógio ou telemóvel que grave a atividade em GPX.
 
-2.2. A inscrição faz-se na página do desafio, com nome, género, data de nascimento e contacto. A Organização aprova cada inscrição. A data de nascimento e o contacto só são visíveis para a Organização.
+2.2. A inscrição faz-se na página do desafio, com nome, género, localidade, data de nascimento e contacto. A Organização aprova cada inscrição e o atleta fica com um PIN pessoal de 5 dígitos para carregar as suas atividades. A data de nascimento e o contacto só são visíveis para a Organização.
 
 2.3. As inscrições fecham a [DATA A DEFINIR]. Quem entrar mais tarde pode participar, mas só contam tentativas feitas a partir da data de inscrição.
 
@@ -18,7 +18,7 @@
 
 2.5. Cada atleta corre sob a sua responsabilidade. Os caminhos atravessam trilhos, estradões e estradas abertas ao trânsito: a Organização não fecha percursos nem garante a segurança fora dos Dias de Ataque.
 
-2.6. Cada atleta compete num **escalão**, que depende da idade a 31 de dezembro do ano da época (2027 menos o ano de nascimento). Os escalões de Juvenis a Seniores são mistos e têm classificação masculina e feminina; a partir dos 35 anos há escalões M e F. A página mostra a Classificação geral por escalão.
+2.6. Cada atleta compete num **escalão**, que depende da idade a 31 de dezembro do ano da época (2027 menos o ano de nascimento). Os escalões Juvenis, Juniores, Sub 23 e SEN têm classificação masculina e feminina; a partir dos 35 anos há escalões M e F (M35 / F35, etc.). O escalão aparece junto ao nome do atleta e a Classificação geral pode ser vista por escalão. A data de nascimento continua privada: só o escalão é público.
 
 | Escalão | Idade em 31/12 do ano da época |
 | Juvenis (Sub 18) | 16-17 anos |
@@ -159,6 +159,7 @@
 | Lanterna Vermelha | Mais check-ins entre quem nunca esteve num pódio no fecho |
 | A Revelação do Ano | Maior subida na Geral entre 1 de junho e o fecho de contas |
 | O Estratega | Mais pontos ganhos na Quinzena Cega |
+| Campeão / Campeã de escalão (M e F) | Mais pontos na Geral dentro de cada escalão (Artigo 2.6), desde que haja pelo menos 3 atletas classificados nesse escalão e género |
 | Campeão da Bifana | Mais presenças em Dias de Ataque; desempata a votação na Noite |
 | Fair Play | Votação secreta dos atletas na Noite dos Guardiões |
 
@@ -168,7 +169,9 @@
 
 11.4. Desempate na Geral, por esta ordem: mais caminhos concluídos, mais bordões guardados, mais presenças em Dias de Ataque. Se ainda houver empate, o prémio é partilhado.
 
-11.5. As classificações de perfil (Montanha, Míssil, Diesel) somam os pontos dos pódios mensais e de check-in dos caminhos desse perfil.
+11.5. O escalão de cada atleta é o do dia 31 de dezembro de 2027 e não muda durante a época. Quem não tem escalão (Artigo 2.7) concorre a todos os prémios, exceto aos de escalão.
+
+11.6. As classificações de perfil (Montanha, Míssil, Diesel) somam os pontos dos pódios mensais e de check-in dos caminhos desse perfil.
 
 ## Artigo 12 — Disposições finais
 12.1. Casos omissos são decididos pela Organização, com justiça e no espírito dos Guardiões.
