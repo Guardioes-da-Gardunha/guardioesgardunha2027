@@ -1410,7 +1410,15 @@ function viewLenda(){
   const go = i => { S.lendaCap = i; doRender(); const r = document.getElementById('lendaread'); if (r) r.scrollIntoView({behavior:'smooth', block:'start'}); };
   const cards = h('div',{class:'qa lcap'}, ...pages.map((pg, i) => h('button',{class:'qa-b' + (i === sel ? ' on' : ''), 'aria-expanded':String(i === sel), onclick:()=>{ if (i === sel){ S.lendaCap = null; doRender(); } else go(i); }},
     h('span',{class:'qa-i'}, navIcon((CAP[i] || CAP[0])[1])), h('span',{class:'qa-t'}, h('strong',{}, titles[i] || 'Capítulo ' + (i + 1)), h('small',{}, (CAP[i] || ['', ''])[0])))));
+  const dayN = iso => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || ''); if (!m) return null; const t = new Date(+m[1], +m[2] - 1, +m[3]), n = new Date(); return Math.round((t - new Date(n.getFullYear(), n.getMonth(), n.getDate())) / 864e5); };
+  const dStart = dayN(cfg().from), dEnd = dayN(cfg().to), plural = (n, a, b) => n + ' ' + (n === 1 ? a : b);
+  const clock = dStart != null && dStart > 0 ? tile('Arranque', String(dStart), dStart === 1 ? 'dia para o arranque' : 'dias para o arranque')
+    : dEnd != null && dEnd >= 0 ? tile(dEnd === 0 ? 'Último dia' : 'Fecho de contas', String(dEnd), dEnd === 1 ? 'dia para o fim' : 'dias para o fim') : tile('Época', '—', 'encerrada');
+  const mine = myAid();
   const out = [h('section',{class:'hero', style:'gap:6px'}, h('h2',{class:'crest-title'}, 'Guardiões da Gardunha'), h('p',{class:'when'}, `${FMT_D(cfg().from)} a ${FMT_D(cfg().to)}`)),
+    h('section',{class:'stack home-cta', style:'gap:14px'},
+      h('div',{class:'row', style:'gap:10px'}, mine ? h('button',{class:'b t', onclick:()=>goTab('eu')}, 'A minha área') : h('button',{class:'b t', onclick:()=>goTab('reg')}, 'Inscrever-me'), h('button',{class:'b o', onclick:()=>goTab('seg')}, 'Ver os caminhos')),
+      h('div',{class:'tiles', style:'grid-template-columns:repeat(2,minmax(0,1fr))'}, tile('Caminhos', nS ? String(nS) : '—', nS ? (nS === 1 ? 'caminho publicado' : 'caminhos publicados') : 'a publicar'), clock)),
     h('section',{class:'stack', style:'gap:10px'}, h('h3',{}, 'A lenda'), h('p',{class:'small muted', style:'margin:0'}, 'Toca num capítulo para o leres.'), cards)];
   if (sel >= 0) out.push(h('section',{class:'card stack lread', id:'lendaread', style:'gap:18px'}, pages[sel],
     h('div',{class:'pager'}, sel > 0 ? h('button',{class:'b o s', onclick:()=>go(sel - 1)}, '← ' + titles[sel - 1]) : h('span'), sel < pages.length - 1 ? h('button',{class:'b t s', onclick:()=>go(sel + 1)}, titles[sel + 1] + ' →') : h('button',{class:'b o s', onclick:()=>{ S.lendaCap = null; doRender(); window.scrollTo(0, 0); }}, 'Fechar'))));
