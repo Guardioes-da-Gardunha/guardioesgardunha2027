@@ -232,6 +232,7 @@ select option,select optgroup{background:var(--surface);color:var(--ink)}
 .cmap-k{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;color:var(--muted)} .cmap-k i{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid var(--line2);vertical-align:-1px;margin-right:6px} .cmap-k i.d{background:var(--terra-soft);border-color:var(--accent-line)} .cmap-k i.g{background:var(--terra);border-color:var(--terra)}
 .up-g{border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden} .up-h{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;text-align:left;background:none;border:0;color:var(--ink);font:inherit;padding:12px 14px;cursor:pointer} .up-h small{display:block;color:var(--muted);font-size:.85rem;overflow-wrap:anywhere} .up-b{display:grid;gap:0;border-top:1px solid var(--line)} .up-r{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line)} .up-r:last-child{border-bottom:0}
 .rv{display:grid;gap:8px} .rv-r{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:10px 14px;cursor:pointer;text-align:left;width:100%;color:var(--ink);font:inherit} .rv-r strong{overflow-wrap:anywhere} .rv-r small{display:block;color:var(--muted);font-size:.85rem}
+.evo-b{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px;align-items:end;height:130px;border-bottom:1px solid var(--line2);padding-top:18px} .evo-b>div{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;height:100%;min-width:0} .evo-b i{display:block;width:100%;max-width:34px;background:var(--terra);border-radius:4px 4px 0 0;min-height:3px} .evo-b span.v{font:700 .8rem/1 var(--mono);color:var(--ink)} .evo-x{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px;text-align:center;font:.75rem var(--mono);color:var(--muted);padding-top:6px} .evo-t{width:100%;height:120px;display:block;overflow:visible}
 .mechip{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line2);border-radius:99px;padding:3px 12px 3px 3px;color:var(--ink);font:600 .85rem/1 var(--body);cursor:pointer}
 .mechip.on{border-color:var(--terra)} .me{display:flex;align-items:center;gap:8px}
 .side{display:none}
@@ -1310,11 +1311,44 @@ function resultCards(aid, st, blind){
   }
   return out;
 }
+function evolution(aid, st, blind){
+  const wrap = h('section',{class:'stack', style:'gap:10px'}, h('h3',{}, 'Evolução'));
+  const MN = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  const mine = effList().filter(d => d.a === aid);
+  const months = [...new Set(mine.flatMap(d => d.h.map(x => monthOf(x.st))))].sort().slice(-12);
+  if (!months.length){ wrap.append(h('div',{class:'card empty'}, 'A tua evolução aparece aqui depois do primeiro carregamento.')); return wrap; }
+  if (!blind){
+    const vals = months.map(m => { const r = standings(m).find(x => x.id === aid); return r ? (r.total || 0) : 0; }), mx = Math.max(1, ...vals);
+    wrap.append(h('div',{class:'card stack', style:'gap:6px'}, h('div',{class:'row', style:'justify-content:space-between'}, h('span',{class:'lbl'}, 'Pontos ganhos por mês'), null),
+      h('div',{class:'evo-b', role:'img', 'aria-label':'Pontos por mês: ' + months.map((m, i) => MN[+m.slice(5) - 1] + ' ' + vals[i]).join(', ')}, vals.map(v => h('div',{}, h('span',{class:'v'}, String(v)), h('i',{style:`height:${Math.max(3, Math.round(v / mx * 84))}px`})))),
+      h('div',{class:'evo-x'}, months.map(m => h('span',{}, MN[+m.slice(5) - 1]))), h('p',{class:'small muted', style:'margin:0'}, 'Pódio, check-ins e roubos de cada mês. Dias de Ataque e bónus contam só no total da época.')));
+  }
+  const withTwo = mine.filter(d => d.h.length >= 2).sort((a, b) => a.s - b.s);
+  if (S.evoSeg == null || !mine.some(d => d.s === S.evoSeg)) S.evoSeg = (withTwo[0] || mine.sort((a, b) => a.s - b.s)[0]).s;
+  const d = mine.find(x => x.s === S.evoSeg), pts = d.h.slice().sort((a, b) => a.st - b.st), sg = segByN(d.s);
+  const sel = h('select',{'aria-label':'Caminho', onchange:e=>{ S.evoSeg = +e.target.value; doRender(); }}, mine.slice().sort((a, b) => a.s - b.s).map(x => h('option',{value:x.s, selected:x.s === S.evoSeg}, pad2(x.s) + ' · ' + ((segByN(x.s) || {}).nome || 'Caminho') + ' (' + x.h.length + ')')));
+  const card = h('div',{class:'card stack', style:'gap:10px'}, h('div',{class:'row', style:'justify-content:space-between'}, h('span',{class:'lbl'}, 'Tempo ao longo do tempo'), sel));
+  if (pts.length < 2){ card.append(h('p',{class:'small muted', style:'margin:0'}, 'Precisas de pelo menos 2 tentativas neste caminho para ver a evolução.')); }
+  else {
+    const W = 300, H = 110, t0 = pts[0].st, t1 = pts[pts.length - 1].st || t0 + 1, lo = Math.min(...pts.map(x => x.t)), hi = Math.max(...pts.map(x => x.t)), sp = Math.max(hi - lo, 1);
+    const X = x => 8 + (t1 === t0 ? 0.5 : (x - t0) / (t1 - t0)) * (W - 16), Y = t => 10 + (t - lo) / sp * (H - 24);
+    const line = pts.map((x, i) => (i ? 'L' : 'M') + X(x.st).toFixed(1) + ' ' + Y(x.t).toFixed(1)).join('');
+    let run = Infinity; const rec = pts.map(x => { const r = x.t < run; if (r) run = x.t; return r; });
+    const best = Math.min(...pts.map(x => x.t)), first = pts[0].t, last = pts[pts.length - 1].t;
+    card.append(sv('svg',{viewBox:`0 0 ${W} ${H}`, class:'evo-t', preserveAspectRatio:'none', role:'img', 'aria-label':'Tempos por tentativa'}, sv('path',{d:line, class:'ev-line'}), ...pts.map((x, i) => sv('circle',{cx:X(x.st).toFixed(1), cy:Y(x.t).toFixed(1), r:rec[i] ? 4.5 : 3, style:`fill:${rec[i] ? 'var(--terra)' : 'var(--line2)'};stroke:var(--bg);stroke-width:1.5`}))),
+      h('div',{class:'row small', style:'justify-content:space-between'}, h('span',{class:'muted'}, fmtDate(pts[0].st)), h('span',{class:'muted'}, fmtDate(pts[pts.length - 1].st))),
+      h('div',{class:'kv'}, h('div',{}, h('span',{class:'lbl'}, 'Primeira'), h('strong',{class:'num'}, C.fmtTime(first))), h('div',{}, h('span',{class:'lbl'}, 'Melhor'), h('strong',{class:'num'}, C.fmtTime(best))), h('div',{}, h('span',{class:'lbl'}, 'Desde a primeira'), h('strong',{class:'num', style:'color:' + (best < first ? 'var(--terra-txt)' : 'var(--ink)')}, best < first ? '−' + gapTxt(first - best) : '—'))),
+      h('p',{class:'small muted', style:'margin:0'}, 'Cada ponto é uma tentativa; os pontos a verde foram melhores do que todas as anteriores.'));
+  }
+  wrap.append(card); return wrap;
+}
 function uploadHistory(aid){
   const L = effList().filter(d => d.a === aid), groups = {};
   for (const d of L) for (const x of d.all){ const up = x.up || 0, key = (up ? Math.floor(up / 120) : 'x' + Math.floor(x.st / 86400)) + '|' + (x.f || ''); const G = groups[key] = groups[key] || {key, up:up || x.st, f:x.f || '', items:[]}; G.up = Math.max(G.up, up || 0) || x.st; G.items.push({d, x}); }
-  const G = Object.values(groups).sort((a, b) => b.up - a.up);
-  const wrap = h('section',{class:'stack', style:'gap:10px'}, h('div',{class:'row', style:'justify-content:space-between'}, h('h3',{}, 'Histórico de carregamentos'), G.length ? h('span',{class:'lbl'}, G.length + (G.length === 1 ? ' carregamento' : ' carregamentos')) : null));
+  const GA = Object.values(groups).sort((a, b) => b.up - a.up), MN = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  const mths = [...new Set(GA.map(g => monthOf(g.up)))]; if (S.upMonth && !mths.includes(S.upMonth)) S.upMonth = null;
+  const G = S.upMonth ? GA.filter(g => monthOf(g.up) === S.upMonth) : GA;
+  const wrap = h('section',{class:'stack', style:'gap:10px'}, h('div',{class:'row', style:'justify-content:space-between'}, h('h3',{}, 'Histórico de carregamentos'), GA.length > 1 && mths.length > 1 ? h('select',{'aria-label':'Mês', onchange:e=>{ S.upMonth = e.target.value || null; doRender(); }}, h('option',{value:''}, 'Todos os meses'), ...mths.map(m => h('option',{value:m, selected:S.upMonth === m}, MN[+m.slice(5) - 1] + ' ' + m.slice(0, 4)))) : (G.length ? h('span',{class:'lbl'}, G.length + (G.length === 1 ? ' carregamento' : ' carregamentos')) : null)));
   if (!G.length){ wrap.append(h('div',{class:'card empty'}, 'Ainda não carregaste nenhuma atividade.')); return wrap; }
   const show = S.open.upAll ? G : G.slice(0, 6);
   wrap.append(...show.map(g => { const k = 'up' + g.key, open = !!S.open[k], best = g.items.length;
@@ -1343,7 +1377,7 @@ function viewEu(){
   out.push(h('div',{class:'tiles'}, tile('Pontos', blind ? '—' : String(st.r.total||0), 'na época'), tile('Posição', blind || !st.pos ? '—' : st.pos + '.º', blind ? 'Quinzena Cega' : st.pos ? 'de ' + st.of + (F ? ' guardiãs' : ' guardiões') + (st.posEsc ? ' · ' + st.posEsc + '.º em ' + escName(a.esc, a.g) : '') : 'ainda sem pontos'),
     tile('Bordões', blind ? '—' : String(st.r.wins||0), 'caminhos que guardas'), tile('Caminhos', done + '/' + N, nextMilestone(done, N), bar)));
   const nc = nextChallenge(aid, st.g); if (nc) out.push(challengeCard(nc, blind));
-  out.push(...resultCards(aid, st, blind), myTimes({kind:'u', uid:S.uid, aid}), uploadHistory(aid), quickActions());
+  out.push(...resultCards(aid, st, blind), myTimes({kind:'u', uid:S.uid, aid}), evolution(aid, st, blind), uploadHistory(aid), quickActions());
   out.push(h('div',{class:'sticky-up'}, h('button',{class:'b t', onclick:()=>goTab('sub')}, 'Carregar atividade')));
   out.push(h('div',{class:'row', style:'justify-content:center;padding:8px 0 4px'}, h('button',{class:'b o', onclick:async()=>{ await S.user.signOut(); location.reload(); }}, 'Sair desta conta'), h('span',{class:'small muted'}, 'Para voltar a entrar precisas do nome e do PIN.')));
   return out;
