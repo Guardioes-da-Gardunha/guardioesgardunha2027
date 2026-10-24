@@ -927,7 +927,7 @@ function render(){ if (rq) return; rq = true; requestAnimationFrame(()=>{ rq = f
   doRender(); }); }
 document.addEventListener('focusout', ()=>{ if (deferred){ deferred = false; setTimeout(render, 50); } });
 function doRender(){
-  histTrack();
+  histTrack(); navSave();
   const tabs = document.getElementById('tabs'); tabs.replaceChildren(...TABS.filter(t => PUB.includes(t[0]) || (ADMIN_TABS.includes(t[0]) && S.admin)).map(([k,l]) => h('button',{role:'tab', class:PUB.includes(k) ? 'pub' : 'adm', 'aria-selected':String(S.tab===k), onclick:()=>goTab(k)}, l)));
   const bn = document.getElementById('bnav'); if (bn) bn.replaceChildren(...PUB.map(k => h('button',{'aria-current': S.tab===k ? 'page' : 'false', onclick:()=>goTab(k)}, navIcon(NAVI[k][1]), h('span',{}, NAVI[k][0]))));
   const me = document.getElementById('me'); const aid = myAid(), ma = aid && athById(aid);
@@ -1088,6 +1088,12 @@ function howToScore(){
     h('div',{class:'row'}, h('button',{class:'b t', onclick:()=>goTab('seg')}, 'Ver caminhos'), h('button',{class:'b o', onclick:()=>goTab('sub')}, 'Carregar atividade')));
 }
 /* histórico de navegação: deslizar para a direita volta, para a esquerda avança (e o botão Voltar do telemóvel faz o mesmo) */
+/* guarda onde o utilizador está, para o refresh ficar na mesma página */
+const NAVY = {y:0, t:0};
+function navSave(){ try { sessionStorage.setItem('g27nav', JSON.stringify({tab:S.tab, segOpen:!!S.segOpen, segSel:S.segSel || null, sec:SEC, y:NAVY.y || Math.round(window.scrollY || 0)})); } catch(e){} }
+let navTm = 0; addEventListener('scroll', () => { if (NAVY.y && Date.now() - NAVY.t < 4000) return; clearTimeout(navTm); navTm = setTimeout(navSave, 250); }, {passive:true});
+addEventListener('pagehide', navSave);
+function navRestoreY(){ if (!NAVY.y) return; const go = () => { if (Date.now() - NAVY.t > 4000){ NAVY.y = 0; return; } window.scrollTo(0, NAVY.y); if (Math.abs((window.scrollY || 0) - NAVY.y) > 4) setTimeout(go, 250); else setTimeout(() => { NAVY.y = 0; }, 600); }; setTimeout(go, 50); }
 const HIST = {keys:[], i:-1, skip:false, hs:true};
 const histKey = () => S.tab;
 function histTrack(){
@@ -1174,7 +1180,7 @@ function orgFooter(){
 }
 
 /* ===== Submeter ===== */
-function goTab(k, anim){ if (k === 'seg' && !S.segKeep) S.segOpen = false; S.segKeep = false; const from = PUB.indexOf(S.tab), to = PUB.indexOf(k); S.tab = k; try{ localStorage.setItem('g27tab',k); }catch(e){} doRender(); window.scrollTo(0,0);
+function goTab(k, anim){ NAVY.y = 0; if (k === 'seg' && !S.segKeep) S.segOpen = false; S.segKeep = false; const from = PUB.indexOf(S.tab), to = PUB.indexOf(k); S.tab = k; try{ localStorage.setItem('g27tab',k); }catch(e){} doRender(); window.scrollTo(0,0);
   const m = document.getElementById('main'); if (from >= 0 && to >= 0 && from !== to){ m.classList.remove('in-l','in-r'); void m.offsetWidth; m.classList.add(to > from ? 'in-r' : 'in-l'); } }
 /* ===== Quem está a carregar: nome (com pesquisa) + PIN ===== */
 function whoCard(){
@@ -2306,7 +2312,8 @@ function dataCard(){
 
 /* ---------- arranque ---------- */
 try { const t = localStorage.getItem('g27tab'); if (t) S.tab = t; } catch(e){}
-doRender();
+try { const n = JSON.parse(sessionStorage.getItem('g27nav') || 'null'); if (n && n.tab){ S.tab = n.tab; if (n.segOpen) S.segOpen = true; if (n.segSel) S.segSel = n.segSel; Object.assign(SEC, n.sec || {}); NAVY.y = n.y || 0; NAVY.t = Date.now(); } } catch(e){}
+doRender(); navRestoreY();
 (async function boot(){
   if (!window.claude || !window.claude.use) { doRender(); return; }
   const [db, user, dl] = await Promise.all([claude.use('db'), claude.use('user'), claude.use('downloads')]);
