@@ -97,4 +97,5 @@ ok(ec('2011-06-01') === 'JUV' && ec('2010-12-31') === 'JUV' && ec('2009-01-01') 
 ok(ec('1992-12-31') === 'V35' && ec('1988-01-01') === 'V35' && ec('1987-06-06') === 'V40' && ec('1977-01-01') === 'V50' && ec('1957-01-01') === 'V70' && ec('1953-12-31') === 'V70', 'escalões de veteranos nas fronteiras');
 ok(ec('2012-01-01') === null && ec('1952-12-31') === null && ec('') === null && ec(null) === null, 'fora de 16–74 anos: sem escalão');
 ok(C.escLabel('V45', 'F') === 'F45' && C.escLabel('V45', 'M') === 'M45' && C.escLabel('SEN', 'F') === 'SEN' && C.escLabel('JUV', 'M') === 'Juvenis (Sub 18)', 'nomes dos escalões');
+ok(C.nivelSub('Descida', 2356, 305) === 4 && C.nivelSub('Subida', 2338, 304) === 4 && C.nivelSub('Subida', 2078, 229) === 3 && C.nivelSub('Cumeada', 5000, 100) === null, 'dificuldade de subida/descida (nivelSub)');
 console.log(fails ? `${fails} falha(s)` : 'todos os testes passaram'); process.exit(fails ? 1 : 0);

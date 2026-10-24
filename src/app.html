@@ -222,6 +222,7 @@ select option,select optgroup{background:var(--surface);color:var(--ink)}
 .av.sm{width:30px;height:30px;font-size:.8rem;border-width:1px} .av.lg{width:76px;height:76px;font-size:1.9rem;border-width:2px}
 .av.ghost{background:var(--surface2);border-color:var(--line2);color:var(--muted)} .av svg{width:58%;height:58%;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
 .subnav{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;position:sticky;top:0;z-index:5;background:var(--bg);scrollbar-width:thin} .subnav button{flex:0 0 auto;font:600 .88rem/1 var(--body);border:1px solid var(--line2);border-radius:10px;background:var(--surface);color:var(--muted);padding:10px 14px;cursor:pointer;display:inline-flex;gap:8px;align-items:center} .subnav button.on{color:var(--ink);border-color:var(--moss,#8FB573);box-shadow:inset 0 -3px 0 var(--moss,#8FB573)} .subnav .n{font-size:.75rem;background:var(--terra-txt,#c96);color:#141614;border-radius:99px;padding:2px 7px}
+.todo{color:var(--warn);font-style:normal} .chk{display:grid;gap:8px;margin:0;padding:0;list-style:none} .chk li{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface)} .chk .dot{flex:0 0 auto;width:10px;height:10px;border-radius:99px;margin-top:6px;background:var(--warn)} .chk .bad .dot{background:var(--bad)} .chk .info .dot{background:var(--track)} .chk .t{flex:1;min-width:0}
 .mechip{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line2);border-radius:99px;padding:3px 12px 3px 3px;color:var(--ink);font:600 .85rem/1 var(--body);cursor:pointer}
 .mechip.on{border-color:var(--terra)} .me{display:flex;align-items:center;gap:8px}
 .side{display:none}
@@ -648,7 +649,7 @@ function regDoc(){
     const body = h('div',{class:'pbody stack', style:'gap:6px'});
     const all = h('button',{class:'linkb', onclick:()=>{ const ds = [...body.querySelectorAll('details')]; const op = !ds.every(d => d.open); ds.forEach(d => d.open = op); all.textContent = op ? 'Fechar os artigos' : 'Abrir os artigos'; }}, 'Abrir os artigos');
     body.append(h('div',{class:'row', style:'justify-content:space-between'}, h('span',{class:'small muted'}, 'Toca num artigo para o abrir.'), all),
-      ...(typeof REG !== 'undefined' ? REG : []).map(x => { const d = h('details',{class:'regart'}, h('summary',{}, x.t)); const bb = h('div',{class:'regbody'}); bb.innerHTML = x.html; d.append(bb); return d; }));
+      ...(typeof REG !== 'undefined' ? REG : []).map(x => { const d = h('details',{class:'regart'}, h('summary',{}, regFill(x.t).replace(/<[^>]+>/g, ''))); const bb = h('div',{class:'regbody'}); bb.innerHTML = regFill(x.html); d.append(bb); return d; }));
     box.append(body);
   }
   return box;
@@ -1329,11 +1330,68 @@ async function exportCSV(){
 }
 
 /* ===== Organização ===== */
-const SEC = {adm:'cfg', ins:'ped'};
+/* Verificações da organização: avisos sobre dados em falta ou incoerentes */
+function orgChecks(){
+  const out = [], c = cfg(), A = (lvl, txt, act) => out.push({lvl, txt, act});
+  const segs = S.segs.slice().sort((a, b) => a.n - b.n);
+  if (!segs.length) A('bad', 'Ainda não há caminhos publicados.');
+  const nm = sg => pad2(sg.n) + ' · ' + sg.nome;
+  const semTr = segs.filter(sg => !hasTrace(sg)); if (semTr.length) A('bad', `${semTr.length} caminho(s) sem traçado de referência (não são detetados nos GPX): ` + semTr.slice(0, 6).map(x => pad2(x.n)).join(', ') + (semTr.length > 6 ? '…' : ''), 'seg');
+  const semAlt = segs.filter(sg => hasTrace(sg) && !segProfile(sg)); if (semAlt.length) A('warn', `${semAlt.length} caminho(s) com traçado mas sem altitude: ` + semAlt.slice(0, 6).map(x => pad2(x.n)).join(', ') + (semAlt.length > 6 ? '…' : '') + '. Usa o botão “Altitude” na lista.', 'seg');
+  const semLoc = segs.filter(sg => !sg.localidade); if (semLoc.length) A('warn', `${semLoc.length} caminho(s) sem localidade: ` + semLoc.slice(0, 6).map(x => pad2(x.n)).join(', '), 'seg');
+  const locEstr = segs.filter(sg => sg.localidade && !LOCS.includes(sg.localidade)); if (locEstr.length) A('info', 'Localidade fora da lista oficial (confirma a grafia): ' + locEstr.slice(0, 5).map(x => pad2(x.n) + ' “' + x.localidade + '”').join('; '), 'seg');
+  const semGpx = segs.filter(sg => !sg.gpxLink); if (semGpx.length && segs.length) A('info', `${semGpx.length} caminho(s) sem link para descarregar o GPX.`, 'seg');
+  const curtos = segs.filter(sg => sg.dist && sg.dist < 1000); if (curtos.length) A('warn', 'Caminhos com menos de 1 km: o erro do GPS pesa muito no tempo. ' + curtos.map(x => pad2(x.n)).join(', '), 'seg');
+  // dificuldade guardada vs calculada
+  for (const sg of segs){ const calc = C.nivelSub(sg.tipo, sg.dist, sg.desn); if (calc != null && sg.nivel && Math.abs(calc - sg.nivel) >= 1)
+    A(Math.abs(calc - sg.nivel) >= 2 ? 'bad' : 'warn', `Caminho ${nm(sg)}: dificuldade guardada “${NIVEIS[sg.nivel - 1]}”, mas pela distância e desnível (${km(sg.dist)}, ${Math.round(sg.desn)} m, ${Math.round((sg.incl||0)*100)}%) seria “${NIVEIS[calc - 1]}”.`, {fix:sg.n, nivel:calc}); }
+  // pares com o mesmo GPX
+  const bySrc = {}; segs.forEach(sg => { if (sg.traceSrc) (bySrc[sg.traceSrc] = bySrc[sg.traceSrc] || []).push(sg); });
+  for (const [src, L] of Object.entries(bySrc)) if (L.length > 1){ const ns = L.map(x => x.nivel || 0);
+    const par = L.length === 2 && L.some(x => x.tipo === 'Subida') && L.some(x => x.tipo === 'Descida');
+    if (!par) A('warn', `Caminhos ${L.map(x => pad2(x.n)).join(' e ')} vêm do mesmo ficheiro (${src}) e não são um par subida/descida. Confirma que não é um engano.`, 'seg');
+    else if (Math.max(...ns) - Math.min(...ns) >= 2) A('warn', `Par ${L.map(x => pad2(x.n)).join('/')} (mesmo trilho, sentidos opostos): dificuldades muito diferentes (${L.map(x => x.dif).join(' vs ')}). Verifica.`, 'seg'); }
+  const ns = segs.map(x => x.n); for (let i = 1; i <= Math.max(0, ...ns); i++) if (!ns.includes(i)){ A('info', `Falta o caminho n.º ${pad2(i)} na numeração.`, 'seg'); break; }
+  // configuração
+  if (!c.dtInscr) A('warn', 'Falta a data de fecho das inscrições (aparece no Regulamento, art. 2.3).', 'cfg');
+  if (!c.dtNoite) A('warn', 'Falta a data da Noite dos Guardiões (Regulamento, art. 9.1).', 'cfg');
+  if (!(c.canal || c.contacto)) A('warn', 'Falta o canal de dúvidas e reclamações (Regulamento, art. 12.4).', 'cfg');
+  const now = new Date(), y = +String(c.to || '2027').slice(0, 4), inBlind = now >= new Date(y, 11, 1) && now < new Date(y, 11, 16);
+  if (inBlind && !c.hide) A('bad', 'Estamos na Quinzena Cega (1–15 dez) e a ocultação está desligada. Liga-a em Configuração.', 'cfg');
+  if (!inBlind && c.hide) A('warn', 'A Quinzena Cega está ligada fora de 1–15 de dezembro: as classificações estão escondidas.', 'cfg');
+  if (!c.open) A('info', 'As submissões estão fechadas.', 'cfg');
+  // pessoas
+  const pend = Object.values(S.regs).filter(r => r.estado === 'pendente').length; if (pend) A('warn', `${pend} pedido(s) de inscrição por aprovar.`, 'ped');
+  const stale = S.ath.filter(a => !a.ex && S.priv[a.id] && S.priv[a.id].nasc && (escOf(S.priv[a.id].nasc) || null) !== (a.esc || null)).length;
+  if (stale) A('warn', `${stale} atleta(s) com o escalão desatualizado. Em Inscrições → Atletas inscritos, toca em “Atualizar escalões”.`, 'ath');
+  const semNasc = S.ath.filter(a => !a.ex && !(S.priv[a.id] && S.priv[a.id].nasc)).length; if (semNasc) A('info', `${semNasc} atleta(s) sem data de nascimento (ficam sem escalão).`, 'ath');
+  return out;
+}
+function checksCard(){
+  const L = orgChecks(), card = h('div',{class:'card stack'}, h('h3',{}, 'Verificações'), h('p',{class:'small muted', style:'margin:0'}, 'Avisos sobre dados em falta ou que não batem certo. Resolve os vermelhos primeiro.'));
+  if (!L.length){ card.append(h('div',{class:'notice f'}, 'Tudo em ordem.')); return card; }
+  const order = {bad:0, warn:1, info:2}; L.sort((a, b) => order[a.lvl] - order[b.lvl]);
+  card.append(h('ul',{class:'chk'}, L.map(it => h('li',{class:it.lvl}, h('span',{class:'dot'}), h('span',{class:'t small'}, it.txt),
+    it.act && it.act.fix ? h('button',{class:'b o s', onclick:()=>safe(()=>S.db.doc('segments/s' + pad2(it.act.fix)).update({nivel:it.act.nivel, dif:NIVEIS[it.act.nivel - 1]}), 'Dificuldade atualizada.')}, 'Aplicar cálculo')
+    : typeof it.act === 'string' ? h('button',{class:'b o s', onclick:()=>{ if (it.act === 'ped' || it.act === 'ath'){ SEC.ins = it.act; goTab('ins'); } else { SEC.adm = it.act; doRender(); window.scrollTo(0,0); } }}, 'Ver') : null)))); 
+  return card;
+}
+const SEC = {adm:'chk', ins:'ped'};
 function subNav(key, items){
   const cur = items.some(i => i[0] === SEC[key]) ? SEC[key] : items[0][0];
   return [h('div',{class:'subnav', role:'tablist'}, items.map(([id,l,n]) => h('button',{role:'tab', class:id===cur?'on':'', 'aria-selected':String(id===cur), onclick:()=>{ SEC[key] = id; doRender(); }}, l, n ? h('span',{class:'n'}, String(n)) : null))), cur];
 }
+/* Regulamento vivo: números e datas vêm dos caminhos publicados e da configuração */
+function regFill(txt){
+  const g = S.segs, N = g.length, c = cfg(), pl = '<span class="todo">[a definir]</span>';
+  const km1 = Math.round(g.reduce((a, x) => a + (x.dist||0), 0) / 100) / 10, desn = Math.round(g.reduce((a, x) => a + (x.desn||0), 0) / 10) * 10;
+  const cnt = f => g.filter(f).length, dash = v => N ? String(v) : '—';
+  const T = {N:dash(N), KM:N ? String(km1).replace('.', ',') : '—', DESN:N ? String(desn) : '—', SUB:dash(cnt(x => x.tipo === 'Subida')), DESC:dash(cnt(x => x.tipo === 'Descida')), CUM:dash(cnt(x => x.tipo !== 'Subida' && x.tipo !== 'Descida')),
+    MEIO:N ? String(c.halfAt || Math.ceil(N / 2)) : '—', HALF_PTS:String(c.halfBonus != null ? c.halfBonus : 16), ALL_PTS:String(c.allBonus != null ? c.allBonus : 32),
+    FECHO_INSCRICOES:esc2(c.dtInscr) || pl, DATA_NOITE:esc2(c.dtNoite) || pl, CANAL:esc2(c.canal || c.contacto) || pl};
+  return String(txt).replace(/\{([A-Z_]+)\}/g, (m, k) => k in T ? T[k] : m);
+}
+function esc2(v){ return String(v == null ? '' : v).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch])); }
 function viewIns(){
   const out = [h('h2',{},'Inscrições')];
   const pend = Object.entries(S.regs).filter(([u,r]) => r.estado === 'pendente').sort((a,b)=>a[1].at-b[1].at);
@@ -1364,8 +1422,8 @@ function viewIns(){
 }
 function viewAdm(){
   const out = [h('h2',{},'Organização'), h('p',{class:'muted', style:'margin:0;max-width:70ch'}, 'Só quem pode editar esta página vê este separador. As alterações ficam visíveis para todos de imediato.')];
-  const [nav, cur] = subNav('adm', [['cfg','Configuração'], ['seg','Caminhos'], ['gtt','Guardiões'], ['rev','Revisão'], ['dat','Dados']]);
-  out.push(nav, {cfg:cfgCard, seg:segAdminCard, gtt:gttAdminCard, rev:reviewCard, dat:dataCard}[cur]());
+  const [nav, cur] = subNav('adm', [['chk','Verificações', orgChecks().filter(x => x.lvl !== 'info').length], ['cfg','Configuração'], ['seg','Caminhos'], ['gtt','Guardiões'], ['rev','Revisão'], ['dat','Dados']]);
+  out.push(nav, {chk:checksCard, cfg:cfgCard, seg:segAdminCard, gtt:gttAdminCard, rev:reviewCard, dat:dataCard}[cur]());
   return out;
 }
 function field(label, input, hint){ return h('label',{class:'stack', style:'gap:4px'}, h('span',{class:'lbl'}, label), input, hint ? h('span',{class:'small muted'}, hint) : null); }
@@ -1545,6 +1603,10 @@ function cfgCard(){
       h('div',{class:'row'}, field('Pódio', h('select',{onchange:e=>save({podiumBy:e.target.value})}, h('option',{value:'genero', selected:c.podiumBy==='genero'}, 'Por género (Guardião/Guardiã)'), h('option',{value:'todos', selected:c.podiumBy==='todos'}, 'Único')))),
       h('div',{class:'row'}, field('Tolerância GPS (m)', num('R')), field('Velocidade média máx. (m/s)', num('maxRun', .1), (c.maxRun*3.6).toFixed(1) + ' km/h'))),
     h('div',{class:'row'}, field('Contacto da organização', h('input',{type:'text', value:c.contacto||'', placeholder:'email ou telefone', style:'min-width:260px', onchange:e=>save({contacto:e.target.value.trim().slice(0,80)})}), 'Aparece em “A minha área”, nas Ações rápidas.')),
+    h('h3',{style:'font-size:1rem;margin:0'},'Datas e canais do Regulamento'),
+    h('div',{class:'row'}, field('Fecho das inscrições', h('input',{type:'text', value:c.dtInscr||'', placeholder:'ex.: 31 de janeiro de 2027', style:'min-width:240px', onchange:e=>save({dtInscr:e.target.value.trim().slice(0,60)})}), 'Art. 2.3'),
+      field('Noite dos Guardiões', h('input',{type:'text', value:c.dtNoite||'', placeholder:'ex.: 18 de dezembro de 2027, Fundão', style:'min-width:240px', onchange:e=>save({dtNoite:e.target.value.trim().slice(0,80)})}), 'Art. 9.1'),
+      field('Dúvidas e reclamações', h('input',{type:'text', value:c.canal||'', placeholder:'ex.: grupo WhatsApp ou e-mail', style:'min-width:240px', onchange:e=>save({canal:e.target.value.trim().slice(0,120)})}), 'Art. 12.4 (se vazio, usa o contacto acima)')),
     h('div',{class:'row'}, field('Animação do “Como funciona” (link https para MP4, WebM ou GIF)', h('input',{type:'text', value:c.animUrl||'', placeholder:'https://…/animacao.mp4', style:'min-width:300px', onchange:e=>save({animUrl:e.target.value.trim().slice(0,300)})}), 'Vazio: aparece a animação dos Guardiões, feita para o site.')),
     h('h3',{style:'font-size:1rem;margin:0'},'Pontuação'),
     h('div',{class:'stack', style:'gap:10px'},

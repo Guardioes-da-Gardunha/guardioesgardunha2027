@@ -361,6 +361,13 @@ function climbStats(e, i, j, thr) {
   return { up, dn };
 }
 /* perfil, desnível, inclinação e dificuldade (1–5) de um troço: L metros, up/dn acumulados, gap = distância entre partida e chegada */
+/* dificuldade (1–5) de uma subida ou descida a partir da distância e do desnível; null para os outros perfis */
+function nivelSub(tipo, L, desn) {
+  const g = L > 0 ? desn / L : 0;
+  if (tipo === 'Subida') { const s = desn * g; return s < 8 ? 1 : s < 15 ? 2 : s < 35 ? 3 : s < 60 ? 4 : 5; }
+  if (tipo === 'Descida') { const s = g * 100 + desn / 50; return s < 10 ? 1 : s < 16 ? 2 : s < 19 ? 3 : s < 23 ? 4 : 5; }
+  return null;
+}
 function classifySeg(L, up, dn, gap) {
   let tipo;
   if (L > 300 && gap < Math.max(50, Math.min(L * 0.05, 150))) tipo = 'Loop';
@@ -386,4 +393,4 @@ function idadeEpoca(nasc, ano) { const y = parseInt(String(nasc || '').slice(0, 
 function escalaoOf(nasc, ano) { const a = idadeEpoca(nasc, ano); if (a == null) return null; const e = ESCALOES.find(x => a >= x.min && a <= x.max); return e ? e.k : null; }
 function escLabel(k, g) { const e = ESCALOES.find(x => x.k === k); if (!e) return ''; return e.nome || ((g === 'F' ? 'F' : 'M') + e.min); }
 function escOptLabel(e) { return e.nome || ('M' + e.min + ' / F' + e.min); }
-if (typeof module !== 'undefined') module.exports = { ESCALOES, idadeEpoca, escalaoOf, escLabel, escOptLabel, traceEle, parseActivity, parseFIT, parseTCX, zipEntries, climbStats, classifySeg, monthKey, parseGPX, detectSegment, suggestWindows, sliceToTrace, proj, unproj, bestPerAthlete, computePoints, rankRows, suspicion, fmtTime, tracePoly, polyLen };
+if (typeof module !== 'undefined') module.exports = { nivelSub, ESCALOES, idadeEpoca, escalaoOf, escLabel, escOptLabel, traceEle, parseActivity, parseFIT, parseTCX, zipEntries, climbStats, classifySeg, monthKey, parseGPX, detectSegment, suggestWindows, sliceToTrace, proj, unproj, bestPerAthlete, computePoints, rankRows, suspicion, fmtTime, tracePoly, polyLen };

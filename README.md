@@ -16,6 +16,7 @@ Site do desafio de trail: inscrição sem login (código pessoal), caminhos com 
 2. Cola o conteúdo de `supabase/schema.sql` e carrega em **Run**. Deve dizer "Success".
 3. **Authentication → Sign In / Providers → Allow anonymous sign-ins**: ligado.
 4. Cola também `supabase/pin.sql` (PIN de 5 dígitos por atleta) e carrega em **Run**.
+4b. Cola também `supabase/cega.sql` e carrega em **Run** (a Quinzena Cega passa a esconder os tempos também na base de dados, não só no ecrã).
 5. Define a frase secreta da organização (só tu a sabes; mínimo 12 caracteres). Num novo query:
 
    ```sql

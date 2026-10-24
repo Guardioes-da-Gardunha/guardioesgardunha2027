@@ -74,6 +74,7 @@ drop policy if exists docs_insert on public.docs;
 drop policy if exists docs_update on public.docs;
 drop policy if exists docs_delete on public.docs;
 
+-- (a leitura de efforts/manual/review durante a Quinzena Cega é restringida por supabase/cega.sql)
 create policy docs_read on public.docs for select to anon, authenticated using (
   col in ('segments','athletes','config','review','manual','claims','efforts')
   or public.is_admin()
