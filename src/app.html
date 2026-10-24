@@ -129,7 +129,7 @@ details>summary{cursor:pointer;font-weight:700}
 @keyframes inR{from{transform:translateX(36px);opacity:0}to{transform:none;opacity:1}} @keyframes inL{from{transform:translateX(-36px);opacity:0}to{transform:none;opacity:1}}
 main.in-r{animation:inR .22s ease} main.in-l{animation:inL .22s ease}
 @media (prefers-reduced-motion: reduce){ main.in-r,main.in-l{animation:none} }
-@media (max-width:760px){
+@media (max-width:999px){
   nav#tabs button.pub{display:none} nav#tabs:not(:has(.adm)){display:none}
   .bnav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:8;background:var(--header-bg);border-top:1px solid var(--line);padding:6px 2px calc(6px + env(safe-area-inset-bottom,0px));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
   .bnav button{background:none;border:0;color:var(--muted);display:grid;justify-items:center;gap:3px;font:600 .7rem/1.1 var(--body);padding:4px 0 2px;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent}
@@ -665,7 +665,7 @@ function howToScore(){
 (function(){
   const main = document.getElementById('main'); let on = false, lock = null, sx = 0, sy = 0, t0 = 0, dx = 0;
   const skip = el => !!(el.closest && el.closest('input,select,textarea,.noswipe,.tw,.zmap,.seg-form,.drop'));
-  main.addEventListener('touchstart', e => { on = false; if (e.touches.length !== 1 || window.innerWidth > 760 || skip(e.target) || !PUB.includes(S.tab)) return; on = true; lock = null; dx = 0; sx = e.touches[0].clientX; sy = e.touches[0].clientY; t0 = Date.now(); }, {passive:true});
+  main.addEventListener('touchstart', e => { on = false; if (e.touches.length !== 1 || window.innerWidth > 999 || skip(e.target) || !PUB.includes(S.tab)) return; on = true; lock = null; dx = 0; sx = e.touches[0].clientX; sy = e.touches[0].clientY; t0 = Date.now(); }, {passive:true});
   main.addEventListener('touchmove', e => { if (!on) return; dx = e.touches[0].clientX - sx; const dy = e.touches[0].clientY - sy;
     if (lock === null){ if (Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy) * 1.5) lock = 'x'; else if (Math.abs(dy) > 12){ on = false; return; } }
     if (lock === 'x'){ const i = PUB.indexOf(S.tab), edge = (dx > 0 && i === 0) || (dx < 0 && i === PUB.length - 1); main.style.transition = 'none'; main.style.transform = `translateX(${dx * (edge ? 0.15 : 0.45)}px)`; main.style.opacity = String(1 - Math.min(0.35, Math.abs(dx) / 900)); } }, {passive:true});
@@ -1412,7 +1412,7 @@ function viewIns(){
     h('div',{}, h('span',{class:'lbl'},'Pedidos pendentes'), h('span',{class:'big num', style:pend.length ? 'color:var(--terra-txt)' : ''}, String(pend.length))),
     h('div',{}, h('span',{class:'lbl'},'Com conta associada'), h('span',{class:'big num'}, String(real.filter(a => ownerOf(a.id)).length)))));
   const pc = h('div',{class:'card stack'}, h('h3',{},'Pedidos de inscrição'));
-  if (!pend.length) pc.append(h('p',{class:'muted', style:'margin:0'}, 'Sem pedidos por aprovar. Os atletas inscrevem-se no separador Submeter.'));
+  if (!pend.length) pc.append(h('p',{class:'muted', style:'margin:0'}, 'Sem pedidos por aprovar. Os atletas inscrevem-se no separador Inscrição.'));
   else pc.append(h('div',{class:'tw'}, h('table',{}, h('thead',{}, h('tr',{}, h('th',{},'Nome'), h('th',{},'Género'), h('th',{},'Nascimento'), h('th',{class:'r'},'Idade 2027'), h('th',{},'Escalão'), h('th',{},'Contacto'), h('th',{},'Pedido'), h('th',{},''))),
     h('tbody',{}, pend.map(([u,r]) => { const age = ageIn2027(r.nasc);
       return h('tr',{}, h('td',{}, h('strong',{}, r.nome), r.loc ? h('div',{class:'small muted'}, r.loc) : null), h('td',{}, r.g === 'F' ? 'Feminino' : 'Masculino'), h('td',{class:'num'}, fmtNasc(r.nasc)), h('td',{class:'r num'}, age != null ? String(age) : '—'),
