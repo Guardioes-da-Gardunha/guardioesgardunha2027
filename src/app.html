@@ -47,6 +47,13 @@ input[type=range]{accent-color:var(--terra)}
 .tag.Subida{background:var(--terra-soft);color:var(--terra-txt)} .tag.Descida{background:var(--surface2);color:var(--ink)}
 .tag.Cumeada,.tag.Loop{background:transparent;border:1px solid var(--line2);color:var(--ink)}
 .tag.warn{background:var(--warn-soft);color:var(--warn)} .tag.ok{background:var(--ok-soft);color:var(--ok)} .tag.bad{background:var(--terra-soft);color:var(--bad)}
+.rk{border:1px solid var(--line);border-radius:12px;background:var(--glass);overflow:hidden}
+.rk-hd,.rk-r{display:grid;grid-template-columns:2.4em minmax(0,1fr) 6.4rem 28px;gap:8px;align-items:center;padding:10px 12px}
+.rk-hd{font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;font-size:.8rem;color:var(--muted);border-bottom:1px solid var(--line)} .rk-hd .r{text-align:right}
+.rk-r{border-bottom:1px solid var(--line);cursor:pointer} .rk-r:hover{background:var(--surface2)} .rk-r.me{background:var(--terra-soft)}
+.rk-r .pos{width:auto} .rk-r.pod1 .pos{color:var(--terra-txt);font-weight:800}
+.rk-n{display:grid;gap:1px;min-width:0;overflow-wrap:anywhere} .rk-p{text-align:right;white-space:nowrap}
+.rk-h{padding:10px 12px;background:var(--bg);border-bottom:1px solid var(--line)} .rk-b>:last-child{border-bottom:0}
 .tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--glass)}
 table{border-collapse:collapse;width:100%;font-size:.92rem}
 th{font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;font-size:.8rem;color:var(--muted);text-align:left;font-weight:400;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
@@ -1466,13 +1473,14 @@ function clsGeral(){
   rows = C.rankRows(rows, cat[2]).filter(r => r.done > 0 || r.total > 0);
   if (!rows.length){ out.push(h('div',{class:'card empty'}, (esc !== 'all' ? 'Ainda sem pontos neste escalão. ' : 'Ainda sem pontos nesta categoria. ') + 'A época corre de ' + FMT_D(cfg().from) + ' a ' + FMT_D(cfg().to) + '.')); return out; }
   const unit = cat[0]==='coroas' ? 'bordões' : cat[0]==='explorer' ? 'caminhos' : cat[0]==='lenda' ? 'lendas' : 'pts';
-  const body = h('tbody');
+  const body = h('div',{class:'rk-b'});
   rows.forEach((r, i) => { const k = 'g' + r.id, open = !!S.open[k], mine = r.id === myAid();
-    body.append(h('tr',{class:'click' + (i===0 ? ' pod1' : '') + (mine ? ' me' : ''), 'aria-expanded':String(open), onclick:()=>{ S.open[k] = !open; doRender(); }},
-      h('td',{class:'pos num'}, String(i+1)), h('td',{}, h('strong',{}, athName(athById(r.id))), (athById(r.id)||{}).esc ? h('span',{class:'small muted'}, ' · ' + escName(athById(r.id).esc, athById(r.id).g)) : null), h('td',{class:'r num'}, h('strong',{}, String(cat[2](r))), h('span',{class:'small muted'}, ' ' + unit)), h('td',{class:'r'}, h('span',{class:'pm sm', 'aria-hidden':'true'}, open ? '−' : '+'))));
-    if (open) body.append(h('tr',{class:'hist'}, h('td',{}), h('td',{colspan:3}, h('div',{class:'chips'}, ...[['Pódios', r.pod], ['Check-in', r.chk], ['Roubos', r.stl - (r.lpts||0)], ['Lenda', r.lpts||0], ['Completismo', r.bonus], ['Dias de Ataque', r.trn], ['Ajuste', r.extra||0], ['Bordões', r.wins], ['Caminhos', r.done]].map(([a, b]) => h('span',{class:'chip'}, h('b',{}, String(b)), ' ' + a))))));
+    const a = athById(r.id) || {};
+    body.append(h('div',{class:'rk-r click' + (i===0 ? ' pod1' : '') + (mine ? ' me' : ''), role:'button', tabindex:'0', 'aria-expanded':String(open), onclick:()=>{ S.open[k] = !open; doRender(); }},
+      h('span',{class:'pos num'}, String(i+1)), h('span',{class:'rk-n'}, h('strong',{}, athName(a)), a.esc ? h('span',{class:'small muted'}, escName(a.esc, a.g)) : null), h('span',{class:'rk-p num'}, h('strong',{}, String(cat[2](r))), h('span',{class:'small muted'}, ' ' + unit)), h('span',{class:'pm sm', 'aria-hidden':'true'}, open ? '−' : '+')));
+    if (open) body.append(h('div',{class:'rk-h'}, h('div',{class:'chips'}, ...[['Pódios', r.pod], ['Check-in', r.chk], ['Roubos', r.stl - (r.lpts||0)], ['Lenda', r.lpts||0], ['Completismo', r.bonus], ['Dias de Ataque', r.trn], ['Ajuste', r.extra||0], ['Bordões', r.wins], ['Caminhos', r.done]].map(([a, b]) => h('span',{class:'chip'}, h('b',{}, String(b)), ' ' + a)))));
   });
-  out.push(h('div',{class:'tw'}, h('table',{}, h('thead',{}, h('tr',{}, h('th',{},'#'), h('th',{},'Atleta'), h('th',{class:'r'}, cat[1] === 'Geral' ? 'Pontos' : cat[1]), h('th',{}, ''))), body)));
+  out.push(h('div',{class:'rk'}, h('div',{class:'rk-hd'}, h('span',{},'#'), h('span',{},'Atleta'), h('span',{class:'r'}, cat[1] === 'Geral' ? 'Pontos' : cat[1]), h('span',{})), body));
   out.push(h('p',{class:'small muted'}, 'Toca no + de um atleta para ver de onde vêm os pontos. Desempate (Art. 11.4): caminhos concluídos, bordões guardados, presenças em Dias de Ataque.'));
   return out;
 }
