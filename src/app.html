@@ -397,13 +397,9 @@ const cfg = () => Object.assign({}, DEF, S.cfg, {mod:'c'}); // o desafio é só 
 const athById = id => S.ath.find(a => a.id === id);
 const athName = a => a ? (a.nome || a.id) + (a.ex ? ' (exemplo)' : '') : '—';
 const athLabel = a => a ? athName(a) + (a.loc ? ' · ' + a.loc : '') : '—';
-/* Freguesias oficiais (CAOP, reorganização de 2013). Concelho do Fundão: 23; São Vicente da Beira e Louriçal do Campo são do concelho de Castelo Branco. */
-const FREGS = ['Alcaide','Alcaria','Alcongosta','Alpedrinha','Barroca','Bogas de Cima','Capinha','Castelejo','Castelo Novo','Enxames','Fatela','Lavacolhos','Orca','Pêro Viseu','Silvares','Soalheira','Souto da Casa','Telhado','Três Povos',
-  'União das freguesias de Fundão, Valverde, Donas, Aldeia de Joanes e Aldeia Nova do Cabo','União das freguesias de Janeiro de Cima e Bogas de Baixo','União das freguesias de Póvoa de Atalaia e Atalaia do Campo','União das freguesias de Vale de Prazeres e Mata da Rainha',
-  'São Vicente da Beira','Louriçal do Campo'];
-/* Para a localidade dos atletas: nomes curtos (as uniões desfazem-se nas suas aldeias) */
-const LOCS = ['Aldeia de Joanes','Aldeia Nova do Cabo','Atalaia do Campo','Bogas de Baixo','Donas','Fundão','Janeiro de Cima','Mata da Rainha','Póvoa de Atalaia','Vale de Prazeres','Valverde','Castelo Branco']
-  .concat(FREGS.filter(x => !x.startsWith('União'))).sort((a,b)=>a.localeCompare(b,'pt'));
+/* Localidades: nomes simples, sem uniões de freguesias. Concelho do Fundão (freguesias e aldeias) + São Vicente da Beira e Louriçal do Campo (Castelo Branco) + lugares da serra. */
+const LOCS = ['Alcaide','Alcaria','Alcongosta','Aldeia de Joanes','Aldeia Nova do Cabo','Alpedrinha','Atalaia do Campo','Barroca','Bogas de Baixo','Bogas de Cima','Capinha','Casal da Serra','Castelejo','Castelo Novo','Donas','Enxames','Fatela','Fundão','Janeiro de Cima','Lavacolhos','Louriçal do Campo','Mata da Rainha','Orca','Pêro Viseu','Póvoa de Atalaia','São Vicente da Beira','Silvares','Soalheira','Souto da Casa','Telhado','Torre','Três Povos','Vale de Prazeres','Valverde'].sort((a,b)=>a.localeCompare(b,'pt'));
+const FREGS = LOCS;
 const norm = t => String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 const segByN = n => S.segs.find(s => s.n === n);
 const hasTrace = s => Array.isArray(s.trace) && s.trace.length >= 4;
@@ -1390,7 +1386,7 @@ function segAdminCard(){
   if (!S.segs.length){ card.append(h('div',{class:'empty small muted'}, 'Ainda não há caminhos. Usa “Adicionar caminho” para criar o primeiro.')); return card; }
   const del = S.segDel;
   const tempos = n => effList().filter(d => d.s === n).reduce((a, d) => a + d.all.length, 0);
-  card.append(h('div',{class:'tw'}, h('table',{}, h('thead',{}, h('tr',{}, h('th',{},'N.º'), h('th',{},'Caminho'), h('th',{},'Freguesia'), h('th',{},'Perfil'), h('th',{class:'r'},'Dist.'), h('th',{class:'r'},'Desn.'), h('th',{},'Dificuldade'), h('th',{},'Traçado'), h('th',{},'Altitude'), h('th',{}, ''))),
+  card.append(h('div',{class:'tw'}, h('table',{}, h('thead',{}, h('tr',{}, h('th',{},'N.º'), h('th',{},'Caminho'), h('th',{},'Localidade'), h('th',{},'Perfil'), h('th',{class:'r'},'Dist.'), h('th',{class:'r'},'Desn.'), h('th',{},'Dificuldade'), h('th',{},'Traçado'), h('th',{},'Altitude'), h('th',{}, ''))),
     h('tbody',{}, S.segs.map(sg => h('tr',{}, h('td',{class:'num'}, pad2(sg.n)), h('td',{}, sg.nome), h('td',{}, sg.localidade || h('span',{class:'tag warn'}, 'falta')), h('td',{}, sg.tipo), h('td',{class:'r num'}, km(sg.dist)), h('td',{class:'r num'}, (sg.tipo === 'Descida' ? '−' : '+') + Math.round(sg.desn||0) + ' m'), h('td',{}, sg.dif || ''), h('td',{}, hasTrace(sg) ? h('span',{class:'tag ok'}, 'sim') : h('span',{class:'tag warn'}, 'falta')),
       h('td',{}, hasTrace(sg) ? h('div',{class:'row', style:'flex-wrap:nowrap;gap:6px'}, segProfile(sg) ? h('span',{class:'tag ok'}, 'sim') : h('span',{class:'tag warn'}, 'falta'), eleBtn(sg)) : '—'),
       h('td',{}, del === sg.n
@@ -1464,7 +1460,7 @@ function segForm(E){
     h('div',{class:'lbl'}, E.n ? 'Editar caminho ' + pad2(E.n) : 'Novo caminho'),
     field('Nome', h('input',{type:'text', maxlength:80, value:E.nome||'', placeholder:'ex.: Rampa dos Castanheiros', style:'width:100%', oninput:e=>{ E.nome = e.target.value; }})),
     field('Link do GPX (opcional)', h('input',{type:'url', maxlength:300, value:E.link||'', placeholder:'https://drive.google.com/…', style:'width:100%', oninput:e=>{ E.link = e.target.value; }}), 'Se preencheres, aparece um botão para abrir este link, além do GPX gerado pela app.'),
-    field('Freguesia', h('input',{type:'text', maxlength:100, list:'localidades', value:E.loc||'', placeholder:'ex.: Castelo Novo', style:'width:100%', autocomplete:'off', oninput:e=>{ E.loc = e.target.value; }}), h('datalist',{id:'localidades'}, [...new Set(FREGS.concat(S.segs.map(x => x.localidade).filter(Boolean)))].sort((a,b)=>a.localeCompare(b,'pt')).map(v => h('option',{value:v})))),
+    field('Localidade', h('input',{type:'text', maxlength:100, list:'localidades', value:E.loc||'', placeholder:'ex.: Castelo Novo', style:'width:100%', autocomplete:'off', oninput:e=>{ E.loc = e.target.value; }}), h('datalist',{id:'localidades'}, [...new Set(FREGS.concat(S.segs.map(x => x.localidade).filter(Boolean)))].sort((a,b)=>a.localeCompare(b,'pt')).map(v => h('option',{value:v})))),
     h('div',{class:'row'}, h('label',{class:'b ' + (cut ? 'o' : 't'), for:'seggpx'}, cut ? 'Trocar GPX' : (sg ? 'Carregar novo GPX (refazer o traçado)' : 'Carregar GPX do caminho')), fileIn, cut ? h('span',{class:'small muted'}, cut.file) : null));
   if (E.msg) box.append(h('div',{class:'notice ' + (E.msgOk ? 'f' : '')}, E.msg));
   // perfil e dificuldade: automático por defeito, com possibilidade de corrigir
@@ -1510,7 +1506,7 @@ function segForm(E){
   const saveSeg = async () => {
     const nome = String(E.nome||'').trim(); if (!nome) return err.textContent = 'Falta o nome.';
     const link = String(E.link||'').trim(); if (link && !/^https:\/\/[^\s]+$/i.test(link)) return err.textContent = 'O link tem de começar por https://';
-    const loc = String(E.loc||'').trim().slice(0,100); if (!loc) return err.textContent = 'Falta a freguesia.';
+    const loc = String(E.loc||'').trim().slice(0,100); if (!loc) return err.textContent = 'Falta a localidade.';
     if (!cut && !sg) return err.textContent = 'Carrega o GPX e marca o troço.';
     let data;
     if (cut){ const g = segGeo(cut); if (g.L < 50) return err.textContent = 'O troço tem menos de 50 m: marca a partida e a chegada.';
