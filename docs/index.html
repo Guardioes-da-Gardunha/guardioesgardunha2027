@@ -1789,6 +1789,31 @@ function uploadHistory(aid){
   if (G.length > 6) wrap.append(h('button',{class:'b o s', style:'justify-self:start', onclick:()=>{ S.open.upAll = !S.open.upAll; doRender(); }}, S.open.upAll ? 'Mostrar menos' : 'Ver todos os ' + G.length));
   return wrap;
 }
+/* ===== A minha área: alterar o PIN ===== */
+function pinCard(aid){
+  const box = h('section',{class:'card stack', style:'gap:10px'});
+  box.append(h('div',{class:'row', style:'justify-content:space-between;align-items:center'}, h('div',{class:'stack', style:'gap:2px'}, h('h3',{style:'margin:0'}, 'Alterar PIN'), h('span',{class:'small muted'}, 'Os 5 algarismos que usas para entrar e carregar atividades.')),
+    h('button',{class:'b o s', onclick:()=>{ S.open.pinEdit = false; doRender(); }}, 'Fechar')));
+  if (!S.user || !S.user.pinLogin || !S.user.setPin) return box;
+  const num = ac => h('input',{type:'password', inputmode:'numeric', pattern:'[0-9]*', maxlength:5, autocomplete:ac, placeholder:'•••••', style:'width:8em;letter-spacing:.3em', oninput:e=>{ e.target.value = e.target.value.replace(/\D/g,'').slice(0,5); }});
+  const cur = num('current-password'), n1 = num('new-password'), n2 = num('new-password');
+  const go = async () => {
+    if (!/^\d{5}$/.test(cur.value)) return toast('Escreve o PIN atual (5 algarismos).');
+    if (!/^\d{5}$/.test(n1.value)) return toast('O PIN novo tem 5 algarismos.');
+    if (n1.value !== n2.value) return toast('Os dois PIN novos não são iguais.');
+    if (n1.value === cur.value) return toast('O PIN novo é igual ao atual.');
+    try {
+      const ok = await S.user.pinLogin(aid, cur.value);
+      if (!ok){ cur.value = ''; return toast('O PIN atual está errado.'); }
+      await S.user.setPin(n1.value);
+      S.open.pinEdit = false; toast('PIN alterado. Usa o novo da próxima vez.'); doRender();
+    } catch(e){ toast(errMsg(e, 'Não foi possível alterar o PIN.')); }
+  };
+  [cur, n1, n2].forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') go(); }));
+  box.append(h('div',{class:'row'}, field('PIN atual', cur), field('PIN novo', n1), field('Repete o novo', n2), h('button',{class:'b t', style:'align-self:flex-end', onclick:go}, 'Guardar')),
+    h('p',{class:'small muted', style:'margin:0'}, 'Esqueceste-te do PIN atual? Pede um novo à organização.'));
+  return box;
+}
 function viewEu(){
   const aid = myAid(), out = [];
   if (!aid){
@@ -1801,7 +1826,8 @@ function viewEu(){
   const a = athById(aid), st = myStats(aid), blind = cfg().hide && !S.admin, N = S.segs.length, F = st.g === 'F';
   const title = !blind && st.r.wins ? (F ? 'Guardiã' : 'Guardião') + ' de ' + st.r.wins + ' caminho' + (st.r.wins === 1 ? '' : 's') : F ? 'Aspirante a Guardiã' : 'Aspirante a Guardião';
   out.push(h('section',{class:'eu-hero'}, avatar(a, 'lg'), h('div',{class:'stack', style:'gap:6px;min-width:0'}, h('span',{class:'nc-k'}, title), h('h2',{}, 'Olá, ' + String(a.nome||'').split(' ')[0]),
-    h('span',{class:'muted'}, [a.loc, a.esc ? escName(a.esc, a.g) : '', 'Época 2027'].filter(Boolean).join(' · '), ' · ', h('button',{class:'linkb', style:'padding:0', onclick:async()=>{ await S.user.signOut(); location.reload(); }}, 'Sair')))));
+    h('span',{class:'muted'}, [a.loc, a.esc ? escName(a.esc, a.g) : '', 'Época 2027'].filter(Boolean).join(' · '), ' · ', h('button',{class:'linkb', style:'padding:0', onclick:async()=>{ await S.user.signOut(); location.reload(); }}, 'Sair'), ' · ', h('button',{class:'linkb', style:'padding:0', 'aria-expanded':String(!!S.open.pinEdit), onclick:()=>{ S.open.pinEdit = !S.open.pinEdit; doRender(); }}, 'Alterar PIN')))));
+  if (S.open.pinEdit) out.push(pinCard(aid));
   const done = Math.min(st.r.done || 0, N), bar = h('div',{class:'bar'}, h('i',{style:`width:${N ? done / N * 100 : 0}%`}));
   out.push(h('div',{class:'tiles'}, tile('Pontos', blind ? '—' : String(st.r.total||0), 'na época'), tile('Posição', blind || !st.pos ? '—' : st.pos + '.º', blind ? 'Quinzena Cega' : st.pos ? 'de ' + st.of + (F ? ' guardiãs' : ' guardiões') + (st.posEsc ? ' · ' + st.posEsc + '.º em ' + escName(a.esc, a.g) : '') : 'ainda sem pontos'),
     tile('Bordões', blind ? '—' : String(st.r.wins||0), 'caminhos que guardas'), tile('Caminhos', done + '/' + N, nextMilestone(done, N), bar)));
