@@ -366,9 +366,9 @@ const S = {db:null, user:null, dl:null, uid:null, admin:false, ready:false,
   segs:[], ath:[], claims:{}, eff:{}, man:{}, cfg:Object.assign({}, DEF), rev:{ok:{}, no:{}},
   tab:'lenda', month:'all', segSel:1, fG:'M', fV:false, fMod:null, clsCat:'geral', clsG:'M', open:{},
   pending:[], target:'self', busy:false, cut:null, profiles:{}, regs:{}, myReg:null, priv:{}, rf:{nome:'', g:'', nasc:'', contacto:'', loc:'', pin:'', pin2:'', ok:false}, na:{nome:'', g:'M', nasc:''}};
-const TABS = [['lenda','A Lenda'],['reg','Inscrição'],['como','Como funciona'],['sub','Carregar atividade'],['seg','Caminhos'],['atv','Atividades'],['cls','Classificação'],['ins','Inscrições'],['adm','Organização']];
-const PUB = ['lenda','reg','como','seg','atv','cls'];
-const NAVI = {como:['Como','M12 21a9 9 0 1 0 0-18a9 9 0 0 0 0 18z M10 8.5l5 3.5-5 3.5z'], home:['Início','M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z'], reg:['Inscrição','M15 20v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1 M13 8a4 4 0 1 1-8 0a4 4 0 1 1 8 0 M19 8v6 M16 11h6'], sub:['Carregar','M12 16V4 M7 9l5-5 5 5 M4 20h16'], seg:['Caminhos','M3 20l6-10 4 6 2-3 6 7z M14 6l1.5-2.5L17 6'], atv:['Atividades','M3 12h4l3-8 4 16 3-8h4'], cls:['Classif.','M4 20v-7h5v7 M9 20V8h6v12 M15 20v-9h5v9'], lenda:['Lenda','M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z M5 17a3 3 0 0 1 3-3h11']};
+const TABS = [['lenda','A Lenda'],['reg','Participar'],['sub','Carregar atividade'],['seg','Caminhos'],['atv','Atividades'],['cls','Classificação'],['ins','Inscrições'],['adm','Organização']];
+const PUB = ['lenda','reg','seg','atv','cls'];
+const NAVI = {como:['Como','M12 21a9 9 0 1 0 0-18a9 9 0 0 0 0 18z M10 8.5l5 3.5-5 3.5z'], home:['Início','M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z'], reg:['Participar','M15 20v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1 M13 8a4 4 0 1 1-8 0a4 4 0 1 1 8 0 M19 8v6 M16 11h6'], sub:['Carregar','M12 16V4 M7 9l5-5 5 5 M4 20h16'], seg:['Caminhos','M3 20l6-10 4 6 2-3 6 7z M14 6l1.5-2.5L17 6'], atv:['Atividades','M3 12h4l3-8 4 16 3-8h4'], cls:['Classif.','M4 20v-7h5v7 M9 20V8h6v12 M15 20v-9h5v9'], lenda:['Lenda','M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z M5 17a3 3 0 0 1 3-3h11']};
 /*REG*/
 /*ANIM*/
 const ADMIN_TABS = ['ins','adm'];
@@ -537,7 +537,7 @@ function doRender(){
   orgFooter(); installBox();
   const main = document.getElementById('main');
   if (!S.db){ main.replaceChildren(h('div',{class:'card notice'}, h('strong',{},'Não foi possível ligar à base de dados. '), 'Verifica a ligação à internet e recarrega a página.')); return; }
-  const v = S.tab === 'eu' ? viewEu() : S.tab === 'como' ? viewComo() : S.tab === 'lenda' ? viewLenda() : S.tab === 'seg' ? viewSeg() : S.tab === 'atv' ? viewAtv() : S.tab === 'cls' ? viewCls() : S.tab === 'adm' && S.admin ? viewAdm() : S.tab === 'ins' && S.admin ? viewIns() : S.tab === 'reg' ? viewReg() : S.tab === 'sub' ? viewSub() : viewLenda();
+  const v = S.tab === 'eu' ? viewEu() : S.tab === 'como' ? viewPart() : S.tab === 'lenda' ? viewLenda() : S.tab === 'seg' ? viewSeg() : S.tab === 'atv' ? viewAtv() : S.tab === 'cls' ? viewCls() : S.tab === 'adm' && S.admin ? viewAdm() : S.tab === 'ins' && S.admin ? viewIns() : S.tab === 'reg' ? viewPart() : S.tab === 'sub' ? viewSub() : viewLenda();
   main.replaceChildren(...[].concat(v));
 }
 
@@ -780,7 +780,7 @@ function orgFooter(){
 }
 
 /* ===== Submeter ===== */
-function goTab(k, anim){ NAVY.y = 0; if (k === 'seg' && !S.segKeep) S.segOpen = false; S.segKeep = false; const from = PUB.indexOf(S.tab), to = PUB.indexOf(k); S.tab = k; try{ localStorage.setItem('g27tab',k); }catch(e){} doRender(); window.scrollTo(0,0);
+function goTab(k, anim){ if (k === 'como') k = 'reg'; NAVY.y = 0; if (k === 'seg' && !S.segKeep) S.segOpen = false; S.segKeep = false; const from = PUB.indexOf(S.tab), to = PUB.indexOf(k); S.tab = k; try{ localStorage.setItem('g27tab',k); }catch(e){} doRender(); window.scrollTo(0,0);
   const m = document.getElementById('main'); if (from >= 0 && to >= 0 && from !== to){ m.classList.remove('in-l','in-r'); void m.offsetWidth; m.classList.add(to > from ? 'in-r' : 'in-l'); } }
 /* ===== Quem está a carregar: nome (com pesquisa) + PIN ===== */
 function whoCard(){
@@ -819,10 +819,9 @@ function whoCard(){
   return card;
 }
 /* ===== Inscrição ===== */
-function viewReg(){
-  const out = [], aid = myAid(), claim = S.claims[S.uid], reg = S.myReg;
-  out.push(h('h2',{},'Inscrição'), regDoc(), h('div',{class:'stack', style:'gap:16px'}, ...viewHome()));
-  const card = h('div',{class:'card stack'});
+function inscCard(){
+  const aid = myAid(), claim = S.claims[S.uid], reg = S.myReg;
+  const card = h('div',{class:'card stack', id:'insc'});
   if (aid){
     card.append(h('h3',{}, 'Estás inscrito'), h('div',{class:'notice f'}, 'Inscrição confirmada como ', h('strong',{}, athName(athById(aid))), '. Já podes carregar atividades.'),
       h('div',{class:'row'}, h('button',{class:'b t', onclick:()=>goTab('sub')}, 'Carregar atividade')));
@@ -836,8 +835,28 @@ function viewReg(){
     card.append(regForm(),
       ...(S.ath.some(a => !ownerOf(a.id) && !a.ex) ? [h('details',{}, h('summary',{}, 'A organização já te inscreveu? Escolhe o teu nome'), h('div',{style:'margin-top:10px'}, claimPicker()))] : []), loginBox());
   }
-  out.push(card, aspirantes());
-  return out;
+  return card;
+}
+function viewReg(){
+  return [h('h2',{},'Inscrição'), regDoc(), h('div',{class:'stack', style:'gap:16px'}, ...viewHome()), inscCard(), aspirantes()];
+}
+/* ===== Participar: Como funciona + Inscrição numa só página (teste) ===== */
+function viewPart(){
+  const aid = myAid(), reg = S.myReg, done1 = !!aid, wait = !aid && reg && reg.estado === 'pendente';
+  const toForm = ()=>{ const e = document.getElementById('insc'); if (e) e.scrollIntoView({behavior:'smooth', block:'start'}); };
+  const P = [
+    [done1 ? 'Estás inscrito' : wait ? 'Inscrição enviada, à espera de aprovação' : 'Inscreve-te', done1 ? 'Já podes carregar atividades.' : wait ? 'A organização aprova em breve.' : 'Nome, nascimento, localidade e um PIN de 5 algarismos.', 'M15 20v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1 M13 8a4 4 0 1 1-8 0a4 4 0 1 1 8 0 M19 8v6 M16 11h6', done1 ? null : toForm, done1],
+    ['Escolhe um caminho', 'Descarrega o GPX e leva-o no relógio.', NAVI.seg[1], ()=>goTab('seg')],
+    ['Grava e descarrega a corrida', 'Do início ao fim do caminho. Exporta o GPX ou FIT do Garmin Connect, do Strava ou da app do relógio.', 'M12 4v12 M7 11l5 5 5-5 M4 20h16', null],
+    ['Entra na tua área e carrega', 'Nome e PIN, e o ficheiro faz o resto.', NAVI.sub[1], ()=>goTab('sub')],
+    ['Vê onde ficaste', 'Se fores o mais rápido, roubas o bordão e passas a ser o Guardião (ou a Guardiã) desse caminho.', NAVI.cls[1], ()=>goTab('cls')]];
+  const st = viewHome()[1];
+  return [h('section',{class:'hero', style:'gap:8px'}, h('h2',{class:'crest-title', style:'font-size:clamp(2.3rem,9vw,4rem)'}, 'Ganha o teu bordão.'), h('p',{class:'claim'}, 'Torna-te guardião.')),
+    animSlot(), st,
+    h('section',{class:'stack', style:'gap:10px'}, h('h3',{}, 'Em 5 passos'),
+      h('ol',{class:'steps'}, ...P.map(([t, d, ic, fn, ok], i) => h('li',{}, h(fn ? 'button' : 'div',{class:'qa-b step' + (fn ? ' go' : ''), onclick:fn || null},
+        h('span',{class:'qa-i step-n'}, ok ? '✓' : String(i + 1)), h('span',{class:'qa-t'}, h('strong',{}, t), h('small',{}, d)), fn ? h('span',{class:'step-ar', 'aria-hidden':'true'}, '→') : h('span',{class:'step-ic', 'aria-hidden':'true'}, navIcon(ic))))))),
+    h('h3',{style:'margin-top:8px'}, 'Inscrição'), regDoc(), inscCard(), aspirantes()];
 }
 function aspirantes(){
   const real = S.ath.filter(a => !a.ex).sort((x, y) => (x.nome||'').localeCompare(y.nome||'', 'pt'));
