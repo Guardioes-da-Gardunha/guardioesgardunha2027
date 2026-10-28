@@ -47,6 +47,14 @@ input[type=range]{accent-color:var(--terra)}
 .tag.Subida{background:var(--terra-soft);color:var(--terra-txt)} .tag.Descida{background:var(--surface2);color:var(--ink)}
 .tag.Cumeada,.tag.Loop{background:transparent;border:1px solid var(--line2);color:var(--ink)}
 .tag.warn{background:var(--warn-soft);color:var(--warn)} .tag.ok{background:var(--ok-soft);color:var(--ok)} .tag.bad{background:var(--terra-soft);color:var(--bad)}
+.atv-f{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.atv-c{border:1px solid var(--line);border-radius:14px;background:var(--glass);padding:12px 14px;display:grid;gap:10px;min-width:0}
+.atv-h{display:flex;align-items:center;gap:10px;min-width:0} .atv-h>div{display:grid;gap:1px;min-width:0;flex:1} .atv-h strong{overflow-wrap:anywhere}
+.atv-r{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding-top:10px;border-top:1px solid var(--line);align-items:baseline}
+.atv-r .nm{background:none;border:0;padding:0;color:var(--text);font:inherit;font-weight:700;text-align:left;cursor:pointer}
+.atv-r .tm{font-family:var(--mono);font-weight:700;font-size:1.15rem;text-align:right;white-space:nowrap}
+.atv-r .rk2{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.atv-pos{font-family:var(--mono);font-size:.85rem;border:1px solid var(--line);border-radius:999px;padding:2px 9px}
 .rk{border:1px solid var(--line);border-radius:12px;background:var(--glass);overflow:hidden}
 .rk-hd,.rk-r{display:grid;grid-template-columns:2.4em minmax(0,1fr) 6.4rem 28px;gap:8px;align-items:center;padding:10px 12px}
 .rk-hd{font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;font-size:.8rem;color:var(--muted);border-bottom:1px solid var(--line)} .rk-hd .r{text-align:right}
@@ -139,8 +147,8 @@ main.in-r{animation:inR .22s ease} main.in-l{animation:inL .22s ease}
 @media (prefers-reduced-motion: reduce){ main.in-r,main.in-l{animation:none} }
 @media (max-width:999px){
   nav#tabs button.pub{display:none} nav#tabs:not(:has(.adm)){display:none}
-  .bnav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:8;background:var(--header-bg);border-top:1px solid var(--line);padding:6px 2px calc(6px + env(safe-area-inset-bottom,0px));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
-  .bnav button{background:none;border:0;color:var(--muted);display:grid;justify-items:center;gap:3px;font:600 .75rem/1.1 var(--body);padding:4px 0 2px;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent}
+  .bnav{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;position:fixed;left:0;right:0;bottom:0;z-index:8;background:var(--header-bg);border-top:1px solid var(--line);padding:6px 2px calc(6px + env(safe-area-inset-bottom,0px));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+  .bnav button{background:none;border:0;color:var(--muted);display:grid;justify-items:center;gap:3px;font:600 .7rem/1.1 var(--body);padding:4px 0 2px;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent}
   .bnav button[aria-current="page"]{color:var(--terra-txt)}
   .bnav button[aria-current="page"]::before{content:'';position:absolute;top:-7px;left:28%;right:28%;height:3px;border-radius:0 0 3px 3px;background:var(--terra)}
   main.wrap{padding-bottom:28px} .site-foot{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
@@ -358,9 +366,9 @@ const S = {db:null, user:null, dl:null, uid:null, admin:false, ready:false,
   segs:[], ath:[], claims:{}, eff:{}, man:{}, cfg:Object.assign({}, DEF), rev:{ok:{}, no:{}},
   tab:'lenda', month:'all', segSel:1, fG:'M', fV:false, fMod:null, clsCat:'geral', clsG:'M', open:{},
   pending:[], target:'self', busy:false, cut:null, profiles:{}, regs:{}, myReg:null, priv:{}, rf:{nome:'', g:'', nasc:'', contacto:'', loc:'', pin:'', pin2:'', ok:false}, na:{nome:'', g:'M', nasc:''}};
-const TABS = [['lenda','A Lenda'],['reg','Inscrição'],['como','Como funciona'],['sub','Carregar atividade'],['seg','Caminhos'],['cls','Classificação'],['ins','Inscrições'],['adm','Organização']];
-const PUB = ['lenda','reg','como','seg','cls'];
-const NAVI = {como:['Como','M12 21a9 9 0 1 0 0-18a9 9 0 0 0 0 18z M10 8.5l5 3.5-5 3.5z'], home:['Início','M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z'], reg:['Inscrição','M15 20v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1 M13 8a4 4 0 1 1-8 0a4 4 0 1 1 8 0 M19 8v6 M16 11h6'], sub:['Carregar','M12 16V4 M7 9l5-5 5 5 M4 20h16'], seg:['Caminhos','M3 20l6-10 4 6 2-3 6 7z M14 6l1.5-2.5L17 6'], cls:['Classif.','M4 20v-7h5v7 M9 20V8h6v12 M15 20v-9h5v9'], lenda:['Lenda','M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z M5 17a3 3 0 0 1 3-3h11']};
+const TABS = [['lenda','A Lenda'],['reg','Inscrição'],['como','Como funciona'],['sub','Carregar atividade'],['seg','Caminhos'],['atv','Atividades'],['cls','Classificação'],['ins','Inscrições'],['adm','Organização']];
+const PUB = ['lenda','reg','como','seg','atv','cls'];
+const NAVI = {como:['Como','M12 21a9 9 0 1 0 0-18a9 9 0 0 0 0 18z M10 8.5l5 3.5-5 3.5z'], home:['Início','M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z'], reg:['Inscrição','M15 20v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1 M13 8a4 4 0 1 1-8 0a4 4 0 1 1 8 0 M19 8v6 M16 11h6'], sub:['Carregar','M12 16V4 M7 9l5-5 5 5 M4 20h16'], seg:['Caminhos','M3 20l6-10 4 6 2-3 6 7z M14 6l1.5-2.5L17 6'], atv:['Atividades','M3 12h4l3-8 4 16 3-8h4'], cls:['Classif.','M4 20v-7h5v7 M9 20V8h6v12 M15 20v-9h5v9'], lenda:['Lenda','M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z M5 17a3 3 0 0 1 3-3h11']};
 /*REG*/
 /*ANIM*/
 const ADMIN_TABS = ['ins','adm'];
@@ -529,7 +537,7 @@ function doRender(){
   orgFooter(); installBox();
   const main = document.getElementById('main');
   if (!S.db){ main.replaceChildren(h('div',{class:'card notice'}, h('strong',{},'Não foi possível ligar à base de dados. '), 'Verifica a ligação à internet e recarrega a página.')); return; }
-  const v = S.tab === 'eu' ? viewEu() : S.tab === 'como' ? viewComo() : S.tab === 'lenda' ? viewLenda() : S.tab === 'seg' ? viewSeg() : S.tab === 'cls' ? viewCls() : S.tab === 'adm' && S.admin ? viewAdm() : S.tab === 'ins' && S.admin ? viewIns() : S.tab === 'reg' ? viewReg() : S.tab === 'sub' ? viewSub() : viewLenda();
+  const v = S.tab === 'eu' ? viewEu() : S.tab === 'como' ? viewComo() : S.tab === 'lenda' ? viewLenda() : S.tab === 'seg' ? viewSeg() : S.tab === 'atv' ? viewAtv() : S.tab === 'cls' ? viewCls() : S.tab === 'adm' && S.admin ? viewAdm() : S.tab === 'ins' && S.admin ? viewIns() : S.tab === 'reg' ? viewReg() : S.tab === 'sub' ? viewSub() : viewLenda();
   main.replaceChildren(...[].concat(v));
 }
 
@@ -1374,6 +1382,46 @@ function uploadHistory(aid){
   if (G.length > 6) wrap.append(h('button',{class:'b o s', style:'justify-self:start', onclick:()=>{ S.open.upAll = !S.open.upAll; doRender(); }}, S.open.upAll ? 'Mostrar menos' : 'Ver todos os ' + G.length));
   return wrap;
 }
+/* ===== Atividades: o que foi carregado, por quem, em que posição ===== */
+const agoTxt = st => { const d = Date.now() / 1000 - st; if (d < 90) return 'agora mesmo'; if (d < 3600) return 'há ' + Math.round(d / 60) + ' min'; if (d < 86400) return 'há ' + Math.round(d / 3600) + ' h'; if (d < 86400 * 7) return 'há ' + Math.round(d / 86400) + (Math.round(d / 86400) === 1 ? ' dia' : ' dias'); return fmtDate(st); };
+function viewAtv(){
+  const blind = cfg().hide && !S.admin, me = myAid(), out = [], F = S.atvF = S.atvF || {who:'all', seg:'all'};
+  out.push(h('h2',{}, 'Atividades'), h('p',{class:'muted', style:'margin:0;max-width:60ch'}, 'O que se tem carregado: quem foi, que caminho, que tempo e em que posição ficou.'));
+  if (!S.segs.length) return out.concat(h('div',{class:'card empty'}, 'Ainda não há caminhos publicados.'));
+  const L = effList(), valid = y => !y.rj && !y.out && (!y.fl || y.ap), bySeg = {};
+  for (const d of L) (bySeg[d.s] = bySeg[d.s] || []).push(d);
+  const rankAt = (sg, a, x) => { const g = gOf(a), best = {}; let prev = null;
+    for (const d of bySeg[sg.n] || []){ const ad = athById(d.a); if (!ad || gOf(ad) !== g) continue;
+      for (const y of d.all){ if (!valid(y) || y.st > x.st || (y === x)) continue; if (!best[d.a] || y.t < best[d.a]) best[d.a] = y.t; } }
+    const own = best[a.id], others = Object.entries(best).filter(([k]) => k !== a.id).map(([k, t]) => [k, t]).sort((p, q) => p[1] - q[1]);
+    const lead = Object.entries(best).sort((p, q) => p[1] - q[1])[0];
+    const beat = Object.entries(best).filter(([k, t]) => k !== a.id && t < x.t).length; const n = Object.keys(best).filter(k => k !== a.id).length + 1;
+    return {pos:beat + 1, n, first:own == null, pb:own != null && x.t < own, ledBy:lead ? lead[0] : null, leadT:lead ? lead[1] : null}; };
+  const groups = {};
+  for (const d of L){ const a = athById(d.a); if (!a) continue; const mine = d.a === me, adm = S.admin;
+    if (blind && !mine) continue; if (F.who === 'mine' && !mine) continue; if (F.seg !== 'all' && String(d.s) !== F.seg) continue;
+    for (const x of d.all){ if (!mine && !adm && !valid(x)) continue;
+      const up = x.up || 0, key = d.a + '|' + (up ? Math.floor(up / 120) : 'x' + Math.floor(x.st / 86400)) + '|' + (x.f || ''); const G = groups[key] = groups[key] || {key, a, up:up || x.st, items:[]}; G.up = Math.max(G.up, up || 0) || x.st; G.items.push({d, x}); } }
+  const GA = Object.values(groups).sort((p, q) => q.up - p.up);
+  const segSel = h('select',{'aria-label':'Caminho', onchange:e=>{ F.seg = e.target.value; S.atvN = 15; doRender(); }}, h('option',{value:'all'}, 'Todos os caminhos'), ...S.segs.map(sg => h('option',{value:String(sg.n), selected:F.seg === String(sg.n)}, pad2(sg.n) + ' · ' + sg.nome)));
+  out.push(h('div',{class:'atv-f'}, me ? h('div',{class:'seg', role:'group', 'aria-label':'Mostrar'}, [['all','Todas'],['mine','As minhas']].map(([k, l]) => h('button',{'aria-pressed':String(F.who === k), onclick:()=>{ F.who = k; S.atvN = 15; doRender(); }}, l))) : null, h('label',{class:'stack', style:'gap:4px;min-width:0;flex:1 1 220px'}, h('span',{class:'lbl'}, 'Caminho'), segSel)));
+  if (blind) out.push(h('div',{class:'notice f'}, 'Quinzena Cega: só vês as tuas atividades. As dos outros aparecem quando acabar.'));
+  if (!GA.length){ out.push(h('div',{class:'card empty'}, blind ? 'Ainda não carregaste nenhuma atividade.' : F.who === 'mine' ? 'Ainda não carregaste nenhuma atividade.' : 'Ainda ninguém carregou atividades com estes filtros.')); return out; }
+  const N = S.atvN || 15;
+  for (const g of GA.slice(0, N)){ const a = g.a, mineG = a.id === me, items = g.items.sort((p, q) => p.x.st - q.x.st);
+    const c = h('article',{class:'atv-c'}, h('div',{class:'atv-h'}, avatar(a, 'sm'), h('div',{}, h('strong',{}, mineG ? 'Tu, ' + athName(a) : athName(a)), h('span',{class:'small muted'}, [a.esc ? escName(a.esc, a.g) : '', items.length + (items.length === 1 ? ' caminho' : ' caminhos')].filter(Boolean).join(' · '))), h('span',{class:'small muted', style:'white-space:nowrap'}, agoTxt(g.up))));
+    for (const {d, x} of items){ const sg = segByN(d.s), stt = status(x), ok = valid(x), r = sg && ok ? rankAt(sg, a, x) : null;
+      const tags = [];
+      if (stt) tags.push(h('span',{class:'tag ' + stt[0]}, stt[1]));
+      if (r && !blind){ if (r.pos === 1){ tags.push(h('span',{class:'tag ok'}, r.first && r.n === 1 ? 'Primeiro bordão' : r.ledBy === a.id ? 'Melhorou o bordão' : r.n === 1 ? 'Primeiro bordão' : 'Roubou o bordão')); } else if (r.pb) tags.push(h('span',{class:'tag'}, 'Melhor tempo pessoal')); else if (r.first) tags.push(h('span',{class:'tag'}, 'Primeira vez')); }
+      c.append(h('div',{class:'atv-r'}, h('span',{}, h('button',{class:'nm', onclick:()=>{ S.segSel = d.s; S.segOpen = true; S.segKeep = true; goTab('seg'); }}, pad2(d.s) + ' · ' + (sg ? sg.nome : 'Caminho')), h('small',{class:'small muted', style:'display:block'}, [sg && sg.localidade, sg ? km(sg.dist) : '', fmtDT(x.st)].filter(Boolean).join(' · '))),
+        h('span',{class:'tm'}, C.fmtTime(x.t), h('small',{class:'small muted', style:'display:block;font-weight:400;font-size:.8rem'}, sg ? kmh(sg.dist, x.t) : '')),
+        h('div',{class:'rk2'}, r && !blind ? h('span',{class:'atv-pos', title:'Posição entre ' + (gOf(a) === 'F' ? 'as guardiãs' : 'os guardiões') + ' na altura'}, r.pos + '.º de ' + r.n) : null, ...tags))); }
+    out.push(c); }
+  if (GA.length > N) out.push(h('button',{class:'b o', style:'justify-self:center', onclick:()=>{ S.atvN = N + 15; doRender(); }}, 'Ver mais (' + (GA.length - N) + ')'));
+  out.push(h('p',{class:'small muted'}, 'A posição é a que o atleta tinha entre o seu género no momento da atividade. Em revisão e rejeitadas só o próprio e a organização veem.'));
+  return out;
+}
 /* ===== A minha área: alterar o PIN ===== */
 function pinCard(aid){
   const box = h('section',{class:'card stack', style:'gap:10px'});
@@ -1938,7 +1986,7 @@ doRender(); navRestoreY();
   const [db, user, dl] = await Promise.all([claude.use('db'), claude.use('user'), claude.use('downloads')]);
   S.db = db; S.user = user; S.dl = dl;
   if (user){ S.uid = await user.id(); S.admin = await user.canEdit(); }
-  if ((ADMIN_TABS.includes(S.tab) && !S.admin) || !TABS.some(t => t[0] === S.tab)) S.tab = 'lenda';
+  if ((ADMIN_TABS.includes(S.tab) && !S.admin) || (!TABS.some(t => t[0] === S.tab) && S.tab !== 'eu')) S.tab = 'lenda';
   if (!db){ doRender(); return; }
   const onErr = e => { console.error(e); if (e && e.code === 'revoked') { S.db = null; render(); } };
   db.collection('segments').onSnapshot(s => { S.segs = s.docs.map(d => Object.assign({id:d.id}, d.data())).sort((a,b)=>a.n-b.n); render(); }, onErr);
