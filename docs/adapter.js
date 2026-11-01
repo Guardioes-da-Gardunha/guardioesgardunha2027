@@ -20,7 +20,7 @@
   function saveSess(s) { sess = s; if (s) lsSet(AUTH_KEY, s); else lsDel(AUTH_KEY); }
   function fromAuthResponse(j) { var p = jwtPayload(j.access_token); return { access_token: j.access_token, refresh_token: j.refresh_token, exp: (p.exp || 0) * 1000, uid: p.sub }; }
   async function authCall(path, body) {
-    var r = await fetch(BASE + '/auth/v1/' + path, { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
+    var r = await fetchT(BASE + '/auth/v1/' + path, { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
     var j = await r.json().catch(function () { return {}; });
     if (!r.ok) throw err(j.error_code || j.code || 'auth_' + r.status, j.msg || j.message || j.error_description || 'Falha na autenticação.', j);
     return j;
@@ -37,6 +37,13 @@
     return sess;
   }
   /* devolve a sessão válida, a criar uma nova (anónima) se ainda não existir e create=true */
+  /* pedido com limite de tempo: se o servidor não responder (projeto em pausa, rede bloqueada), falha em vez de ficar à espera para sempre */
+  async function fetchT(url, o) {
+    var ac = new AbortController(), t = setTimeout(function () { ac.abort(); }, 20000);
+    try { o = o || {}; o.signal = ac.signal; return await fetch(url, o); }
+    catch (e) { if (e && e.name === 'AbortError') { var x = new Error('O servidor demorou mais de 20 s a responder.'); x.code = 'timeout'; throw x; } throw e; }
+    finally { clearTimeout(t); }
+  }
   async function session(create) {
     if (signing && (create || !sess)) { try { await signing; } catch (e) {} }
     if (sess && sess.exp - Date.now() < 60000) {
@@ -57,7 +64,7 @@
     var h = { apikey: KEY, Authorization: 'Bearer ' + (s ? s.access_token : KEY) };
     if (opt.body !== undefined) h['Content-Type'] = 'application/json';
     if (opt.prefer) h.Prefer = opt.prefer;
-    var r = await fetch(BASE + '/rest/v1/' + path, { method: method, headers: h, body: opt.body !== undefined ? JSON.stringify(opt.body) : undefined });
+    var r = await fetchT(BASE + '/rest/v1/' + path, { method: method, headers: h, body: opt.body !== undefined ? JSON.stringify(opt.body) : undefined });
     var txt = await r.text(), j = null; try { j = txt ? JSON.parse(txt) : null; } catch (e) {}
     if (!r.ok) {
       var code = j && j.code === '42501' ? 'permission_denied' : j && j.message && /demasiadas_tentativas/.test(j.message) ? 'rate_limited' : j && j.message && /sem_inscricao/.test(j.message) ? 'no_registration' : j && j.message && /pin_invalido/.test(j.message) ? 'pin_invalid' : (j && j.code) || 'http_' + r.status;
@@ -234,5 +241,5 @@
   }
   window.addEventListener('error', function (e) { showFatal(e.message || 'erro'); });
   window.addEventListener('unhandledrejection', function (e) { showFatal((e.reason && (e.reason.message || e.reason)) || 'erro'); });
-  setTimeout(function () { var m = document.getElementById('main'); if (m && /A carregar/.test(m.textContent)) showFatal('A página demorou demasiado a arrancar (ligação lenta ou bloqueada).'); }, 12000);
+  setTimeout(function () { var m = document.getElementById('main'); if (m && /A carregar/.test(m.textContent)) showFatal('O servidor não respondeu a tempo (ligação lenta, rede bloqueada ou projeto Supabase em pausa).'); }, 12000);
 })();
