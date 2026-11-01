@@ -1462,8 +1462,14 @@ function viewLenda(){
     h('span',{class:'qa-i'}, navIcon((CAP[i] || CAP[0])[1])), h('span',{class:'qa-t'}, h('strong',{}, titles[i] || 'Capítulo ' + (i + 1)), h('small',{}, (CAP[i] || ['', ''])[0])))));
   const dayN = iso => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || ''); if (!m) return null; const t = new Date(+m[1], +m[2] - 1, +m[3]), n = new Date(); return Math.round((t - new Date(n.getFullYear(), n.getMonth(), n.getDate())) / 864e5); };
   const dStart = dayN(cfg().from), dEnd = dayN(cfg().to), plural = (n, a, b) => n + ' ' + (n === 1 ? a : b);
-  const clock = dStart != null && dStart > 0 ? tile('Arranque', String(dStart), dStart === 1 ? 'dia para o arranque' : 'dias para o arranque')
-    : dEnd != null && dEnd >= 0 ? tile(dEnd === 0 ? 'Último dia' : 'Fecho de contas', String(dEnd), dEnd === 1 ? 'dia para o fim' : 'dias para o fim') : tile('Época', '—', 'encerrada');
+  const atMid = (iso, add) => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || ''); return m ? new Date(+m[1], +m[2] - 1, +m[3] + (add || 0)).getTime() : null; };
+  const liveTile = (lbl, target, tail) => { const el = tile(lbl, '0', '\u00a0'), big = el.querySelector('.tile-v'), sub = el.querySelector('.small'); sub.style.whiteSpace = 'pre-line'; sub.style.fontVariantNumeric = 'tabular-nums';
+    const tick = () => { const d = Math.max(0, target - Date.now()), D = Math.floor(d / 864e5), H = Math.floor(d % 864e5 / 36e5), M = Math.floor(d % 36e5 / 6e4), Sx = Math.floor(d % 6e4 / 1e3);
+      big.textContent = String(D); sub.textContent = (D === 1 ? 'dia ' : 'dias ') + tail + '\n' + pad2(H) + ' h ' + pad2(M) + ' min ' + pad2(Sx) + ' s'; return d; };
+    tick(); const iv = setInterval(() => { if (!el.isConnected) { clearInterval(iv); return; } if (tick() <= 0){ clearInterval(iv); doRender(); } }, 1000); return el; };
+  const tStart = atMid(cfg().from), tEnd = atMid(cfg().to, 1);
+  const clock = tStart != null && tStart > Date.now() ? liveTile('Arranque', tStart, 'para o arranque')
+    : tEnd != null && tEnd > Date.now() ? liveTile(dEnd === 0 ? 'Último dia' : 'Fecho de contas', tEnd, 'para o fim') : tile('Época', '—', 'encerrada');
   const mine = myAid();
   const out = [h('section',{class:'hero', style:'gap:6px'}, h('h2',{class:'crest-title'}, 'Guardiões da Gardunha'), h('p',{class:'when'}, `${FMT_D(cfg().from)} a ${FMT_D(cfg().to)}`)),
     h('section',{class:'stack home-cta', style:'gap:14px'},
