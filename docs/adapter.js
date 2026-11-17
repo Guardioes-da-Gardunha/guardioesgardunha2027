@@ -7,7 +7,7 @@
   var CFG = window.G27_CONFIG || {};
   var BASE = (CFG.url || '').replace(/\/+$/, ''), KEY = CFG.anonKey || '';
   var POLL_MS = CFG.pollMs || 25000, OVERLAP_MS = 60000, PAGE = 1000;
-  var PUBLIC_COLS = ['segments', 'athletes', 'config', 'review', 'manual', 'claims', 'efforts'];
+  var PUBLIC_COLS = ['segments', 'athletes', 'config', 'review', 'manual', 'claims', 'efforts', 'reacts'];
   var LS = (function () { try { var k = '__g27'; localStorage.setItem(k, '1'); localStorage.removeItem(k); return localStorage; } catch (e) { return null; } })();
   function lsGet(k) { try { return LS ? JSON.parse(LS.getItem(k)) : null; } catch (e) { return null; } }
   function lsSet(k, v) { try { if (LS) LS.setItem(k, JSON.stringify(v)); } catch (e) { try { LS.removeItem(k); } catch (e2) {} } }

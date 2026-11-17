@@ -245,6 +245,44 @@ select option,select optgroup{background:var(--surface);color:var(--ink)}
 .chk{display:flex;gap:10px;align-items:flex-start;flex-wrap:nowrap} .chk input{flex:none;width:20px;height:20px;margin:2px 0 0;accent-color:var(--terra)}
 .linkb.inl{padding:0;font-size:inherit;color:var(--terra-txt);font-weight:700}
 .howto{display:grid;gap:8px;margin:0;padding:0;list-style:none} .howto li{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dashed var(--line);padding-bottom:6px} .howto li > span{min-width:0} .howto b{font-family:var(--mono);color:var(--terra-txt);white-space:nowrap;flex:none}
+
+/* atividades: feed vertical + reações */
+.feed{display:grid;gap:16px;max-width:560px;width:100%;margin-inline:auto}
+.feed~*{max-width:560px;margin-inline:auto;width:100%}
+.fc{display:grid;gap:0;border:1px solid var(--line);border-radius:18px;background:var(--glass);overflow:hidden;min-width:0}
+.fc.mine{border-color:var(--accent-line)}
+.fc-h{display:flex;align-items:center;gap:10px;padding:12px 14px}
+.fc-hero{display:grid;gap:0;background:linear-gradient(135deg,var(--surface2),var(--surface) 72%);border-block:1px solid var(--line)}
+.fc-seg{display:grid;gap:6px;padding:16px 16px 14px;border-bottom:1px solid var(--line)} .fc-seg:last-child{border-bottom:0}
+.fc-k{font-family:var(--mono);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--terra-txt)}
+.fc-t{all:unset;box-sizing:border-box;cursor:pointer;font-family:var(--head);font-weight:900;font-stretch:62%;text-transform:uppercase;font-size:clamp(1.9rem,8vw,2.5rem);line-height:.95;text-wrap:balance;color:var(--ink)} .fc-t:hover{color:var(--terra-txt)} .fc-t:focus-visible{outline:2px solid var(--terra);outline-offset:3px;border-radius:4px}
+.fc-m{display:flex;align-items:baseline;gap:6px 14px;flex-wrap:wrap} .fc-time{font-family:var(--mono);font-weight:700;font-size:1.7rem;letter-spacing:-.01em}
+.fc-tags{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.fc-act{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px}
+.fc-act.own{grid-template-columns:auto minmax(0,1fr)}
+.fc-th{display:grid;gap:6px;min-width:0}
+.thumbs{display:flex;gap:8px}
+.thumb{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;border:1.5px solid var(--line2);background:transparent;color:var(--muted);cursor:pointer;transition:transform .12s ease,background .15s,border-color .15s,color .15s;-webkit-tap-highlight-color:transparent}
+.thumb svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:fill .15s}
+.thumb:active{transform:scale(.9)} .thumb:hover{border-color:var(--accent-line);color:var(--ink)}
+.thumb.on{background:var(--terra-soft);border-color:var(--terra);color:var(--terra-txt)} .thumb.on svg{fill:currentColor;fill-opacity:.28}
+.fc-go{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 20px;border-radius:99px;border:1.5px solid var(--terra);background:var(--terra);color:var(--on-terra);font-family:var(--head);font-weight:800;font-stretch:75%;text-transform:uppercase;letter-spacing:.05em;font-size:1rem;cursor:pointer;white-space:nowrap;transition:transform .12s ease,background .15s,color .15s;-webkit-tap-highlight-color:transparent}
+.fc-go svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round} .fc-go:active{transform:scale(.96)}
+.fc-go.on{background:var(--terra-soft);color:var(--terra-txt)}
+.fc-more{justify-self:center;min-width:220px;justify-content:center}
+@media (max-width:420px){ .fc-act{grid-template-columns:1fr} .fc-go{width:100%} }
+@media (prefers-reduced-motion:reduce){ .thumb,.fc-go,.thumb svg{transition:none} }
+/* sino e notificações */
+.bell{position:relative;display:inline-grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--surface);border:1px solid var(--line2);color:var(--ink);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.bell svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round} .bell:hover{border-color:var(--terra)}
+.bell-n{position:absolute;top:-4px;right:-4px;min-width:19px;height:19px;padding:0 5px;border-radius:99px;background:var(--terra);color:var(--on-terra);font:800 .7rem/19px var(--mono);text-align:center;border:2px solid var(--bg)}
+.bell-n.inl{position:static;margin-left:auto;border:0}
+.nlist{display:grid;gap:8px}
+.nitem{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--ink);font:inherit;cursor:pointer;min-width:0}
+.nitem:hover{border-color:var(--accent-line)} .nitem.new{border-color:var(--terra);background:var(--terra-soft)}
+.nt{display:grid;gap:2px;min-width:0;flex:1} .nt-t{overflow-wrap:anywhere;line-height:1.35} .nt-c{color:var(--terra-txt);font-weight:700}
+.ndot{flex:none;width:10px;height:10px;border-radius:50%;background:var(--terra)}
+
 /* ===== área do atleta (inspirada nas áreas de atleta das provas) ===== */
 .av{flex:none;display:inline-grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--terra-soft);border:1.5px solid var(--terra);color:var(--terra-txt);font-family:var(--head);font-weight:900;font-stretch:75%;font-size:1rem;letter-spacing:.02em}
 .av.sm{width:30px;height:30px;font-size:.8rem;border-width:1px} .av.lg{width:76px;height:76px;font-size:1.9rem;border-width:2px}
@@ -778,7 +816,7 @@ return { nivelSub, ESCALOES, idadeEpoca, escalaoOf, escLabel, escOptLabel, trace
 'use strict';
 const DEF = {open:true, periodOn:false, from:'2027-01-01', to:'2027-12-15', hide:false, R:25, podium:[8,5,3], checkin:1, checkinMax:3, halfAt:0, halfBonus:16, allAt:0, allBonus:32, treinoPts:8, treinoMax:40, stealMonth:3, stealSeason:5, stealLegend:8, podiumBy:'genero', mod:'c', maxRun:6.5};
 const S = {db:null, user:null, dl:null, uid:null, admin:false, ready:false,
-  segs:[], ath:[], claims:{}, eff:{}, man:{}, cfg:Object.assign({}, DEF), rev:{ok:{}, no:{}},
+  segs:[], ath:[], claims:{}, rx:{}, eff:{}, man:{}, cfg:Object.assign({}, DEF), rev:{ok:{}, no:{}},
   tab:'lenda', month:'all', segSel:1, fG:'M', fV:false, fMod:null, clsCat:'geral', clsG:'M', open:{},
   pending:[], target:'self', busy:false, cut:null, profiles:{}, regs:{}, myReg:null, priv:{}, rf:{nome:'', g:'', nasc:'', contacto:'', loc:'', pin:'', pin2:'', ok:false}, na:{nome:'', g:'M', nasc:''}};
 const TABS = [['lenda','A Lenda'],['reg','Inscrição'],['como','Como funciona'],['sub','Carregar atividade'],['seg','Caminhos'],['atv','Atividades'],['cls','Classificação'],['ins','Inscrições'],['adm','Organização']];
@@ -946,7 +984,7 @@ function doRender(){
   const tabs = document.getElementById('tabs'); tabs.replaceChildren(...TABS.filter(t => PUB.includes(t[0]) || (ADMIN_TABS.includes(t[0]) && S.admin)).map(([k,l]) => h('button',{role:'tab', class:PUB.includes(k) ? 'pub' : 'adm', 'aria-selected':String(S.tab===k), onclick:()=>goTab(k)}, l)));
   const bn = document.getElementById('bnav'); if (bn) bn.replaceChildren(...PUB.map(k => h('button',{'aria-current': S.tab===k ? 'page' : 'false', onclick:()=>goTab(k)}, navIcon(NAVI[k][1]), h('span',{}, NAVI[k][0]))));
   const me = document.getElementById('me'); const aid = myAid(), ma = aid && athById(aid);
-  me.replaceChildren(h('button',{class:'mechip' + (S.tab === 'eu' ? ' on' : ''), onclick:()=>goTab('eu'), 'aria-label':'A minha área'}, avatar(ma, 'sm'), h('span',{class:'mechip-t'}, ma ? String(ma.nome||'').split(' ')[0] : 'Entrar')), ...(S.admin ? [h('span',{class:'tag'}, 'Organização')] : [])); me.hidden = false;
+  me.replaceChildren(h('button',{class:'mechip' + (S.tab === 'eu' ? ' on' : ''), onclick:()=>goTab('eu'), 'aria-label':'A minha área'}, avatar(ma, 'sm'), h('span',{class:'mechip-t'}, ma ? String(ma.nome||'').split(' ')[0] : 'Entrar')), ...(aid ? [bellBtn()] : []), ...(S.admin ? [h('span',{class:'tag'}, 'Organização')] : [])); me.hidden = false;
   sideNav();
   const sub = document.getElementById('sub'); if (sub) sub.textContent = 'Época 2027' + (S.segs.length ? ' · ' + S.segs.length + ' caminho' + (S.segs.length === 1 ? '' : 's') : '');
   orgFooter(); installBox();
@@ -966,7 +1004,7 @@ function sideNav(){
   el.replaceChildren(
     h('div',{class:'side-brand'}, shield ? shield.cloneNode(true) : null, h('div',{}, h('small',{}, 'Época 2027'), h('strong',{}, 'Guardiões da Gardunha'))),
     h('button',{class:'side-me' + (S.tab === 'eu' ? ' on' : ''), onclick:()=>goTab('eu')}, avatar(a), h('span',{class:'side-me-t'}, h('strong',{}, a ? athName(a) : 'Visitante'), h('small',{}, a ? (a.loc || 'A minha área') : 'Entrar · A minha área'))),
-    h('nav',{class:'side-nav', 'aria-label':'Secções'}, item('eu', 'A minha área', ICON_EU), h('span',{class:'side-sep'}), ...PUB.map(k => item(k, lbl(k), NAVI[k][1])),
+    h('nav',{class:'side-nav', 'aria-label':'Secções'}, item('eu', 'A minha área', ICON_EU), ...(aid ? [(()=>{ const n = unreadN(); return h('button',{class:'sn', onclick:openNotifs}, navIcon(ICON_BELL), h('span',{}, 'Notificações'), n ? h('span',{class:'bell-n inl num'}, n > 9 ? '9+' : String(n)) : null); })()] : []), h('span',{class:'side-sep'}), ...PUB.map(k => item(k, lbl(k), NAVI[k][1])),
       ...(S.admin ? [h('span',{class:'side-sep lbl'}, 'Organização'), ...ADMIN_TABS.map(k => item(k, lbl(k), ADMIN_ICON[k]))] : [])),
     h('div',{class:'side-foot'}, h('span',{class:'num'}, S.segs.length + ' caminho' + (S.segs.length === 1 ? '' : 's')), h('span',{}, ' · '), h('span',{class:'num'}, real + ' inscrito' + (real === 1 ? '' : 's'))));
 }
@@ -1803,44 +1841,113 @@ function uploadHistory(aid){
   if (G.length > 6) wrap.append(h('button',{class:'b o s', style:'justify-self:start', onclick:()=>{ S.open.upAll = !S.open.upAll; doRender(); }}, S.open.upAll ? 'Mostrar menos' : 'Ver todos os ' + G.length));
   return wrap;
 }
-/* ===== Atividades: o que foi carregado, por quem, em que posição ===== */
+/* ===== Atividades: feed vertical das últimas atividades, com reações ===== */
 const agoTxt = st => { const d = Date.now() / 1000 - st; if (d < 90) return 'agora mesmo'; if (d < 3600) return 'há ' + Math.round(d / 60) + ' min'; if (d < 86400) return 'há ' + Math.round(d / 3600) + ' h'; if (d < 86400 * 7) return 'há ' + Math.round(d / 86400) + (Math.round(d / 86400) === 1 ? ' dia' : ' dias'); return fmtDate(st); };
+const ICON_THUMB = 'M7 10v12 M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z';
+const ICON_BELL = 'M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9 M10.3 21a1.94 1.94 0 0 0 3.4 0';
+const ICON_FLAG = 'M5 21V4 M5 4h12l-2.5 4 2.5 4H5';
+const ATV_PAGE = 5;
+/* reações: uma coleção "reacts", um documento por pessoa (id = o seu membro) → {t:{<atividade>:{a,s,n,d,at}}, seen}.
+   a = atleta que publicou · s = caminhos · n = polegares (0 a 3) · d = "vou desafiar" · at = quando */
+const myRx = () => (S.uid && S.rx[S.uid]) || {t:{}, seen:0};
+function rxOf(key){ let thumbs = 0, des = 0; for (const doc of Object.values(S.rx)){ const r = (doc.t || {})[key]; if (!r) continue; thumbs += r.n || 0; if (r.d) des++; } return {thumbs, des}; }
+async function setRx(g, patch){
+  const aid = myAid(); if (!aid){ toast('Entra com o nome e o PIN para reagires.'); goTab('eu'); return; }
+  if (!S.db || !S.uid) return;
+  const cur = myRx(), prev = (cur.t || {})[g.rk] || {n:0, d:0};
+  const nx = Object.assign({}, prev, patch, {a:g.a.id, s:g.items.map(i => i.d.s), at:Math.floor(Date.now() / 1000)});
+  let t = Object.assign({}, cur.t || {}); if (!nx.n && !nx.d) delete t[g.rk]; else t[g.rk] = nx;
+  const ks = Object.keys(t); if (ks.length > 400) ks.sort((p, q) => (t[q].at || 0) - (t[p].at || 0)).slice(400).forEach(k => delete t[k]);
+  const doc = Object.assign({}, cur, {t});
+  S.rx = Object.assign({}, S.rx, {[S.uid]: doc}); doRender();
+  try { await S.db.doc('reacts/' + S.uid).set(doc); } catch(e){ toast(errMsg(e, 'Não foi possível guardar a reação.')); }
+}
+/* notificações: reações dos outros às atividades que publiquei */
+function myNotifs(){
+  const aid = myAid(); if (!aid) return [];
+  const byUid = {}; for (const a of S.ath){ const u = ownerOf(a.id); if (u) byUid[u] = a; }
+  const out = [];
+  for (const [uid, doc] of Object.entries(S.rx)){ if (uid === S.uid) continue;
+    for (const [k, r] of Object.entries(doc.t || {})){ if (r.a !== aid || !(r.n || r.d)) continue; out.push({k, uid, who:byUid[uid] || null, n:r.n || 0, d:!!r.d, at:r.at || 0, s:r.s || []}); } }
+  return out.sort((p, q) => q.at - p.at);
+}
+const unreadN = () => { const seen = myRx().seen || 0; return myNotifs().filter(n => n.at > seen).length; };
+async function markSeen(){
+  if (!S.uid || !S.db || !myAid()) return; const cur = myRx(), L = myNotifs(); const top = L.length ? L[0].at : 0;
+  if ((cur.seen || 0) >= top) return;
+  const doc = Object.assign({}, cur, {t:cur.t || {}, seen:top}); S.rx = Object.assign({}, S.rx, {[S.uid]: doc});
+  try { await S.db.doc('reacts/' + S.uid).set(doc); } catch(e){ console.error(e); }
+}
+function openNotifs(){
+  S.nSnap = myRx().seen || 0; S.open.notifs = true; markSeen(); goTab('eu');
+  setTimeout(() => { const el = document.getElementById('notifs'); if (el) el.scrollIntoView({behavior:'smooth', block:'start'}); }, 80);
+}
+function bellBtn(cls){
+  const n = unreadN();
+  return h('button',{class:'bell' + (cls ? ' ' + cls : ''), 'aria-label': n ? n + (n === 1 ? ' notificação nova' : ' notificações novas') : 'Notificações', onclick:openNotifs}, navIcon(ICON_BELL), n ? h('span',{class:'bell-n num'}, n > 9 ? '9+' : String(n)) : null);
+}
+const plural = (n, a, b) => n + ' ' + (n === 1 ? a : b);
+function notifText(n){
+  const nm = n.who ? athName(n.who) : 'Alguém', cam = n.s.length ? n.s.map(x => { const sg = segByN(x); return sg ? pad2(x) + ' · ' + sg.nome : 'caminho ' + pad2(x); }).join(', ') : 'uma atividade tua';
+  const parts = []; if (n.n) parts.push('deu ' + plural(n.n, 'polegar', 'polegares')); if (n.d) parts.push(n.n ? 'e vai desafiar-te' : 'vai desafiar-te');
+  return [h('strong',{}, nm), ' ' + parts.join(' ') + ' em ', h('span',{class:'nt-c'}, cam), '.'];
+}
+function notifCard(){
+  const L = myNotifs(), seen = S.nSnap != null ? S.nSnap : (myRx().seen || 0), N = S.nN || 8, unread = L.filter(n => n.at > seen).length;
+  const box = h('section',{class:'card stack', id:'notifs', style:'gap:10px'});
+  box.append(h('div',{class:'row', style:'justify-content:space-between;align-items:center'}, h('div',{class:'row', style:'gap:10px'}, h('span',{class:'qa-i'}, navIcon(ICON_BELL)), h('div',{class:'stack', style:'gap:0'}, h('h3',{style:'margin:0'}, 'Notificações'), h('span',{class:'small muted'}, L.length ? plural(L.length, 'reação', 'reações') + ' às tuas atividades' : 'Reações às tuas atividades'))), unread ? h('span',{class:'tag ok'}, unread + (unread === 1 ? ' nova' : ' novas')) : null));
+  if (!L.length){ box.append(h('p',{class:'muted', style:'margin:0'}, 'Ainda sem notificações. Quando alguém der polegares ou aceitar o desafio nas tuas atividades, aparece aqui.')); return box; }
+  box.append(h('div',{class:'nlist'}, ...L.slice(0, N).map(n => h('button',{class:'nitem' + (n.at > seen ? ' new' : ''), onclick:()=>{ const s0 = n.s[0]; if (s0){ S.segSel = s0; S.segOpen = true; S.segKeep = true; goTab('seg'); } }}, n.who ? avatar(n.who, 'sm') : avatar(null, 'sm'), h('span',{class:'nt'}, h('span',{class:'nt-t'}, ...notifText(n)), h('small',{class:'small muted'}, agoTxt(n.at))), n.at > seen ? h('i',{class:'ndot', 'aria-label':'nova'}) : null))));
+  if (L.length > N) box.append(h('button',{class:'b o s', style:'justify-self:start', onclick:()=>{ S.nN = N + 8; doRender(); }}, 'Ver mais (' + (L.length - N) + ')'));
+  return box;
+}
+function thumbsBar(g, mineG, me){
+  const r = ((S.rx[S.uid] || {}).t || {})[g.rk] || {n:0, d:0}, tot = rxOf(g.rk);
+  const lab = h('span',{class:'fc-n small muted'}, tot.thumbs || tot.des ? [tot.thumbs ? plural(tot.thumbs, 'polegar', 'polegares') : '', tot.des ? plural(tot.des, 'desafio', 'desafios') : ''].filter(Boolean).join(' · ') : (mineG ? 'Ainda sem reações' : 'Sê o primeiro a reagir'));
+  if (mineG) return h('div',{class:'fc-act own'}, h('span',{class:'qa-i'}, navIcon(ICON_THUMB)), h('div',{class:'stack', style:'gap:0'}, h('strong',{}, tot.thumbs || tot.des ? 'Recebeste ' + [plural(tot.thumbs, 'polegar', 'polegares'), plural(tot.des, 'desafio', 'desafios')].join(' e ') : 'Ainda sem reações'), h('small',{class:'small muted'}, 'Os outros atletas veem aqui o que acham da tua atividade.')));
+  const thumbs = [0, 1, 2].map(i => h('button',{class:'thumb' + (r.n > i ? ' on' : ''), 'aria-pressed':String(r.n > i), 'aria-label':'Dar ' + (i + 1) + (i ? ' polegares' : ' polegar'),
+    onclick:()=>setRx(g, {n: r.n > i ? i : i + 1})}, navIcon(ICON_THUMB)));
+  return h('div',{class:'fc-act'}, h('div',{class:'fc-th'}, h('div',{class:'thumbs', role:'group', 'aria-label':'Polegares'}, ...thumbs), lab),
+    h('button',{class:'fc-go' + (r.d ? ' on' : ''), 'aria-pressed':String(!!r.d), onclick:()=>setRx(g, {d: r.d ? 0 : 1})}, navIcon(r.d ? 'M5 12l5 5L20 7' : ICON_FLAG), h('span',{}, r.d ? 'A desafiar' : 'Vou desafiar')));
+}
 function viewAtv(){
-  const blind = cfg().hide && !S.admin, me = myAid(), out = [], F = S.atvF = S.atvF || {who:'all', seg:'all'};
-  out.push(h('h2',{}, 'Atividades'), h('p',{class:'muted', style:'margin:0;max-width:60ch'}, 'O que se tem carregado: quem foi, que caminho, que tempo e em que posição ficou.'));
+  const blind = cfg().hide && !S.admin, me = myAid(), out = [];
+  out.push(h('h2',{}, 'Atividades'), h('p',{class:'muted', style:'margin:0;max-width:60ch'}, 'As últimas atividades carregadas. Dá até 3 polegares e diz que vais desafiar.'));
   if (!S.segs.length) return out.concat(h('div',{class:'card empty'}, 'Ainda não há caminhos publicados.'));
   const L = effList(), valid = y => !y.rj && !y.out && (!y.fl || y.ap), bySeg = {};
   for (const d of L) (bySeg[d.s] = bySeg[d.s] || []).push(d);
-  const rankAt = (sg, a, x) => { const g = gOf(a), best = {}; let prev = null;
+  const rankAt = (sg, a, x) => { const g = gOf(a), best = {};
     for (const d of bySeg[sg.n] || []){ const ad = athById(d.a); if (!ad || gOf(ad) !== g) continue;
       for (const y of d.all){ if (!valid(y) || y.st > x.st || (y === x)) continue; if (!best[d.a] || y.t < best[d.a]) best[d.a] = y.t; } }
-    const own = best[a.id], others = Object.entries(best).filter(([k]) => k !== a.id).map(([k, t]) => [k, t]).sort((p, q) => p[1] - q[1]);
-    const lead = Object.entries(best).sort((p, q) => p[1] - q[1])[0];
-    const beat = Object.entries(best).filter(([k, t]) => k !== a.id && t < x.t).length; const n = Object.keys(best).filter(k => k !== a.id).length + 1;
-    return {pos:beat + 1, n, first:own == null, pb:own != null && x.t < own, ledBy:lead ? lead[0] : null, leadT:lead ? lead[1] : null}; };
+    const own = best[a.id], lead = Object.entries(best).sort((p, q) => p[1] - q[1])[0];
+    const beat = Object.entries(best).filter(([k, t]) => k !== a.id && t < x.t).length, n = Object.keys(best).filter(k => k !== a.id).length + 1;
+    return {pos:beat + 1, n, first:own == null, pb:own != null && x.t < own, ledBy:lead ? lead[0] : null}; };
   const groups = {};
   for (const d of L){ const a = athById(d.a); if (!a) continue; const mine = d.a === me, adm = S.admin;
-    if (blind && !mine) continue; if (F.who === 'mine' && !mine) continue; if (F.seg !== 'all' && String(d.s) !== F.seg) continue;
+    if (blind && !mine) continue;
     for (const x of d.all){ if (!mine && !adm && !valid(x)) continue;
       const up = x.up || 0, key = d.a + '|' + (up ? Math.floor(up / 120) : 'x' + Math.floor(x.st / 86400)) + '|' + (x.f || ''); const G = groups[key] = groups[key] || {key, a, up:up || x.st, items:[]}; G.up = Math.max(G.up, up || 0) || x.st; G.items.push({d, x}); } }
   const GA = Object.values(groups).sort((p, q) => q.up - p.up);
-  const segSel = h('select',{'aria-label':'Caminho', onchange:e=>{ F.seg = e.target.value; S.atvN = 15; doRender(); }}, h('option',{value:'all'}, 'Todos os caminhos'), ...S.segs.map(sg => h('option',{value:String(sg.n), selected:F.seg === String(sg.n)}, pad2(sg.n) + ' · ' + sg.nome)));
-  out.push(h('div',{class:'atv-f'}, me ? h('div',{class:'seg', role:'group', 'aria-label':'Mostrar'}, [['all','Todas'],['mine','As minhas']].map(([k, l]) => h('button',{'aria-pressed':String(F.who === k), onclick:()=>{ F.who = k; S.atvN = 15; doRender(); }}, l))) : null, h('label',{class:'stack', style:'gap:4px;min-width:0;flex:1 1 220px'}, h('span',{class:'lbl'}, 'Caminho'), segSel)));
   if (blind) out.push(h('div',{class:'notice f'}, 'Quinzena Cega: só vês as tuas atividades. As dos outros aparecem quando acabar.'));
-  if (!GA.length){ out.push(h('div',{class:'card empty'}, blind ? 'Ainda não carregaste nenhuma atividade.' : F.who === 'mine' ? 'Ainda não carregaste nenhuma atividade.' : 'Ainda ninguém carregou atividades com estes filtros.')); return out; }
-  const N = S.atvN || 15;
-  for (const g of GA.slice(0, N)){ const a = g.a, mineG = a.id === me, items = g.items.sort((p, q) => p.x.st - q.x.st);
-    const c = h('article',{class:'atv-c'}, h('div',{class:'atv-h'}, avatar(a, 'sm'), h('div',{}, h('strong',{}, mineG ? 'Tu, ' + athName(a) : athName(a)), h('span',{class:'small muted'}, [a.esc ? escName(a.esc, a.g) : '', items.length + (items.length === 1 ? ' caminho' : ' caminhos')].filter(Boolean).join(' · '))), h('span',{class:'small muted', style:'white-space:nowrap'}, agoTxt(g.up))));
-    for (const {d, x} of items){ const sg = segByN(d.s), stt = status(x), ok = valid(x), r = sg && ok ? rankAt(sg, a, x) : null;
-      const tags = [];
+  if (!GA.length){ out.push(h('div',{class:'card empty'}, blind ? 'Ainda não carregaste nenhuma atividade.' : 'Ainda ninguém carregou atividades.')); return out; }
+  const N = S.atvN || ATV_PAGE, feed = h('div',{class:'feed'});
+  for (const g of GA.slice(0, N)){ const a = g.a, mineG = a.id === me, items = g.items.sort((p, q) => p.x.st - q.x.st); g.rk = items[0].x.key;
+    const card = h('article',{class:'fc' + (mineG ? ' mine' : '')},
+      h('div',{class:'fc-h'}, avatar(a, 'sm'), h('div',{class:'stack', style:'gap:0;min-width:0;flex:1'}, h('strong',{}, mineG ? 'Tu, ' + athName(a) : athName(a)), h('span',{class:'small muted'}, [a.esc ? escName(a.esc, a.g) : '', a.loc || ''].filter(Boolean).join(' · ') || ' ')), h('span',{class:'small muted', style:'white-space:nowrap'}, agoTxt(g.up))));
+    const hero = h('div',{class:'fc-hero'});
+    for (const {d, x} of items){ const sg = segByN(d.s), stt = status(x), ok = valid(x), r = sg && ok ? rankAt(sg, a, x) : null, tags = [];
       if (stt) tags.push(h('span',{class:'tag ' + stt[0]}, stt[1]));
-      if (r && !blind){ if (r.pos === 1){ tags.push(h('span',{class:'tag ok'}, r.first && r.n === 1 ? 'Primeiro bordão' : r.ledBy === a.id ? 'Melhorou o bordão' : r.n === 1 ? 'Primeiro bordão' : 'Roubou o bordão')); } else if (r.pb) tags.push(h('span',{class:'tag'}, 'Melhor tempo pessoal')); else if (r.first) tags.push(h('span',{class:'tag'}, 'Primeira vez')); }
-      c.append(h('div',{class:'atv-r'}, h('span',{}, h('button',{class:'nm', onclick:()=>{ S.segSel = d.s; S.segOpen = true; S.segKeep = true; goTab('seg'); }}, pad2(d.s) + ' · ' + (sg ? sg.nome : 'Caminho')), h('small',{class:'small muted', style:'display:block'}, [sg && sg.localidade, sg ? km(sg.dist) : '', fmtDT(x.st)].filter(Boolean).join(' · '))),
-        h('span',{class:'tm'}, C.fmtTime(x.t), h('small',{class:'small muted', style:'display:block;font-weight:400;font-size:.8rem'}, sg ? kmh(sg.dist, x.t) : '')),
-        h('div',{class:'rk2'}, r && !blind ? h('span',{class:'atv-pos', title:'Posição entre ' + (gOf(a) === 'F' ? 'as guardiãs' : 'os guardiões') + ' na altura'}, r.pos + '.º de ' + r.n) : null, ...tags))); }
-    out.push(c); }
-  if (GA.length > N) out.push(h('button',{class:'b o', style:'justify-self:center', onclick:()=>{ S.atvN = N + 15; doRender(); }}, 'Ver mais (' + (GA.length - N) + ')'));
-  out.push(h('p',{class:'small muted'}, 'A posição é a que o atleta tinha entre o seu género no momento da atividade. Em revisão e rejeitadas só o próprio e a organização veem.'));
+      if (r && !blind){ if (r.pos === 1) tags.push(h('span',{class:'tag ok'}, r.first && r.n === 1 ? 'Primeiro bordão' : r.ledBy === a.id ? 'Melhorou o bordão' : r.n === 1 ? 'Primeiro bordão' : 'Roubou o bordão')); else if (r.pb) tags.push(h('span',{class:'tag'}, 'Melhor tempo pessoal')); else if (r.first) tags.push(h('span',{class:'tag'}, 'Primeira vez')); }
+      hero.append(h('div',{class:'fc-seg'},
+        h('span',{class:'fc-k'}, [pad2(d.s), sg && sg.localidade, sg && sg.tipo].filter(Boolean).join(' · ')),
+        h('button',{class:'fc-t', onclick:()=>{ S.segSel = d.s; S.segOpen = true; S.segKeep = true; goTab('seg'); }}, sg ? sg.nome : 'Caminho'),
+        h('div',{class:'fc-m'}, h('strong',{class:'fc-time num'}, C.fmtTime(x.t)), h('span',{class:'small muted num'}, [sg ? km(sg.dist) : '', sg ? kmh(sg.dist, x.t) : '', fmtDT(x.st)].filter(Boolean).join(' · '))),
+        r && !blind ? h('div',{class:'fc-tags'}, h('span',{class:'atv-pos', title:'Posição entre ' + (gOf(a) === 'F' ? 'as guardiãs' : 'os guardiões') + ' na altura'}, r.pos + '.º de ' + r.n), ...tags) : (tags.length ? h('div',{class:'fc-tags'}, ...tags) : null))); }
+    card.append(hero, blind ? null : thumbsBar(g, mineG, me)); feed.append(card); }
+  out.push(feed);
+  if (GA.length > N) out.push(h('button',{class:'b o fc-more', onclick:()=>{ S.atvN = N + ATV_PAGE; doRender(); }}, 'Carregar mais · faltam ' + (GA.length - N)));
+  else if (GA.length > ATV_PAGE) out.push(h('p',{class:'small muted', style:'text-align:center;margin:0'}, 'Chegaste à primeira atividade.'), h('button',{class:'linkb', style:'justify-self:center', onclick:()=>{ S.atvN = ATV_PAGE; doRender(); window.scrollTo({top:0, behavior:'smooth'}); }}, 'Voltar às últimas ' + ATV_PAGE));
+  out.push(h('p',{class:'small muted', style:'max-width:56ch'}, 'A posição é a que o atleta tinha entre o seu género no momento da atividade. Em revisão e rejeitadas só o próprio e a organização veem.'));
   return out;
 }
 /* ===== A minha área: alterar o PIN ===== */
@@ -1882,6 +1989,7 @@ function viewEu(){
   out.push(h('section',{class:'eu-hero'}, avatar(a, 'lg'), h('div',{class:'stack', style:'gap:6px;min-width:0'}, h('span',{class:'nc-k'}, title), h('h2',{}, 'Olá, ' + String(a.nome||'').split(' ')[0]),
     h('span',{class:'muted'}, [a.loc, a.esc ? escName(a.esc, a.g) : '', 'Época 2027'].filter(Boolean).join(' · '), ' · ', h('button',{class:'linkb', style:'padding:0', onclick:async()=>{ await S.user.signOut(); location.reload(); }}, 'Sair'), ' · ', h('button',{class:'linkb', style:'padding:0', 'aria-expanded':String(!!S.open.pinEdit), onclick:()=>{ S.open.pinEdit = !S.open.pinEdit; doRender(); }}, 'Alterar PIN')))));
   if (S.open.pinEdit) out.push(pinCard(aid));
+  out.push(notifCard());
   const done = Math.min(st.r.done || 0, N), bar = h('div',{class:'bar'}, h('i',{style:`width:${N ? done / N * 100 : 0}%`}));
   out.push(h('div',{class:'tiles'}, tile('Pontos', blind ? '—' : String(st.r.total||0), 'na época'), tile('Posição', blind || !st.pos ? '—' : st.pos + '.º', blind ? 'Quinzena Cega' : st.pos ? 'de ' + st.of + (F ? ' guardiãs' : ' guardiões') + (st.posEsc ? ' · ' + st.posEsc + '.º em ' + escName(a.esc, a.g) : '') : 'ainda sem pontos'),
     tile('Bordões', blind ? '—' : String(st.r.wins||0), 'caminhos que guardas'), tile('Caminhos', done + '/' + N, nextMilestone(done, N), bar)));
@@ -2414,6 +2522,7 @@ doRender(); navRestoreY();
   db.collection('athletes').onSnapshot(s => { S.ath = s.docs.map(d => Object.assign({id:d.id}, d.data())).sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt')); render(); }, onErr);
   db.collection('claims').onSnapshot(s => { S.claims = {}; s.docs.forEach(d => S.claims[d.id] = d.data()); render(); }, onErr);
   db.collection('efforts').onSnapshot(s => { S.eff = {}; s.docs.forEach(d => S.eff[d.id] = d.data()); render(); }, onErr);
+  db.collection('reacts').onSnapshot(s => { S.rx = {}; s.docs.forEach(d => S.rx[d.id] = d.data()); render(); }, e => { console.warn('reacts', e); });
   db.collection('manual').onSnapshot(s => { S.man = {}; s.docs.forEach(d => S.man[d.id] = d.data()); render(); }, onErr);
   db.doc('config/main').onSnapshot(d => { S.cfg = d.exists ? d.data() : {}; render(); }, onErr);
   if (S.admin){
