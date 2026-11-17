@@ -1477,7 +1477,7 @@ function bellBtn(cls){
 const plural = (n, a, b) => n + ' ' + (n === 1 ? a : b);
 function notifText(n){
   const nm = n.who ? athName(n.who) : 'Alguém', cam = n.s.length ? n.s.map(x => { const sg = segByN(x); return sg ? pad2(x) + ' · ' + sg.nome : 'caminho ' + pad2(x); }).join(', ') : 'uma atividade tua';
-  const parts = []; if (n.r.length) parts.push('reagiu com ' + n.r.map(i => EMO[i][0]).join(' ')); if (n.d) parts.push(n.r.length ? 'e vai desafiar-te' : 'vai desafiar-te');
+  const parts = []; if (n.r.length) parts.push('reagiu com ' + n.r.map(i => EMO[i][0] + ' «' + EMO[i][1] + '»').join(' ')); if (n.d) parts.push(n.r.length ? 'e vai desafiar-te' : 'vai desafiar-te');
   return [h('strong',{}, nm), ' ' + parts.join(' ') + ' em ', h('span',{class:'nt-c'}, cam), '.'];
 }
 function notifCard(){
