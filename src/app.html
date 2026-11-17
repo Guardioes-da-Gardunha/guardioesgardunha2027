@@ -1494,7 +1494,7 @@ function thumbsBar(g, mineG, me){
   const lab = h('span',{class:'fc-n small muted'}, tot.any ? rxTxt(tot) : (mineG ? 'Ainda sem reações' : 'Sê o primeiro a reagir'));
   if (mineG) return h('div',{class:'fc-act own'}, h('span',{class:'qa-i'}, navIcon(ICON_THUMB)), h('div',{class:'stack', style:'gap:0'}, h('strong',{}, tot.any ? 'Recebeste ' + rxTxt(tot) : 'Ainda sem reações'), h('small',{class:'small muted'}, 'Os outros atletas veem aqui o que acham da tua atividade.')));
   const btns = EMO.map(([em, nm], i) => { const on = mine.includes(i); return h('button',{class:'thumb' + (on ? ' on' : ''), 'aria-pressed':String(on), 'aria-label':nm, title:nm,
-    onclick:()=>setRx(g, {r: on ? mine.filter(x => x !== i) : [...mine, i].sort()})}, h('span',{class:'em', 'aria-hidden':'true'}, em)); });
+    onclick:()=>setRx(g, {r: on ? [] : [i]})}, h('span',{class:'em', 'aria-hidden':'true'}, em)); });
   return h('div',{class:'fc-act'}, h('div',{class:'fc-th'}, h('div',{class:'thumbs', role:'group', 'aria-label':'Reações'}, ...btns), lab),
     h('button',{class:'fc-go' + (r.d ? ' on' : ''), 'aria-pressed':String(!!r.d), onclick:()=>setRx(g, {d: r.d ? 0 : 1})}, navIcon(r.d ? 'M5 12l5 5L20 7' : ICON_FLAG), h('span',{}, r.d ? 'A desafiar' : 'Vou desafiar')));
 }
