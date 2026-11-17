@@ -254,11 +254,11 @@ select option,select optgroup{background:var(--surface);color:var(--ink)}
 .thumb .em{font-size:1.45rem;line-height:1;filter:grayscale(1);opacity:.6;transition:filter .15s,opacity .15s,transform .15s} .thumb.on .em{filter:none;opacity:1;transform:scale(1.12)}
 .thumb:active{transform:scale(.9)} .thumb:hover{border-color:var(--accent-line);color:var(--ink)}
 .thumb.on{background:var(--terra-soft);border-color:var(--terra);color:var(--terra-txt)} 
-.fc-go{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 20px;border-radius:99px;border:1.5px solid var(--terra);background:var(--terra);color:var(--on-terra);font-family:var(--head);font-weight:800;font-stretch:75%;text-transform:uppercase;letter-spacing:.05em;font-size:1rem;cursor:pointer;white-space:nowrap;transition:transform .12s ease,background .15s,color .15s;-webkit-tap-highlight-color:transparent}
+.fc-go{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;max-width:230px;padding:8px 18px;border-radius:99px;border:1.5px solid var(--terra);background:var(--terra);color:var(--on-terra);font-family:var(--head);font-weight:800;font-stretch:75%;text-transform:uppercase;letter-spacing:.04em;font-size:1rem;line-height:1.1;text-align:center;cursor:pointer;transition:transform .12s ease,background .15s,color .15s;-webkit-tap-highlight-color:transparent}
 .fc-go svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round} .fc-go:active{transform:scale(.96)}
 .fc-go.on{background:var(--terra-soft);color:var(--terra-txt)}
 .fc-more{justify-self:center;min-width:220px;justify-content:center}
-@media (max-width:420px){ .fc-act{grid-template-columns:1fr} .fc-go{width:100%} }
+@media (max-width:520px){ .fc-act{grid-template-columns:1fr} .fc-go{width:100%;max-width:none} }
 @media (prefers-reduced-motion:reduce){ .thumb,.fc-go,.thumb .em{transition:none} }
 /* sino e notificações */
 .bell{position:relative;display:inline-grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--surface);border:1px solid var(--line2);color:var(--ink);cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -1477,7 +1477,7 @@ function bellBtn(cls){
 const plural = (n, a, b) => n + ' ' + (n === 1 ? a : b);
 function notifText(n){
   const nm = n.who ? athName(n.who) : 'Alguém', cam = n.s.length ? n.s.map(x => { const sg = segByN(x); return sg ? pad2(x) + ' · ' + sg.nome : 'caminho ' + pad2(x); }).join(', ') : 'uma atividade tua';
-  const parts = []; if (n.r.length) parts.push('reagiu com ' + n.r.map(i => EMO[i][0] + ' «' + EMO[i][1] + '»').join(' ')); if (n.d) parts.push(n.r.length ? 'e vai desafiar-te' : 'vai desafiar-te');
+  const parts = []; if (n.r.length) parts.push('reagiu com ' + n.r.map(i => EMO[i][0] + ' «' + EMO[i][1] + '»').join(' ')); if (n.d) parts.push(n.r.length ? 'e vai buscar o teu bordão' : 'vai buscar o teu bordão');
   return [h('strong',{}, nm), ' ' + parts.join(' ') + ' em ', h('span',{class:'nt-c'}, cam), '.'];
 }
 function notifCard(){
@@ -1496,11 +1496,11 @@ function thumbsBar(g, mineG, me){
   const btns = EMO.map(([em, nm], i) => { const on = mine.includes(i); return h('button',{class:'thumb' + (on ? ' on' : ''), 'aria-pressed':String(on), 'aria-label':nm, title:nm,
     onclick:()=>setRx(g, {r: on ? [] : [i]})}, h('span',{class:'em', 'aria-hidden':'true'}, em)); });
   return h('div',{class:'fc-act'}, h('div',{class:'fc-th'}, h('div',{class:'thumbs', role:'group', 'aria-label':'Reações'}, ...btns), lab),
-    h('button',{class:'fc-go' + (r.d ? ' on' : ''), 'aria-pressed':String(!!r.d), onclick:()=>setRx(g, {d: r.d ? 0 : 1})}, navIcon(r.d ? 'M5 12l5 5L20 7' : ICON_FLAG), h('span',{}, r.d ? 'A desafiar' : 'Vou desafiar')));
+    h('button',{class:'fc-go' + (r.d ? ' on' : ''), 'aria-pressed':String(!!r.d), onclick:()=>setRx(g, {d: r.d ? 0 : 1})}, navIcon(r.d ? 'M5 12l5 5L20 7' : ICON_FLAG), h('span',{}, r.d ? 'Desafio lançado!' : 'Prepara-te! Vou buscar esse bordão!')));
 }
 function viewAtv(){
   const blind = cfg().hide && !S.admin, me = myAid(), out = [];
-  out.push(h('h2',{}, 'Atividades'), h('p',{class:'muted', style:'margin:0;max-width:60ch'}, 'As últimas atividades carregadas. Reage com 🥴 👍 💪 e diz que vais desafiar.'));
+  out.push(h('h2',{}, 'Atividades'), h('p',{class:'muted', style:'margin:0;max-width:60ch'}, 'As últimas atividades carregadas. Reage a cada atividade com 🥴 👍 💪 e avisa que vais buscar o bordão.'));
   if (!S.segs.length) return out.concat(h('div',{class:'card empty'}, 'Ainda não há caminhos publicados.'));
   const L = effList(), valid = y => !y.rj && !y.out && (!y.fl || y.ap), bySeg = {};
   for (const d of L) (bySeg[d.s] = bySeg[d.s] || []).push(d);
@@ -1510,16 +1510,15 @@ function viewAtv(){
     const own = best[a.id], lead = Object.entries(best).sort((p, q) => p[1] - q[1])[0];
     const beat = Object.entries(best).filter(([k, t]) => k !== a.id && t < x.t).length, n = Object.keys(best).filter(k => k !== a.id).length + 1;
     return {pos:beat + 1, n, first:own == null, pb:own != null && x.t < own, ledBy:lead ? lead[0] : null}; };
-  const groups = {};
+  const GA = [];
   for (const d of L){ const a = athById(d.a); if (!a) continue; const mine = d.a === me, adm = S.admin;
     if (blind && !mine) continue;
-    for (const x of d.all){ if (!mine && !adm && !valid(x)) continue;
-      const up = x.up || 0, key = d.a + '|' + (up ? Math.floor(up / 120) : 'x' + Math.floor(x.st / 86400)) + '|' + (x.f || ''); const G = groups[key] = groups[key] || {key, a, up:up || x.st, items:[]}; G.up = Math.max(G.up, up || 0) || x.st; G.items.push({d, x}); } }
-  const GA = Object.values(groups).sort((p, q) => q.up - p.up);
+    for (const x of d.all){ if (!mine && !adm && !valid(x)) continue; GA.push({a, up:x.up || x.st, st:x.st, rk:x.key, items:[{d, x}]}); } }
+  GA.sort((p, q) => q.up - p.up || q.st - p.st);
   if (blind) out.push(h('div',{class:'notice f'}, 'Quinzena Cega: só vês as tuas atividades. As dos outros aparecem quando acabar.'));
   if (!GA.length){ out.push(h('div',{class:'card empty'}, blind ? 'Ainda não carregaste nenhuma atividade.' : 'Ainda ninguém carregou atividades.')); return out; }
   const N = S.atvN || ATV_PAGE, feed = h('div',{class:'feed'});
-  for (const g of GA.slice(0, N)){ const a = g.a, mineG = a.id === me, items = g.items.sort((p, q) => p.x.st - q.x.st); g.rk = items[0].x.key;
+  for (const g of GA.slice(0, N)){ const a = g.a, mineG = a.id === me, items = g.items;
     const card = h('article',{class:'fc' + (mineG ? ' mine' : '')},
       h('div',{class:'fc-h'}, avatar(a, 'sm'), h('div',{class:'stack', style:'gap:0;min-width:0;flex:1'}, h('strong',{}, mineG ? 'Tu, ' + athName(a) : athName(a)), h('span',{class:'small muted'}, [a.esc ? escName(a.esc, a.g) : '', a.loc || ''].filter(Boolean).join(' · ') || ' ')), h('span',{class:'small muted', style:'white-space:nowrap'}, agoTxt(g.up))));
     const hero = h('div',{class:'fc-hero'});
