@@ -263,15 +263,15 @@ select option,select optgroup{background:var(--surface);color:var(--ink)}
 .fc-th{display:grid;gap:6px;min-width:0}
 .thumbs{display:flex;gap:8px}
 .thumb{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;border:1.5px solid var(--line2);background:transparent;color:var(--muted);cursor:pointer;transition:transform .12s ease,background .15s,border-color .15s,color .15s;-webkit-tap-highlight-color:transparent}
-.thumb svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:fill .15s}
+.thumb .em{font-size:1.45rem;line-height:1;filter:grayscale(1);opacity:.6;transition:filter .15s,opacity .15s,transform .15s} .thumb.on .em{filter:none;opacity:1;transform:scale(1.12)}
 .thumb:active{transform:scale(.9)} .thumb:hover{border-color:var(--accent-line);color:var(--ink)}
-.thumb.on{background:var(--terra-soft);border-color:var(--terra);color:var(--terra-txt)} .thumb.on svg{fill:currentColor;fill-opacity:.28}
+.thumb.on{background:var(--terra-soft);border-color:var(--terra);color:var(--terra-txt)} 
 .fc-go{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 20px;border-radius:99px;border:1.5px solid var(--terra);background:var(--terra);color:var(--on-terra);font-family:var(--head);font-weight:800;font-stretch:75%;text-transform:uppercase;letter-spacing:.05em;font-size:1rem;cursor:pointer;white-space:nowrap;transition:transform .12s ease,background .15s,color .15s;-webkit-tap-highlight-color:transparent}
 .fc-go svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round} .fc-go:active{transform:scale(.96)}
 .fc-go.on{background:var(--terra-soft);color:var(--terra-txt)}
 .fc-more{justify-self:center;min-width:220px;justify-content:center}
 @media (max-width:420px){ .fc-act{grid-template-columns:1fr} .fc-go{width:100%} }
-@media (prefers-reduced-motion:reduce){ .thumb,.fc-go,.thumb svg{transition:none} }
+@media (prefers-reduced-motion:reduce){ .thumb,.fc-go,.thumb .em{transition:none} }
 /* sino e notificações */
 .bell{position:relative;display:inline-grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--surface);border:1px solid var(--line2);color:var(--ink);cursor:pointer;-webkit-tap-highlight-color:transparent}
 .bell svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round} .bell:hover{border-color:var(--terra)}
@@ -1847,16 +1847,19 @@ const ICON_THUMB = 'M7 10v12 M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2
 const ICON_BELL = 'M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9 M10.3 21a1.94 1.94 0 0 0 3.4 0';
 const ICON_FLAG = 'M5 21V4 M5 4h12l-2.5 4 2.5 4H5';
 const ATV_PAGE = 5;
+const EMO = [['🥴','Dura!'], ['👍','Boa!'], ['💪','Que força!']];
+const rIdx = r => Array.isArray(r.r) ? r.r : (r.n ? [1] : []);
 /* reações: uma coleção "reacts", um documento por pessoa (id = o seu membro) → {t:{<atividade>:{a,s,n,d,at}}, seen}.
    a = atleta que publicou · s = caminhos · n = polegares (0 a 3) · d = "vou desafiar" · at = quando */
 const myRx = () => (S.uid && S.rx[S.uid]) || {t:{}, seen:0};
-function rxOf(key){ let thumbs = 0, des = 0; for (const doc of Object.values(S.rx)){ const r = (doc.t || {})[key]; if (!r) continue; thumbs += r.n || 0; if (r.d) des++; } return {thumbs, des}; }
+function rxOf(key){ const em = [0, 0, 0]; let des = 0; for (const doc of Object.values(S.rx)){ const r = (doc.t || {})[key]; if (!r) continue; rIdx(r).forEach(i => { if (i >= 0 && i < 3) em[i]++; }); if (r.d) des++; } return {em, des, any:em.some(Boolean) || des > 0}; }
+const rxTxt = tot => [...EMO.map((e, i) => tot.em[i] ? e[0] + ' ' + tot.em[i] : ''), tot.des ? plural(tot.des, 'desafio', 'desafios') : ''].filter(Boolean).join(' · ');
 async function setRx(g, patch){
   const aid = myAid(); if (!aid){ toast('Entra com o nome e o PIN para reagires.'); goTab('eu'); return; }
   if (!S.db || !S.uid) return;
-  const cur = myRx(), prev = (cur.t || {})[g.rk] || {n:0, d:0};
-  const nx = Object.assign({}, prev, patch, {a:g.a.id, s:g.items.map(i => i.d.s), at:Math.floor(Date.now() / 1000)});
-  let t = Object.assign({}, cur.t || {}); if (!nx.n && !nx.d) delete t[g.rk]; else t[g.rk] = nx;
+  const cur = myRx(), prev = (cur.t || {})[g.rk] || {r:[], d:0};
+  const nx = Object.assign({}, prev, patch, {n:undefined, a:g.a.id, s:g.items.map(i => i.d.s), at:Math.floor(Date.now() / 1000)});
+  let t = Object.assign({}, cur.t || {}); nx.r = rIdx(nx); delete nx.n; if (!nx.r.length && !nx.d) delete t[g.rk]; else t[g.rk] = nx;
   const ks = Object.keys(t); if (ks.length > 400) ks.sort((p, q) => (t[q].at || 0) - (t[p].at || 0)).slice(400).forEach(k => delete t[k]);
   const doc = Object.assign({}, cur, {t});
   S.rx = Object.assign({}, S.rx, {[S.uid]: doc}); doRender();
@@ -1868,7 +1871,7 @@ function myNotifs(){
   const byUid = {}; for (const a of S.ath){ const u = ownerOf(a.id); if (u) byUid[u] = a; }
   const out = [];
   for (const [uid, doc] of Object.entries(S.rx)){ if (uid === S.uid) continue;
-    for (const [k, r] of Object.entries(doc.t || {})){ if (r.a !== aid || !(r.n || r.d)) continue; out.push({k, uid, who:byUid[uid] || null, n:r.n || 0, d:!!r.d, at:r.at || 0, s:r.s || []}); } }
+    for (const [k, r] of Object.entries(doc.t || {})){ if (r.a !== aid || !(rIdx(r).length || r.d)) continue; out.push({k, uid, who:byUid[uid] || null, r:rIdx(r), d:!!r.d, at:r.at || 0, s:r.s || []}); } }
   return out.sort((p, q) => q.at - p.at);
 }
 const unreadN = () => { const seen = myRx().seen || 0; return myNotifs().filter(n => n.at > seen).length; };
@@ -1889,30 +1892,30 @@ function bellBtn(cls){
 const plural = (n, a, b) => n + ' ' + (n === 1 ? a : b);
 function notifText(n){
   const nm = n.who ? athName(n.who) : 'Alguém', cam = n.s.length ? n.s.map(x => { const sg = segByN(x); return sg ? pad2(x) + ' · ' + sg.nome : 'caminho ' + pad2(x); }).join(', ') : 'uma atividade tua';
-  const parts = []; if (n.n) parts.push('deu ' + plural(n.n, 'polegar', 'polegares')); if (n.d) parts.push(n.n ? 'e vai desafiar-te' : 'vai desafiar-te');
+  const parts = []; if (n.r.length) parts.push('reagiu com ' + n.r.map(i => EMO[i][0]).join(' ')); if (n.d) parts.push(n.r.length ? 'e vai desafiar-te' : 'vai desafiar-te');
   return [h('strong',{}, nm), ' ' + parts.join(' ') + ' em ', h('span',{class:'nt-c'}, cam), '.'];
 }
 function notifCard(){
   const L = myNotifs(), seen = S.nSnap != null ? S.nSnap : (myRx().seen || 0), N = S.nN || 8, unread = L.filter(n => n.at > seen).length;
   const box = h('section',{class:'card stack', id:'notifs', style:'gap:10px'});
   box.append(h('div',{class:'row', style:'justify-content:space-between;align-items:center'}, h('div',{class:'row', style:'gap:10px'}, h('span',{class:'qa-i'}, navIcon(ICON_BELL)), h('div',{class:'stack', style:'gap:0'}, h('h3',{style:'margin:0'}, 'Notificações'), h('span',{class:'small muted'}, L.length ? plural(L.length, 'reação', 'reações') + ' às tuas atividades' : 'Reações às tuas atividades'))), unread ? h('span',{class:'tag ok'}, unread + (unread === 1 ? ' nova' : ' novas')) : null));
-  if (!L.length){ box.append(h('p',{class:'muted', style:'margin:0'}, 'Ainda sem notificações. Quando alguém der polegares ou aceitar o desafio nas tuas atividades, aparece aqui.')); return box; }
+  if (!L.length){ box.append(h('p',{class:'muted', style:'margin:0'}, 'Ainda sem notificações. Quando alguém reagir ou aceitar o desafio nas tuas atividades, aparece aqui.')); return box; }
   box.append(h('div',{class:'nlist'}, ...L.slice(0, N).map(n => h('button',{class:'nitem' + (n.at > seen ? ' new' : ''), onclick:()=>{ const s0 = n.s[0]; if (s0){ S.segSel = s0; S.segOpen = true; S.segKeep = true; goTab('seg'); } }}, n.who ? avatar(n.who, 'sm') : avatar(null, 'sm'), h('span',{class:'nt'}, h('span',{class:'nt-t'}, ...notifText(n)), h('small',{class:'small muted'}, agoTxt(n.at))), n.at > seen ? h('i',{class:'ndot', 'aria-label':'nova'}) : null))));
   if (L.length > N) box.append(h('button',{class:'b o s', style:'justify-self:start', onclick:()=>{ S.nN = N + 8; doRender(); }}, 'Ver mais (' + (L.length - N) + ')'));
   return box;
 }
 function thumbsBar(g, mineG, me){
-  const r = ((S.rx[S.uid] || {}).t || {})[g.rk] || {n:0, d:0}, tot = rxOf(g.rk);
-  const lab = h('span',{class:'fc-n small muted'}, tot.thumbs || tot.des ? [tot.thumbs ? plural(tot.thumbs, 'polegar', 'polegares') : '', tot.des ? plural(tot.des, 'desafio', 'desafios') : ''].filter(Boolean).join(' · ') : (mineG ? 'Ainda sem reações' : 'Sê o primeiro a reagir'));
-  if (mineG) return h('div',{class:'fc-act own'}, h('span',{class:'qa-i'}, navIcon(ICON_THUMB)), h('div',{class:'stack', style:'gap:0'}, h('strong',{}, tot.thumbs || tot.des ? 'Recebeste ' + [plural(tot.thumbs, 'polegar', 'polegares'), plural(tot.des, 'desafio', 'desafios')].join(' e ') : 'Ainda sem reações'), h('small',{class:'small muted'}, 'Os outros atletas veem aqui o que acham da tua atividade.')));
-  const thumbs = [0, 1, 2].map(i => h('button',{class:'thumb' + (r.n > i ? ' on' : ''), 'aria-pressed':String(r.n > i), 'aria-label':'Dar ' + (i + 1) + (i ? ' polegares' : ' polegar'),
-    onclick:()=>setRx(g, {n: r.n > i ? i : i + 1})}, navIcon(ICON_THUMB)));
-  return h('div',{class:'fc-act'}, h('div',{class:'fc-th'}, h('div',{class:'thumbs', role:'group', 'aria-label':'Polegares'}, ...thumbs), lab),
+  const r = ((S.rx[S.uid] || {}).t || {})[g.rk] || {r:[], d:0}, mine = rIdx(r), tot = rxOf(g.rk);
+  const lab = h('span',{class:'fc-n small muted'}, tot.any ? rxTxt(tot) : (mineG ? 'Ainda sem reações' : 'Sê o primeiro a reagir'));
+  if (mineG) return h('div',{class:'fc-act own'}, h('span',{class:'qa-i'}, navIcon(ICON_THUMB)), h('div',{class:'stack', style:'gap:0'}, h('strong',{}, tot.any ? 'Recebeste ' + rxTxt(tot) : 'Ainda sem reações'), h('small',{class:'small muted'}, 'Os outros atletas veem aqui o que acham da tua atividade.')));
+  const btns = EMO.map(([em, nm], i) => { const on = mine.includes(i); return h('button',{class:'thumb' + (on ? ' on' : ''), 'aria-pressed':String(on), 'aria-label':nm, title:nm,
+    onclick:()=>setRx(g, {r: on ? mine.filter(x => x !== i) : [...mine, i].sort()})}, h('span',{class:'em', 'aria-hidden':'true'}, em)); });
+  return h('div',{class:'fc-act'}, h('div',{class:'fc-th'}, h('div',{class:'thumbs', role:'group', 'aria-label':'Reações'}, ...btns), lab),
     h('button',{class:'fc-go' + (r.d ? ' on' : ''), 'aria-pressed':String(!!r.d), onclick:()=>setRx(g, {d: r.d ? 0 : 1})}, navIcon(r.d ? 'M5 12l5 5L20 7' : ICON_FLAG), h('span',{}, r.d ? 'A desafiar' : 'Vou desafiar')));
 }
 function viewAtv(){
   const blind = cfg().hide && !S.admin, me = myAid(), out = [];
-  out.push(h('h2',{}, 'Atividades'), h('p',{class:'muted', style:'margin:0;max-width:60ch'}, 'As últimas atividades carregadas. Dá até 3 polegares e diz que vais desafiar.'));
+  out.push(h('h2',{}, 'Atividades'), h('p',{class:'muted', style:'margin:0;max-width:60ch'}, 'As últimas atividades carregadas. Reage com 🥴 👍 💪 e diz que vais desafiar.'));
   if (!S.segs.length) return out.concat(h('div',{class:'card empty'}, 'Ainda não há caminhos publicados.'));
   const L = effList(), valid = y => !y.rj && !y.out && (!y.fl || y.ap), bySeg = {};
   for (const d of L) (bySeg[d.s] = bySeg[d.s] || []).push(d);
