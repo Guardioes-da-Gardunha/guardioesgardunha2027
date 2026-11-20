@@ -279,7 +279,7 @@ select option,select optgroup{background:var(--surface);color:var(--ink)}
 .fc-pic{position:absolute;inset:0} .fc-pic svg,.fc-pic img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover}
 .fc-ph::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,22,20,0) 38%,rgba(20,22,20,.9) 100%);pointer-events:none}
 .fc-cap{position:absolute;left:14px;right:14px;bottom:12px;z-index:1;display:grid;gap:3px;text-align:left}
-.fc-pic ~ .fc-cap .fc-k{display:flex;align-items:baseline;gap:10px} .fc-num{font-family:var(--head);font-weight:900;font-stretch:62%;font-size:1.5rem;line-height:.9;letter-spacing:.01em;color:var(--ink);text-shadow:0 1px 8px rgba(0,0,0,.6)}
+.fc-pic ~ .fc-cap .fc-k{display:flex;align-items:baseline;gap:10px} .fc-num{font-family:var(--head);font-weight:900;font-stretch:62%;font-size:2.6rem;line-height:.85;letter-spacing:.01em;color:var(--terra-txt);text-shadow:0 1px 8px rgba(0,0,0,.6)}
 .fc-nm{font-family:var(--head);font-weight:800;font-stretch:75%;text-transform:uppercase;letter-spacing:.02em;font-size:1.1rem;line-height:1.05;color:var(--ink);text-shadow:0 1px 8px rgba(0,0,0,.6);overflow-wrap:anywhere}
 .fc-pic .ra-run{animation:ra-vis 8s linear infinite both} .fc-pic .ra-pa{animation:ra-a .36s steps(1) infinite} .fc-pic .ra-pb{animation:ra-b .36s steps(1) infinite}
 .fc-pic .ra-lb{font:700 11px 'JetBrains Mono',monospace;letter-spacing:.08em;fill:var(--ink);stroke:var(--bg);stroke-width:3;paint-order:stroke}
@@ -1982,8 +1982,6 @@ function segRun(sg){
   const sc = sv('g',{transform:'scale(.34)'}); sc.append(inner);
   const run = sv('g',{class:'ra-run'}); run.append(sv('animateMotion',{dur:'8s', repeatCount:'indefinite', path:d, keyPoints:'0;0;1;1', keyTimes:'0;0.08;0.62;1', calcMode:'linear'}), sc);
   svg.append(run);
-  if (circ.length > 1){ const lb = (c, t, dx, anchor) => { const x = sv('text',{x:+c.getAttribute('cx') + dx, y:+c.getAttribute('cy') - 12, class:'ra-lb', 'text-anchor':anchor}); x.textContent = t; svg.append(x); };
-    const pt = segPts(sg); lb(circ[0], pt[0], -2, 'start'); lb(circ[1], pt[1], 2, 'end'); }
   return box;
 }
 const ATV_PAGE = 5;
