@@ -1666,7 +1666,7 @@ function viewAtv(){
       hero.append(h('div',{class:'fc-seg'},
         h('button',{class:'fc-ph', 'aria-label':'Abrir o caminho ' + (sg ? sg.nome : ''), onclick:()=>{ S.segSel = d.s; S.segOpen = true; S.segKeep = true; goTab('seg'); }},
           segRun(sg),
-          h('span',{class:'fc-cap'}, h('span',{class:'fc-k'}, h('b',{class:'fc-num num'}, pad2(d.s)), [sg && sg.localidade, sg && sg.tipo].filter(Boolean).join(' · ')))),
+          h('span',{class:'fc-cap'}, h('span',{class:'fc-k'}, h('b',{class:'fc-num num'}, pad2(d.s)), (sg && sg.localidade) || ''))),
         h('div',{class:'fc-m'}, h('strong',{class:'fc-time num'}, C.fmtTime(x.t)), h('span',{class:'small muted num'}, [sg ? km(sg.dist) : '', sg ? kmh(sg.dist, x.t) : '', fmtDT(x.st)].filter(Boolean).join(' · '))),
         r && !blind ? h('div',{class:'fc-tags'}, h('span',{class:'atv-pos', title:'Posição entre ' + (gOf(a) === 'F' ? 'as guardiãs' : 'os guardiões') + ' na altura'}, r.pos + '.º de ' + r.n), ...tags) : (tags.length ? h('div',{class:'fc-tags'}, ...tags) : null))); }
     card.append(hero, blind ? null : thumbsBar(g, mineG, me)); feed.append(card); }
