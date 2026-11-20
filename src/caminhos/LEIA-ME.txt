@@ -1,0 +1,3 @@
+Fotografias dos caminhos: um ficheiro por caminho, com o número a dois dígitos (01.jpg, 02.jpg, ... 25.jpg).
+Sem ficheiro, a app mostra uma ilustração desenhada a partir do tipo e do nível do caminho.
+Formato recomendado: JPG, 1280x720 (16:9), até 250 KB.

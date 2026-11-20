@@ -63,4 +63,7 @@ open('docs/.nojekyll', 'w').close()
 # e na raiz, para o GitHub Pages funcionar com a pasta / (root) ou /docs
 for f in PUBFILES: shutil.copy('public/' + f, f)
 open('.nojekyll', 'w').close()
+# fotografias dos caminhos (src/caminhos/NN.jpg) para as 3 pastas publicadas
+if os.path.isdir('src/caminhos'):
+    for dst in ('public/caminhos', 'docs/caminhos', 'caminhos'): shutil.copytree('src/caminhos', dst, dirs_exist_ok=True)
 print('public/index.html', len(head + src))
