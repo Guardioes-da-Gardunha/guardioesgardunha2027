@@ -1927,8 +1927,8 @@ function segArt(sg, bare){
 /* fotografia por nome/localidade (primeira regra que bate) → ficheiros em caminhos/<nome>.jpg; depois caminhos/NN.jpg; sem nada, a ilustração */
 const SEG_FOTOS = [
   [/castanheir/, ['pr-castanheiros']],
-  [/mastro/, ['cabeco-do-mastro-baloico']],
   [/orada/, ['senhora-da-orada']],
+  [/mastro/, ['cabeco-do-mastro-baloico']],
   [/moeda/, ['alto-da-moeda']],
   [/pedra d.?hera|hera/, ['pedra-dhera']],
   [/penha/, ['penha']],
@@ -1947,9 +1947,13 @@ const SEG_FOTOS = [
   [/praia|fluvial/, ['souto-da-casa-praia']],
   [/alcongosta.*antena|antena.*alcongosta|antenas/, ['alcongosta-antenas']],
   [/capela/, ['capela-gardunha']],
-  [/fully|cereja|cerejeira/, ['fully-gardunha']]
+  [/fully|cereja|cerejeira|barbas/, ['fully-gardunha']],
+  [/cumeeira|cumeada/, ['penha']]
 ];
+/* escolhas manuais por número do caminho (têm prioridade sobre o nome) */
+const SEG_FOTO_N = {4:'souto-da-casa-praia', 7:'alcongosta-floresta', 9:'alcongosta-antenas', 19:'castelo-novo-antenas', 21:'fully-gardunha', 29:'castelo-novo', 33:'miradouro-castelo-novo'};
 const segFotos = sg => {
+  if (SEG_FOTO_N[sg.n]) return [SEG_FOTO_N[sg.n], pad2(sg.n)];
   const t = (sg.nome || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ' ').replace(/\s+/g, ' ');
   const tt = t.replace(/ç/g, 'c');
   const hit = SEG_FOTOS.find(r => r[0].test(t) || r[0].test(tt));
