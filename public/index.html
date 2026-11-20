@@ -274,12 +274,14 @@ select option,select optgroup{background:var(--surface);color:var(--ink)}
 @media (prefers-reduced-motion:reduce){ .thumb,.fc-go,.thumb .em{transition:none} }
 
 .fc-seg{padding:0 0 14px} .fc-seg>:not(.fc-ph){margin-inline:16px}
-.fc-ph{all:unset;box-sizing:border-box;position:relative;display:block;width:100%;aspect-ratio:16/9;cursor:pointer;overflow:hidden;margin-bottom:2px}
+.fc-ph{all:unset;box-sizing:border-box;display:block;width:100%;cursor:pointer;margin-bottom:2px}
 .fc-ph:focus-visible{outline:2px solid var(--terra);outline-offset:-2px}
+.fc-map{display:block;position:relative;aspect-ratio:16/9;overflow:hidden;background:var(--mapbg);border-block:1px solid var(--line)}
+.fc-map svg.map{position:absolute;inset:0;width:100%;height:100%;border-radius:0;max-height:none}
 .fc-pic{position:absolute;inset:0} .fc-pic svg,.fc-pic img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover}
-.fc-ph::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,22,20,0) 38%,rgba(20,22,20,.9) 100%);pointer-events:none}
-.fc-cap{position:absolute;left:14px;right:14px;bottom:12px;z-index:1;display:grid;gap:3px;text-align:left}
-.fc-nm{font-family:var(--head);font-weight:800;font-stretch:75%;text-transform:uppercase;letter-spacing:.02em;font-size:1.1rem;line-height:1.05;color:var(--ink);text-shadow:0 1px 8px rgba(0,0,0,.6);overflow-wrap:anywhere}
+.fc-cap{display:grid;gap:3px;text-align:left;padding:10px 16px 0}
+.fc-pc{display:flex;flex-wrap:wrap;gap:2px 14px;font-size:.8rem;color:var(--soft-text)} .fc-pc b{font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--terra-txt);font-weight:600}
+.fc-nm{font-family:var(--head);font-weight:800;font-stretch:75%;text-transform:uppercase;letter-spacing:.02em;font-size:.88rem;line-height:1.1;color:var(--ink);overflow-wrap:anywhere}
 .fc-ph:hover .fc-nm{color:var(--terra-txt)}
 
 /* caminhos em mosaico (tiles) */
@@ -956,7 +958,9 @@ function mapSVG(layers, opts){ // layers: [{xy:[[x,y]..], cls}] em metros locais
     let d = ''; for (let i=0;i<L.xy.length;i+=step) d += (i?'L':'M') + X(L.xy[i][0]) + ' ' + Y(L.xy[i][1]);
     const last = L.xy[L.xy.length-1]; d += 'L' + X(last[0]) + ' ' + Y(last[1]);
     svg.append(sv('path',{d, class:L.cls}));
-    if (L.ends){ svg.append(flagIcon(+X(L.xy[0][0]), +Y(L.xy[0][1]), false), flagIcon(+X(last[0]), +Y(last[1]), true)); }
+    if (L.ends){ svg.append(flagIcon(+X(L.xy[0][0]), +Y(L.xy[0][1]), false), flagIcon(+X(last[0]), +Y(last[1]), true));
+      if (opts && opts.labels){ const lb = (px, py, txt, fin) => { const t = sv('text',{x:(+px + 30).toFixed(1), y:(+py - 18).toFixed(1), fill:'var(--ink)', 'font-size':12, 'font-weight':700, 'font-family':'JetBrains Mono, monospace', 'letter-spacing':'.06em', 'text-anchor':+px > W - 110 ? 'end' : 'start', stroke:'var(--mapbg)', 'stroke-width':3, 'paint-order':'stroke'}); if (+px > W - 110) t.setAttribute('x', (+px - 6).toFixed(1)); t.textContent = txt; svg.append(t); };
+        lb(X(L.xy[0][0]), Y(L.xy[0][1]), 'PARTIDA'); lb(X(last[0]), Y(last[1]), 'CHEGADA'); } }
   }
   // escala
   const m = [50,100,200,500,1000,2000].find(v => v*k > 60) || 2000; const bx = W-P-m*k, by = H-P;
@@ -1927,6 +1931,8 @@ function segPic(sg){
   }
   return box;
 }
+/* partida e chegada a partir do nome ("A - B D+"); sem isso, só as etiquetas */
+const segPC = sg => { const n = ((sg && sg.nome) || '').replace(/\s+[Dd][+\-−]\s*$/, ''), m = n.split(/\s+[-–]\s+/); return m.length === 2 ? [': ' + m[0].trim(), ': ' + m[1].trim()] : ['', '']; };
 const ATV_PAGE = 5;
 const EMO = [['🥴','É preciso puxar mais!'], ['👍','Bom esforço!'], ['💪','Que máquina!']];
 const rIdx = r => Array.isArray(r.r) ? r.r : (r.n ? [1] : []);
@@ -2022,8 +2028,9 @@ function viewAtv(){
       if (stt) tags.push(h('span',{class:'tag ' + stt[0]}, stt[1]));
       if (r && !blind){ if (r.pos === 1) tags.push(h('span',{class:'tag ok'}, r.first && r.n === 1 ? 'Primeiro bordão' : r.ledBy === a.id ? 'Melhorou o bordão' : r.n === 1 ? 'Primeiro bordão' : 'Roubou o bordão')); else if (r.pb) tags.push(h('span',{class:'tag'}, 'Melhor tempo pessoal')); else if (r.first) tags.push(h('span',{class:'tag'}, 'Primeira vez')); }
       hero.append(h('div',{class:'fc-seg'},
-        h('button',{class:'fc-ph', 'aria-label':'Abrir o caminho ' + (sg ? sg.nome : ''), onclick:()=>{ S.segSel = d.s; S.segOpen = true; S.segKeep = true; goTab('seg'); }}, segPic(sg),
-          h('span',{class:'fc-cap'}, h('span',{class:'fc-k'}, [pad2(d.s), sg && sg.localidade, sg && sg.tipo].filter(Boolean).join(' · ')), h('strong',{class:'fc-nm'}, sg ? sg.nome : 'Caminho'))),
+        h('button',{class:'fc-ph', 'aria-label':'Abrir o caminho ' + (sg ? sg.nome : ''), onclick:()=>{ S.segSel = d.s; S.segOpen = true; S.segKeep = true; goTab('seg'); }},
+          h('span',{class:'fc-map'}, sg && hasTrace(sg) ? mapSVG([{xy:segXY(sg), cls:'sel', ends:true}], {w:640, h:300, labels:true, label:'Desenho do percurso ' + sg.nome}) : segPic(sg)),
+          h('span',{class:'fc-cap'}, h('span',{class:'fc-k'}, [pad2(d.s), sg && sg.localidade, sg && sg.tipo].filter(Boolean).join(' · ')), (() => { const pc = segPC(sg); return pc[0] ? h('span',{class:'fc-pc'}, h('span',{}, h('b',{}, 'Partida'), pc[0]), h('span',{}, h('b',{}, 'Chegada'), pc[1])) : null; })(), h('strong',{class:'fc-nm'}, sg ? sg.nome : 'Caminho'))),
         h('div',{class:'fc-m'}, h('strong',{class:'fc-time num'}, C.fmtTime(x.t)), h('span',{class:'small muted num'}, [sg ? km(sg.dist) : '', sg ? kmh(sg.dist, x.t) : '', fmtDT(x.st)].filter(Boolean).join(' · '))),
         r && !blind ? h('div',{class:'fc-tags'}, h('span',{class:'atv-pos', title:'Posição entre ' + (gOf(a) === 'F' ? 'as guardiãs' : 'os guardiões') + ' na altura'}, r.pos + '.º de ' + r.n), ...tags) : (tags.length ? h('div',{class:'fc-tags'}, ...tags) : null))); }
     card.append(hero, blind ? null : thumbsBar(g, mineG, me)); feed.append(card); }
