@@ -285,8 +285,7 @@ select option,select optgroup{background:var(--surface);color:var(--ink)}
 .fc-ph:hover .fc-nm{color:var(--terra-txt)}
 
 /* animação do percurso */
-.map .ra-cont path{fill:none;stroke:#A3A895;stroke-opacity:.13;stroke-width:1;stroke-linejoin:round} .map .ra-cont path.ix{stroke-opacity:.3;stroke-width:1.4}
-.map .ra-base{fill:none;stroke:var(--track);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;opacity:.55}
+.map .ra-base{fill:none;stroke:var(--bg);stroke-width:9;stroke-linecap:round;stroke-linejoin:round;opacity:.6}
 .map .ra{stroke-dasharray:1000;animation:ra-draw 8s linear infinite both}
 @keyframes ra-draw{0%,8%{stroke-dashoffset:1000}62%,100%{stroke-dashoffset:0}}
 .map .ra-run{animation:ra-vis 8s linear infinite both}
@@ -981,15 +980,11 @@ function mapSVG(layers, opts){ // layers: [{xy:[[x,y]..], cls}] em metros locais
 const segXY = s => C.tracePoly(s.trace);
 /* desenho animado do percurso (como na animação do "Como funciona"): o traçado desenha-se e o guardião com bordão corre até à meta */
 function routeAnim(sg){
-  const svg = mapSVG([{xy:segXY(sg), cls:'sel', ends:true}], {w:640, h:300, labels:true, label:'Desenho do percurso ' + sg.nome});
+  const svg = mapSVG([{xy:segXY(sg), cls:'sel', ends:true}], {w:640, h:360, labels:true, label:'Desenho do percurso ' + sg.nome});
   const sel = svg.querySelector('path.sel'); if (!sel) return svg;
-  /* curvas de nível do design system, por trás do percurso (cada caminho tem as suas) */
-  let z = ((sg.n || 1) * 7919 + 11) >>> 0; const rnd = () => { z = (z + 0x6D2B79F5) >>> 0; let t = z; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; };
-  const cg = sv('g',{class:'ra-cont', 'aria-hidden':'true'}), ph = rnd() * 6.28, ph2 = rnd() * 6.28;
-  for (let i = 0; i < 15; i++){ const y0 = -10 + i * 24, a = 14 + rnd() * 18; let dd = '';
-    for (let x = -20; x <= 660; x += 20){ const y = y0 + Math.sin(x / 95 + ph + i * .45) * a + Math.sin(x / 41 + ph2 - i * .3) * (a * .35); dd += (x < 0 ? 'M' : 'L') + x + ' ' + y.toFixed(1); }
-    cg.append(sv('path',{d:dd, class: i % 4 === 0 ? 'ix' : ''})); }
-  svg.insertBefore(cg, svg.firstChild);
+  /* relevo em camadas (quase 3D) do design system por trás do percurso */
+  { const tmp = document.createElement('div'); tmp.innerHTML = segArt(sg, true); const bg = tmp.firstChild, g = sv('g',{class:'ra-bg', 'aria-hidden':'true'});
+    while (bg && bg.firstChild) g.append(bg.firstChild); svg.insertBefore(g, svg.firstChild); }
   const d = sel.getAttribute('d'), base = sv('path',{d, class:'ra-base'});
   sel.setAttribute('class', 'sel ra'); sel.setAttribute('pathLength', '1000'); svg.insertBefore(base, sel);
   const ln = (dd, c) => sv('path',{d:dd, fill:'none', stroke:c, 'stroke-width':14, 'stroke-linecap':'round', 'stroke-linejoin':'round'});
@@ -1909,7 +1904,7 @@ const ICON_THUMB = 'M7 10v12 M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2
 const ICON_BELL = 'M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9 M10.3 21a1.94 1.94 0 0 0 3.4 0';
 const ICON_FLAG = 'M5 21V4 M5 4h12l-2.5 4 2.5 4H5';
 /* imagem do caminho: fotografia (caminhos/NN.jpg) ou, sem ela, uma ilustração desenhada a partir do tipo e do nível */
-function segArt(sg){
+function segArt(sg, bare){
   const n = sg ? sg.n : 0, tipo = sg ? sg.tipo : 'Subida', niv = (sg && sg.nivel) || 3;
   let z = (n * 7919 + 3) >>> 0; const rnd = () => { z = (z + 0x6D2B79F5) >>> 0; let t = z; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; };
   const W = 640, H = 360, X = 9, trend = tipo === 'Descida' ? -1 : tipo === 'Cumeada' ? 0 : tipo === 'Loop' ? 0.3 : 1;
@@ -1921,6 +1916,7 @@ function segArt(sg){
   let svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><rect width="' + W + '" height="' + H + '" fill="var(--mapbg)"/>';
   for (let i = 0; i < 9; i++){ const y = 24 + i * 38 + rnd() * 10; svg += '<path d="M-20 ' + y.toFixed(0) + ' C 160 ' + (y - 22).toFixed(0) + ', 340 ' + (y + 24).toFixed(0) + ', 660 ' + (y - 8).toFixed(0) + '" fill="none" stroke="#A3A895" stroke-opacity="' + (i % 3 ? .08 : .16) + '"/>'; }
   L.forEach((pts, i) => { svg += '<path d="' + smooth(pts) + bottom + '" fill="' + fills[i] + '"/>'; });
+  if (bare) return svg + '</svg>';
   const front = L[2], st = front[1], en = front[X - 1], route = front.slice(1, X);
   svg += '<path d="' + smooth(route) + '" fill="none" stroke="var(--terra)" stroke-width="4" stroke-linecap="round" stroke-dasharray="1 9"/>';
   svg += '<circle cx="' + st[0] + '" cy="' + (st[1] - 2) + '" r="6" fill="var(--bg)" stroke="var(--terra)" stroke-width="3"/><circle cx="' + en[0] + '" cy="' + (en[1] - 2) + '" r="7" fill="var(--terra)"/></svg>';
