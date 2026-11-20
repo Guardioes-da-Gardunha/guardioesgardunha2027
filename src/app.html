@@ -277,14 +277,14 @@ select option,select optgroup{background:var(--surface);color:var(--ink)}
 .mt{all:unset;box-sizing:border-box;position:relative;display:block;min-width:0;border-radius:20px;overflow:hidden;border:1px solid var(--line);background:var(--surface);cursor:pointer;isolation:isolate;-webkit-tap-highlight-color:transparent}
 .mt.tall{grid-row:span 2} .mt.wide{grid-column:span 2}
 .mt .fc-pic{transition:transform .5s cubic-bezier(.2,.7,.2,1)} .mt:hover .fc-pic{transform:scale(1.05)}
-.mt::after{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(20,22,20,.35) 0%,rgba(20,22,20,0) 32%,rgba(20,22,20,.88) 100%);pointer-events:none}
+.mt::after{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(20,22,20,.4) 0%,rgba(20,22,20,0) 28%,rgba(20,22,20,.55) 52%,rgba(20,22,20,.92) 100%);pointer-events:none}
 .mt:focus-visible{outline:2px solid var(--terra);outline-offset:2px}
 .mt-top{position:absolute;z-index:2;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
 .mt-chip{font-family:var(--mono);font-size:.68rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:99px;background:rgba(20,22,20,.72);color:var(--ink);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .mt-chip.Subida{background:var(--terra);color:var(--on-terra)}
 .mt-plus{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:rgba(236,238,230,.92);color:var(--on-light);font-size:1.3rem;line-height:1;font-weight:500;transition:transform .2s ease,background .2s} .mt:hover .mt-plus{transform:rotate(90deg);background:var(--terra)}
 .mt-bot{position:absolute;z-index:2;left:12px;right:12px;bottom:11px;display:grid;gap:3px}
-.mt-k{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--terra-txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mt-k{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--terra-txt);text-shadow:0 1px 6px rgba(0,0,0,.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mt-nm{font-family:var(--head);font-weight:900;font-stretch:62%;text-transform:uppercase;font-size:1.28rem;line-height:.98;text-wrap:balance;color:var(--ink);text-shadow:0 1px 10px rgba(0,0,0,.55);overflow-wrap:break-word;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .mt.tall .mt-nm,.mt.wide .mt-nm{font-size:1.5rem;-webkit-line-clamp:4} @media (min-width:700px){ .mt.tall .mt-nm,.mt.wide .mt-nm{font-size:1.6rem} }
 .mt-m{display:flex;align-items:center;gap:6px;font-size:.72rem;white-space:nowrap;color:var(--soft-text)} .mt-m .pips i{width:7px;height:7px}
@@ -1479,9 +1479,49 @@ function segArt(sg){
   svg += '<circle cx="' + st[0] + '" cy="' + (st[1] - 2) + '" r="6" fill="var(--bg)" stroke="var(--terra)" stroke-width="3"/><circle cx="' + en[0] + '" cy="' + (en[1] - 2) + '" r="7" fill="var(--terra)"/></svg>';
   return svg;
 }
+/* fotografia por nome/localidade (primeira regra que bate) → ficheiros em caminhos/<nome>.jpg; depois caminhos/NN.jpg; sem nada, a ilustração */
+const SEG_FOTOS = [
+  [/castanheir/, ['pr-castanheiros']],
+  [/mastro/, ['cabeco-do-mastro-baloico']],
+  [/orada/, ['senhora-da-orada']],
+  [/moeda/, ['alto-da-moeda']],
+  [/pedra d.?hera|hera/, ['pedra-dhera']],
+  [/penha/, ['penha']],
+  [/vigia/, ['posto-de-vigia']],
+  [/balou?[cç]o|baloi|balan[cç]o/, ['baloico-gardunha']],
+  [/castelo velho/, ['castelo-velho']],
+  [/miradouro.*castelo novo|castelo novo.*miradouro/, ['miradouro-castelo-novo']],
+  [/castelo novo.*antena|antena.*castelo novo/, ['castelo-novo-antenas']],
+  [/castelo novo/, ['castelo-novo', 'castelo-novo-2']],
+  [/alpedrinha.*miradouro|miradouro.*alpedrinha/, ['alpedrinha-miradouro']],
+  [/pelourinho/, ['alpedrinha-pelourinho']],
+  [/cal[cç]ada/, ['alpedrinha-calcada']],
+  [/teatro|t\.? ?c\./, ['alpedrinha-teatro']],
+  [/picoto/, ['souto-da-casa-picoto']],
+  [/carvalh/, ['souto-da-casa-carvalhal']],
+  [/praia|fluvial/, ['souto-da-casa-praia']],
+  [/alcongosta.*antena|antena.*alcongosta|antenas/, ['alcongosta-antenas']],
+  [/capela/, ['capela-gardunha']],
+  [/fully|cereja|cerejeira/, ['fully-gardunha']],
+  [/alcongosta/, ['alcongosta-floresta', 'alcongosta-antenas']],
+  [/alpedrinha/, ['alpedrinha-pelourinho', 'alpedrinha-calcada']],
+  [/souto da casa/, ['souto-da-casa-praia', 'souto-da-casa-carvalhal']],
+  [/s[aã]o vicente/, ['senhora-da-orada']],
+  [/gardunha/, ['fully-gardunha']]
+];
+const segFotos = sg => {
+  const t = ((sg.nome || '') + ' ' + (sg.localidade || '')).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ' ').replace(/\s+/g, ' ');
+  const tt = t.replace(/ç/g, 'c');
+  const hit = SEG_FOTOS.find(r => r[0].test(t) || r[0].test(tt));
+  return (hit ? hit[1] : []).concat(pad2(sg.n));
+};
 function segPic(sg){
   const box = h('div',{class:'fc-pic'}); box.innerHTML = segArt(sg);
-  if (sg){ const im = new Image(); im.alt = ''; im.loading = 'lazy'; im.decoding = 'async'; im.onload = () => box.prepend(im); im.src = 'caminhos/' + pad2(sg.n) + '.jpg'; }
+  if (sg){
+    const lista = segFotos(sg);
+    const tenta = i => { if (i >= lista.length) return; const im = new Image(); im.alt = ''; im.decoding = 'async'; im.onload = () => { box.textContent = ''; box.append(im); }; im.onerror = () => tenta(i + 1); im.src = 'caminhos/' + lista[i] + '.jpg'; };
+    tenta(0);
+  }
   return box;
 }
 const ATV_PAGE = 5;
