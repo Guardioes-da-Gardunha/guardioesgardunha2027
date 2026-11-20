@@ -267,6 +267,7 @@ select option,select optgroup{background:var(--surface);color:var(--ink)}
 .fc-pic{position:absolute;inset:0} .fc-pic svg,.fc-pic img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover}
 .fc-ph::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,22,20,0) 38%,rgba(20,22,20,.9) 100%);pointer-events:none}
 .fc-cap{position:absolute;left:14px;right:14px;bottom:12px;z-index:1;display:grid;gap:3px;text-align:left}
+.fc-pic ~ .fc-cap .fc-k{display:flex;align-items:baseline;gap:10px} .fc-num{font-family:var(--head);font-weight:900;font-stretch:62%;font-size:1.5rem;line-height:.9;letter-spacing:.01em;color:var(--ink);text-shadow:0 1px 8px rgba(0,0,0,.6)}
 .fc-nm{font-family:var(--head);font-weight:800;font-stretch:75%;text-transform:uppercase;letter-spacing:.02em;font-size:1.1rem;line-height:1.05;color:var(--ink);text-shadow:0 1px 8px rgba(0,0,0,.6);overflow-wrap:anywhere}
 .fc-pic .ra-run{animation:ra-vis 8s linear infinite both} .fc-pic .ra-pa{animation:ra-a .36s steps(1) infinite} .fc-pic .ra-pb{animation:ra-b .36s steps(1) infinite}
 .fc-pic .ra-lb{font:700 11px 'JetBrains Mono',monospace;letter-spacing:.08em;fill:var(--ink);stroke:var(--bg);stroke-width:3;paint-order:stroke}
@@ -1548,6 +1549,9 @@ function segPic(sg){
   }
   return box;
 }
+/* pontos de partida e de chegada: "A - B" no nome; sem isso, a localidade e o nome */
+const segPts = sg => { const n = ((sg && sg.nome) || '').replace(/\s+[Dd][+\-−]\s*$/, '').trim(), m = n.split(/\s+[-–]\s+/), cut = t => t.length > 28 ? t.slice(0, 27).trim() + '…' : t;
+  return m.length === 2 ? [cut(m[0].trim()), cut(m[1].trim())] : [cut((sg && sg.localidade) || 'Partida'), cut(n || 'Chegada')]; };
 /* partida e chegada a partir do nome ("A - B D+"); sem isso, só as etiquetas */
 const segPC = sg => { const n = ((sg && sg.nome) || '').replace(/\s+[Dd][+\-−]\s*$/, ''), m = n.split(/\s+[-–]\s+/); return m.length === 2 ? [': ' + m[0].trim(), ': ' + m[1].trim()] : ['', '']; };
 /* relevo em camadas do caminho com o guardião (bordão) a correr pelo tracejado */
@@ -1564,7 +1568,7 @@ function segRun(sg){
   const run = sv('g',{class:'ra-run'}); run.append(sv('animateMotion',{dur:'8s', repeatCount:'indefinite', path:d, keyPoints:'0;0;1;1', keyTimes:'0;0.08;0.62;1', calcMode:'linear'}), sc);
   svg.append(run);
   if (circ.length > 1){ const lb = (c, t, dx, anchor) => { const x = sv('text',{x:+c.getAttribute('cx') + dx, y:+c.getAttribute('cy') - 12, class:'ra-lb', 'text-anchor':anchor}); x.textContent = t; svg.append(x); };
-    lb(circ[0], 'PARTIDA', -2, 'start'); lb(circ[1], 'CHEGADA', 2, 'end'); }
+    const pt = segPts(sg); lb(circ[0], pt[0], -2, 'start'); lb(circ[1], pt[1], 2, 'end'); }
   return box;
 }
 const ATV_PAGE = 5;
@@ -1664,7 +1668,7 @@ function viewAtv(){
       hero.append(h('div',{class:'fc-seg'},
         h('button',{class:'fc-ph', 'aria-label':'Abrir o caminho ' + (sg ? sg.nome : ''), onclick:()=>{ S.segSel = d.s; S.segOpen = true; S.segKeep = true; goTab('seg'); }},
           segRun(sg),
-          h('span',{class:'fc-cap'}, h('span',{class:'fc-k'}, [pad2(d.s), sg && sg.localidade, sg && sg.tipo].filter(Boolean).join(' · ')), h('strong',{class:'fc-nm'}, sg ? sg.nome : 'Caminho'))),
+          h('span',{class:'fc-cap'}, h('span',{class:'fc-k'}, h('b',{class:'fc-num num'}, pad2(d.s)), [sg && sg.localidade, sg && sg.tipo].filter(Boolean).join(' · ')))),
         h('div',{class:'fc-m'}, h('strong',{class:'fc-time num'}, C.fmtTime(x.t)), h('span',{class:'small muted num'}, [sg ? km(sg.dist) : '', sg ? kmh(sg.dist, x.t) : '', fmtDT(x.st)].filter(Boolean).join(' · '))),
         r && !blind ? h('div',{class:'fc-tags'}, h('span',{class:'atv-pos', title:'Posição entre ' + (gOf(a) === 'F' ? 'as guardiãs' : 'os guardiões') + ' na altura'}, r.pos + '.º de ' + r.n), ...tags) : (tags.length ? h('div',{class:'fc-tags'}, ...tags) : null))); }
     card.append(hero, blind ? null : thumbsBar(g, mineG, me)); feed.append(card); }
