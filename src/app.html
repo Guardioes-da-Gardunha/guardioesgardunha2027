@@ -269,6 +269,26 @@ select option,select optgroup{background:var(--surface);color:var(--ink)}
 .fc-cap{position:absolute;left:14px;right:14px;bottom:12px;z-index:1;display:grid;gap:3px;text-align:left}
 .fc-nm{font-family:var(--head);font-weight:800;font-stretch:75%;text-transform:uppercase;letter-spacing:.02em;font-size:1.1rem;line-height:1.05;color:var(--ink);text-shadow:0 1px 8px rgba(0,0,0,.6);overflow-wrap:anywhere}
 .fc-ph:hover .fc-nm{color:var(--terra-txt)}
+
+/* caminhos em mosaico (tiles) */
+.mosaic{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:172px;grid-auto-flow:dense;gap:10px}
+@media (min-width:700px){ .mosaic{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:200px} }
+@media (min-width:1000px){ .mosaic{grid-template-columns:repeat(4,minmax(0,1fr))} }
+.mt{all:unset;box-sizing:border-box;position:relative;display:block;min-width:0;border-radius:20px;overflow:hidden;border:1px solid var(--line);background:var(--surface);cursor:pointer;isolation:isolate;-webkit-tap-highlight-color:transparent}
+.mt.tall{grid-row:span 2} .mt.wide{grid-column:span 2}
+.mt .fc-pic{transition:transform .5s cubic-bezier(.2,.7,.2,1)} .mt:hover .fc-pic{transform:scale(1.05)}
+.mt::after{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(20,22,20,.35) 0%,rgba(20,22,20,0) 32%,rgba(20,22,20,.88) 100%);pointer-events:none}
+.mt:focus-visible{outline:2px solid var(--terra);outline-offset:2px}
+.mt-top{position:absolute;z-index:2;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.mt-chip{font-family:var(--mono);font-size:.68rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:99px;background:rgba(20,22,20,.72);color:var(--ink);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.mt-chip.Subida{background:var(--terra);color:var(--on-terra)}
+.mt-plus{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:rgba(236,238,230,.92);color:var(--on-light);font-size:1.3rem;line-height:1;font-weight:500;transition:transform .2s ease,background .2s} .mt:hover .mt-plus{transform:rotate(90deg);background:var(--terra)}
+.mt-bot{position:absolute;z-index:2;left:12px;right:12px;bottom:11px;display:grid;gap:3px}
+.mt-k{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--terra-txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mt-nm{font-family:var(--head);font-weight:900;font-stretch:62%;text-transform:uppercase;font-size:1.28rem;line-height:.98;text-wrap:balance;color:var(--ink);text-shadow:0 1px 10px rgba(0,0,0,.55);overflow-wrap:break-word;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.mt.tall .mt-nm,.mt.wide .mt-nm{font-size:1.5rem;-webkit-line-clamp:4} @media (min-width:700px){ .mt.tall .mt-nm,.mt.wide .mt-nm{font-size:1.6rem} }
+.mt-m{display:flex;align-items:center;gap:6px;font-size:.72rem;white-space:nowrap;color:var(--soft-text)} .mt-m .pips i{width:7px;height:7px}
+@media (prefers-reduced-motion:reduce){ .mt .fc-pic,.mt-plus{transition:none} }
 /* sino e notificações */
 .bell{position:relative;display:inline-grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--surface);border:1px solid var(--line2);color:var(--ink);cursor:pointer;-webkit-tap-highlight-color:transparent}
 .bell svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round} .bell:hover{border-color:var(--terra)}
@@ -1147,17 +1167,18 @@ function viewSeg(){
   const PF = [['all','Todos'],['Subida','Subida'],['Descida','Descida'],['Outros','Cumeada e Loop']];
   const norm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   const locs = [...new Set(S.segs.map(x => x.localidade).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt'));
-  const list = h('div',{class:'srows', role:'list'}), count = h('span',{class:'small muted'}), clear = h('button',{class:'linkb', onclick:()=>{ Object.assign(F, {q:'', pf:'all', loc:'all', dif:'all', ord:'n'}); doRender(); }}, 'Limpar filtros');
+  const list = h('div',{class:'mosaic', role:'list'}), count = h('span',{class:'small muted'}), clear = h('button',{class:'linkb', onclick:()=>{ Object.assign(F, {q:'', pf:'all', loc:'all', dif:'all', ord:'n'}); doRender(); }}, 'Limpar filtros');
   const pass = x => (!F.q || norm(x.nome + ' ' + (x.localidade || '')).includes(norm(F.q))) && (F.pf === 'all' || (F.pf === 'Outros' ? x.tipo !== 'Subida' && x.tipo !== 'Descida' : x.tipo === F.pf)) && (F.loc === 'all' || x.localidade === F.loc) && (F.dif === 'all' || (x.nivel || 3) === +F.dif);
   const rows = () => {
     const L = S.segs.filter(pass).sort((a, b) => F.ord === 'n' ? a.n - b.n : F.ord === 'dist' ? (a.dist||0) - (b.dist||0) : F.ord === 'desn' ? (b.desn||0) - (a.desn||0) : (b.nivel||0) - (a.nivel||0) || a.n - b.n);
     count.textContent = L.length === S.segs.length ? S.segs.length + ' caminhos' : L.length + ' de ' + S.segs.length + ' caminhos';
     clear.hidden = !(F.q || F.pf !== 'all' || F.loc !== 'all' || F.dif !== 'all' || F.ord !== 'n');
-    list.replaceChildren(...(L.length ? L.map(x => { const gM = guardOf(x.n, 'M'), gF = guardOf(x.n, 'F'), nm = g => g ? g.a.nome.split(' ')[0] + ' ' + C.fmtTime(g.r.t) : 'livre';
-      return h('button',{class:'srow', role:'listitem', onclick:()=>{ S.segSel = x.n; S.segOpen = true; doRender(); window.scrollTo(0, 0); }},
-        h('span',{class:'srow-n num'}, pad2(x.n)),
-        h('span',{class:'srow-t'}, h('strong',{}, x.nome), h('small',{}, [x.localidade, x.tipo].filter(Boolean).join(' · ')), h('small',{class:'srow-g'}, cfg().hide && !S.admin ? '' : '♂ ' + nm(gM) + '  ♀ ' + nm(gF))),
-        h('span',{class:'srow-k'}, h('span',{class:'num'}, km(x.dist)), h('span',{class:'num small muted'}, (x.tipo === 'Descida' ? '−' : '+') + Math.round(x.desn || 0) + ' m'), pips(x.nivel || 3))); })
+    list.replaceChildren(...(L.length ? L.map((x, i) => { const shape = i % 6 === 0 ? ' tall' : i % 6 === 3 ? ' wide' : '';
+      return h('button',{class:'mt' + shape, role:'listitem', 'aria-label':'Abrir o caminho ' + x.nome, onclick:()=>{ S.segSel = x.n; S.segOpen = true; doRender(); window.scrollTo(0, 0); }},
+        segPic(x),
+        h('span',{class:'mt-top'}, h('span',{class:'mt-chip ' + x.tipo}, x.tipo), h('span',{class:'mt-plus', 'aria-hidden':'true'}, '+')),
+        h('span',{class:'mt-bot'}, h('span',{class:'mt-k'}, pad2(x.n) + (x.localidade ? ' · ' + x.localidade : '')), h('strong',{class:'mt-nm'}, x.nome),
+          h('span',{class:'mt-m num'}, km(x.dist).replace(' km', 'km') + ' · ' + (x.tipo === 'Descida' ? '−' : '+') + Math.round(x.desn || 0) + 'm', pips(x.nivel || 3)))); })
       : [h('div',{class:'card empty'}, 'Nenhum caminho com estes filtros.')]));
   };
   const chip = (k, v, l) => h('button',{class:'fchip', 'aria-pressed':String(F[k] === v), onclick:e=>{ F[k] = v; [...e.currentTarget.parentNode.children].forEach(c => c.setAttribute('aria-pressed', String(c === e.currentTarget))); rows(); }}, l);
