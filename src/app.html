@@ -271,24 +271,19 @@ select option,select optgroup{background:var(--surface);color:var(--ink)}
 .fc-ph:hover .fc-nm{color:var(--terra-txt)}
 
 /* caminhos em mosaico (tiles) */
-.mosaic{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:172px;grid-auto-flow:dense;gap:10px}
-@media (min-width:700px){ .mosaic{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:200px} }
-@media (min-width:1000px){ .mosaic{grid-template-columns:repeat(4,minmax(0,1fr))} }
-.mt{all:unset;box-sizing:border-box;position:relative;display:block;min-width:0;border-radius:20px;overflow:hidden;border:1px solid var(--line);background:var(--surface);cursor:pointer;isolation:isolate;-webkit-tap-highlight-color:transparent}
-.mt.tall{grid-row:span 2} .mt.wide{grid-column:span 2}
-.mt .fc-pic{transition:transform .5s cubic-bezier(.2,.7,.2,1)} .mt:hover .fc-pic{transform:scale(1.05)}
-.mt::after{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(20,22,20,.4) 0%,rgba(20,22,20,0) 28%,rgba(20,22,20,.55) 52%,rgba(20,22,20,.92) 100%);pointer-events:none}
-.mt:focus-visible{outline:2px solid var(--terra);outline-offset:2px}
-.mt-top{position:absolute;z-index:2;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
-.mt-chip{font-family:var(--mono);font-size:.68rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:99px;background:rgba(20,22,20,.72);color:var(--ink);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.mosaic{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-width:760px;margin-inline:auto}
+.mt{all:unset;box-sizing:border-box;display:flex;flex-direction:column;min-width:0;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--surface);cursor:pointer;isolation:isolate;-webkit-tap-highlight-color:transparent;transition:border-color .2s}
+.mt:hover{border-color:var(--accent-line)} .mt:focus-visible{outline:2px solid var(--terra);outline-offset:2px}
+.mt-ph{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--mapbg)}
+.mt .fc-pic{transition:transform .5s cubic-bezier(.2,.7,.2,1)} .mt:hover .fc-pic{transform:scale(1.04)}
+.mt-top{position:absolute;z-index:2;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.mt-chip{font-family:var(--mono);font-size:.66rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:99px;background:rgba(20,22,20,.78);color:var(--ink)}
 .mt-chip.Subida{background:var(--terra);color:var(--on-terra)}
-.mt-plus{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:rgba(236,238,230,.92);color:var(--on-light);font-size:1.3rem;line-height:1;font-weight:500;transition:transform .2s ease,background .2s} .mt:hover .mt-plus{transform:rotate(90deg);background:var(--terra)}
-.mt-bot{position:absolute;z-index:2;left:12px;right:12px;bottom:11px;display:grid;gap:3px}
-.mt-k{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--terra-txt);text-shadow:0 1px 6px rgba(0,0,0,.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mt-nm{font-family:var(--head);font-weight:900;font-stretch:62%;text-transform:uppercase;font-size:1.28rem;line-height:.98;text-wrap:balance;color:var(--ink);text-shadow:0 1px 10px rgba(0,0,0,.55);overflow-wrap:break-word;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.mt.tall .mt-nm,.mt.wide .mt-nm{font-size:1.5rem;-webkit-line-clamp:4} @media (min-width:700px){ .mt.tall .mt-nm,.mt.wide .mt-nm{font-size:1.6rem} }
+.mt-bot{display:grid;gap:4px;padding:10px 12px 12px}
+.mt-k{font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--terra-txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mt-nm{font-family:var(--head);font-weight:800;font-stretch:75%;text-transform:uppercase;font-size:1.05rem;line-height:1.05;letter-spacing:.01em;color:var(--ink);overflow-wrap:break-word;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .mt-m{display:flex;align-items:center;gap:6px;font-size:.72rem;white-space:nowrap;color:var(--soft-text)} .mt-m .pips i{width:7px;height:7px}
-@media (prefers-reduced-motion:reduce){ .mt .fc-pic,.mt-plus{transition:none} }
+@media (prefers-reduced-motion:reduce){ .mt .fc-pic{transition:none} }
 /* sino e notificações */
 .bell{position:relative;display:inline-grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--surface);border:1px solid var(--line2);color:var(--ink);cursor:pointer;-webkit-tap-highlight-color:transparent}
 .bell svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round} .bell:hover{border-color:var(--terra)}
@@ -1173,12 +1168,10 @@ function viewSeg(){
     const L = S.segs.filter(pass).sort((a, b) => F.ord === 'n' ? a.n - b.n : F.ord === 'dist' ? (a.dist||0) - (b.dist||0) : F.ord === 'desn' ? (b.desn||0) - (a.desn||0) : (b.nivel||0) - (a.nivel||0) || a.n - b.n);
     count.textContent = L.length === S.segs.length ? S.segs.length + ' caminhos' : L.length + ' de ' + S.segs.length + ' caminhos';
     clear.hidden = !(F.q || F.pf !== 'all' || F.loc !== 'all' || F.dif !== 'all' || F.ord !== 'n');
-    list.replaceChildren(...(L.length ? L.map((x, i) => { const shape = i % 6 === 0 ? ' tall' : i % 6 === 3 ? ' wide' : '';
-      return h('button',{class:'mt' + shape, role:'listitem', 'aria-label':'Abrir o caminho ' + x.nome, onclick:()=>{ S.segSel = x.n; S.segOpen = true; doRender(); window.scrollTo(0, 0); }},
-        segPic(x),
-        h('span',{class:'mt-top'}, h('span',{class:'mt-chip ' + x.tipo}, x.tipo), h('span',{class:'mt-plus', 'aria-hidden':'true'}, '+')),
+    list.replaceChildren(...(L.length ? L.map(x => h('button',{class:'mt', role:'listitem', 'aria-label':'Abrir o caminho ' + x.nome, onclick:()=>{ S.segSel = x.n; S.segOpen = true; doRender(); window.scrollTo(0, 0); }},
+        h('span',{class:'mt-ph'}, segPic(x), h('span',{class:'mt-top'}, h('span',{class:'mt-chip ' + x.tipo}, x.tipo))),
         h('span',{class:'mt-bot'}, h('span',{class:'mt-k'}, pad2(x.n) + (x.localidade ? ' · ' + x.localidade : '')), h('strong',{class:'mt-nm'}, x.nome),
-          h('span',{class:'mt-m num'}, km(x.dist).replace(' km', 'km') + ' · ' + (x.tipo === 'Descida' ? '−' : '+') + Math.round(x.desn || 0) + 'm', pips(x.nivel || 3)))); })
+          h('span',{class:'mt-m num'}, km(x.dist).replace(' km', 'km') + ' · ' + (x.tipo === 'Descida' ? '−' : '+') + Math.round(x.desn || 0) + 'm', pips(x.nivel || 3)))))
       : [h('div',{class:'card empty'}, 'Nenhum caminho com estes filtros.')]));
   };
   const chip = (k, v, l) => h('button',{class:'fchip', 'aria-pressed':String(F[k] === v), onclick:e=>{ F[k] = v; [...e.currentTarget.parentNode.children].forEach(c => c.setAttribute('aria-pressed', String(c === e.currentTarget))); rows(); }}, l);
@@ -1502,15 +1495,10 @@ const SEG_FOTOS = [
   [/praia|fluvial/, ['souto-da-casa-praia']],
   [/alcongosta.*antena|antena.*alcongosta|antenas/, ['alcongosta-antenas']],
   [/capela/, ['capela-gardunha']],
-  [/fully|cereja|cerejeira/, ['fully-gardunha']],
-  [/alcongosta/, ['alcongosta-floresta', 'alcongosta-antenas']],
-  [/alpedrinha/, ['alpedrinha-pelourinho', 'alpedrinha-calcada']],
-  [/souto da casa/, ['souto-da-casa-praia', 'souto-da-casa-carvalhal']],
-  [/s[aã]o vicente/, ['senhora-da-orada']],
-  [/gardunha/, ['fully-gardunha']]
+  [/fully|cereja|cerejeira/, ['fully-gardunha']]
 ];
 const segFotos = sg => {
-  const t = ((sg.nome || '') + ' ' + (sg.localidade || '')).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ' ').replace(/\s+/g, ' ');
+  const t = (sg.nome || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ' ').replace(/\s+/g, ' ');
   const tt = t.replace(/ç/g, 'c');
   const hit = SEG_FOTOS.find(r => r[0].test(t) || r[0].test(tt));
   return (hit ? hit[1] : []).concat(pad2(sg.n));
