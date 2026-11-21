@@ -2,14 +2,29 @@ import cv2, numpy as np, sys
 rng=np.random.default_rng(7)
 src,out,crop=sys.argv[1],sys.argv[2],sys.argv[3]
 inp=sys.argv[4] if len(sys.argv)>4 else ''   # x0,y0,x1,y1 a apagar (coords da foto)
-x,y,w,h=map(int,crop.split(','))
 im=cv2.imread(src)
+if crop=='auto':
+    ih,iw=im.shape[:2]
+    if iw/ih>4/3: cw,ch=int(ih*4/3),ih; cx,cy=(iw-cw)//2,0
+    else: cw,ch=iw,int(iw*3/4); cx,cy=0,int((ih-ch)*0.30)
+    x,y,w,h=cx,cy,cw,ch
+else: x,y,w,h=map(int,crop.split(','))
 if inp:
     a,b,c,d=map(int,inp.split(','));m=np.zeros(im.shape[:2],np.uint8);m[b:d,a:c]=255
     im=cv2.inpaint(im,m,9,cv2.INPAINT_TELEA)
 im=im[y:y+h,x:x+w]; im=cv2.resize(im,(1600,1200),interpolation=cv2.INTER_CUBIC); H,W=im.shape[:2]
 b_,g_,r_=[im[...,i].astype(np.float32) for i in range(3)]
 sky=((b_>r_+28)&(b_>g_+8)).astype(np.uint8)*255
+hsv=cv2.cvtColor(im,cv2.COLOR_BGR2HSV).astype(np.float32)
+cloud=((hsv[...,2]>200)&(hsv[...,1]<55)&(np.mgrid[0:H,0:W][0]<H*0.5)).astype(np.uint8)*255
+sky=np.maximum(sky,cloud)
+gg=cv2.GaussianBlur(cv2.cvtColor(im,cv2.COLOR_BGR2GRAY),(0,0),2.5).astype(np.float32)
+mag=np.hypot(cv2.Sobel(gg,cv2.CV_32F,1,0),cv2.Sobel(gg,cv2.CV_32F,0,1))
+smooth=(cv2.GaussianBlur(mag,(0,0),6)<2.6).astype(np.uint8)
+smooth[int(H*0.62):]=0
+n,lab,stt,cen=cv2.connectedComponentsWithStats(smooth)
+for i in range(1,n):
+    if stt[i,cv2.CC_STAT_AREA]>0.015*H*W and cen[i][1]<H*0.45: sky=np.maximum(sky,(lab==i).astype(np.uint8)*255)
 sky=cv2.morphologyEx(sky,cv2.MORPH_CLOSE,np.ones((9,9),np.uint8)); sky=cv2.GaussianBlur(sky,(0,0),2)/255.
 g=cv2.cvtColor(im,cv2.COLOR_BGR2GRAY); g=cv2.bilateralFilter(g,7,30,7)
 gf=g.astype(np.float32)/255
@@ -68,9 +83,9 @@ canvas=canvas+(GR-BG+ (np.array([0xA3,0xA8,0x95],np.float32)[::-1]-GR)*0.2)*cl[.
 glow=cv2.GaussianBlur((1-sky).astype(np.float32),(0,0),90)
 canvas=canvas+AC*glow[...,None]*0.07
 # sombras e hachura em verde-musgo; contorno em branco-granito
-shade=np.clip(hatn*0.75+soft*1.0,0,1)
+shade=np.clip(hatn*0.55+soft*0.55,0,1)
 canvas=canvas*(1-shade[...,None]*0.0)+( (GR*0.9+AC*0.35) - BG)*shade[...,None]*1.0
-canvas=canvas+(AC-BG)*np.clip(hatn,0,1)[...,None]*0.30
+canvas=canvas+(AC-BG)*np.clip(hatn,0,1)[...,None]*0.17
 canvas=canvas*(1-lin[...,None])+FG*lin[...,None]
 grain=cv2.GaussianBlur(rng.normal(0,1,(H,W)).astype(np.float32),(0,0),1.1)*2.0
 canvas=np.clip(canvas+grain[...,None],0,255).astype(np.uint8)
