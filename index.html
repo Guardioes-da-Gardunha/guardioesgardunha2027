@@ -1668,7 +1668,7 @@ function viewSeg(){
     const upd = () => { const c = S.segs.filter(x => pass(x, {...D, q:F.q})).length; go.textContent = c ? 'Mostrar ' + c + (c === 1 ? ' caminho' : ' caminhos') : 'Nenhum caminho'; go.disabled = !c; };
     const toggle = (arr, v) => { const i = arr.indexOf(v); i < 0 ? arr.push(v) : arr.splice(i, 1); };
     const chip = (label, arr, v) => h('button',{class:'fs-chip', type:'button', 'aria-pressed':String(arr.includes(v)), onclick:e=>{ toggle(arr, v); e.currentTarget.setAttribute('aria-pressed', String(arr.includes(v))); upd(); }}, label);
-    const radio = (label, on, set, grp) => h('button',{class:'fs-rd', type:'button', 'aria-pressed':String(on()), onclick:e=>{ set(); [...e.currentTarget.parentNode.querySelectorAll('.fs-rd')].forEach(c => c.setAttribute('aria-pressed', String(c === e.currentTarget))); upd(); }}, label);
+    const radio = (label, on, set, grp) => h('button',{class:'fs-rd', type:'button', 'data-g':grp, 'aria-pressed':String(on()), onclick:e=>{ set(); const me = e.currentTarget; [...me.parentNode.querySelectorAll('.fs-rd[data-g="'+grp+'"]')].forEach(c => c.setAttribute('aria-pressed', String(c === me))); upd(); }}, label);
     const sec = (title, ...kids) => { const body = h('div',{class:'fs-body'}, ...kids), box = h('div',{class:'fs-sec'}); const btn = h('button',{class:'fs-st', type:'button', 'aria-expanded':'true', onclick:()=>{ const c = box.classList.toggle('cl'); btn.setAttribute('aria-expanded', String(!c)); }}, title); const ic = h('span',{class:'fico'}); ic.innerHTML = IC_CHEV; btn.append(ic); box.append(btn, body); return box; };
     const dual = (key, max, step, unit, label) => {
       const lab = h('div',{class:'fs-rv'}, h('span',{}), h('span',{})), fl = h('div',{class:'fs-fl'});
@@ -1680,7 +1680,7 @@ function viewSeg(){
     };
     const crit = [['desn','Desnível'], ['dist','Distância'], ['nivel','Dificuldade']], dirs = [['d','Maior para menor'], ['a','Menor para maior']];
     const sc = h('div',{class:'fs-sc'},
-      sec('Ordenar', crit.map(([v, l]) => radio(l, () => D.ord.split('-')[0] === v, () => D.ord = v + '-' + D.ord.split('-')[1])), h('div',{class:'fs-br'}), dirs.map(([v, l]) => radio(l, () => D.ord.split('-')[1] === v, () => D.ord = D.ord.split('-')[0] + '-' + v))),
+      sec('Ordenar', crit.map(([v, l]) => radio(l, () => D.ord.split('-')[0] === v, () => D.ord = v + '-' + D.ord.split('-')[1], 'c')), h('div',{class:'fs-br'}), dirs.map(([v, l]) => radio(l, () => D.ord.split('-')[1] === v, () => D.ord = D.ord.split('-')[0] + '-' + v, 'd'))),
       sec('Perfil', PERFIS_F.map(v => chip(v, D.perfil, v))),
       sec('Localidade', locs.map(v => chip(v, D.loc, v))),
       sec('Dificuldade', NIVEIS.map((l, i) => chip(l, D.dif, i + 1))),
