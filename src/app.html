@@ -315,6 +315,19 @@ select option,select optgroup{background:var(--surface);color:var(--ink)}
 .subnav{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;position:sticky;top:0;z-index:5;background:var(--bg);scrollbar-width:thin} .subnav button{flex:0 0 auto;font:600 .88rem/1 var(--body);border:1px solid var(--line2);border-radius:10px;background:var(--surface);color:var(--muted);padding:10px 14px;cursor:pointer;display:inline-flex;gap:8px;align-items:center} .subnav button.on{color:var(--ink);border-color:var(--moss,#8FB573);box-shadow:inset 0 -3px 0 var(--moss,#8FB573)} .subnav .n{font-size:.75rem;background:var(--terra-txt,#c96);color:#141614;border-radius:99px;padding:2px 7px}
 .todo{color:var(--warn);font-style:normal} .chk{display:grid;gap:8px;margin:0;padding:0;list-style:none} .chk li{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface)} .chk .dot{flex:0 0 auto;width:10px;height:10px;border-radius:99px;margin-top:6px;background:var(--warn)} .chk .bad .dot{background:var(--bad)} .chk .info .dot{background:var(--track)} .chk .t{flex:1;min-width:0}
 .srows{display:grid;gap:8px} .srow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;text-align:left;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--ink);font:inherit;cursor:pointer} .srow:hover,.srow:focus-visible{border-color:var(--terra)} .srow-n{font-family:var(--head);font-weight:900;font-stretch:62%;font-size:1.6rem;color:var(--terra-txt);min-width:1.6em} .srow-t{display:grid;gap:2px;min-width:0} .srow-t strong{overflow-wrap:anywhere;line-height:1.2} .srow-t small{color:var(--muted);font-size:.85rem} .srow-g{font-family:var(--mono);font-size:.78rem!important} .srow-k{display:grid;gap:3px;justify-items:end;font-size:.9rem}
+.fbar{display:flex;gap:10px;align-items:center} .fpill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line2);border-radius:99px;background:var(--surface);color:var(--ink);font:600 .9rem/1 var(--body);padding:12px 16px;cursor:pointer;white-space:nowrap;min-width:0;min-height:44px} .fgrow{flex:1;overflow:hidden} .fgrow>span:last-child{overflow:hidden;text-overflow:ellipsis} .fico{display:inline-flex;flex:none} .fico svg,.fs-st .fico svg{width:16px;height:16px;stroke:var(--terra-txt);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round} .fn{background:var(--terra);color:var(--on-terra);border-radius:99px;font:700 .72rem/1 var(--mono);padding:3px 7px}
+.ftags{display:flex;gap:6px;flex-wrap:wrap} .ftag{display:inline-flex;gap:6px;align-items:center;font:600 .78rem/1 var(--body);background:var(--terra-soft);color:var(--terra-txt);border:1px solid var(--accent-line);border-radius:99px;padding:8px 8px 8px 12px;cursor:pointer;min-height:34px} .ftag i{font-style:normal;opacity:.8;padding:0 4px} .ftag.clr{background:transparent;border-color:transparent;text-decoration:underline;padding-right:12px}
+.fs-scrim{position:fixed;inset:0;z-index:30;background:rgba(8,9,8,.62);opacity:0;transition:opacity .35s cubic-bezier(.32,.72,0,1)} .fs-scrim.on{opacity:1}
+.fs-sheet{position:fixed;left:0;right:0;bottom:0;z-index:31;margin-inline:auto;max-width:560px;max-height:88dvh;background:var(--surface);border:1px solid var(--line2);border-bottom:0;border-radius:24px 24px 0 0;display:flex;flex-direction:column;transform:translateY(105%);transition:transform .5s cubic-bezier(.32,.72,0,1);padding-bottom:env(safe-area-inset-bottom,0px)} .fs-sheet.on{transform:none}
+.fs-grab{width:40px;height:4px;border-radius:4px;background:var(--line2);margin:10px auto 2px;flex:none} .fs-h{display:flex;align-items:center;justify-content:space-between;padding:10px 20px 6px;flex:none} .fs-h h2{font-size:1.7rem} .fs-lk{background:none;border:0;color:var(--terra-txt);font:600 .9rem/1 var(--body);text-decoration:underline;cursor:pointer;padding:12px 0}
+.fs-sc{overflow:auto;padding:4px 20px 16px;display:flex;flex-direction:column;min-height:0} .fs-sec{border-top:1px solid var(--line);padding:14px 0} .fs-st{width:100%;display:flex;justify-content:space-between;align-items:center;background:none;border:0;color:var(--ink);font-family:var(--head);font-weight:800;font-stretch:75%;text-transform:uppercase;letter-spacing:.03em;font-size:1.05rem;padding:0;cursor:pointer;min-height:32px} .fs-st .fico svg{width:18px;height:18px;stroke-width:2;transition:transform .35s cubic-bezier(.32,.72,0,1)} .fs-sec.cl .fs-st .fico svg{transform:rotate(-90deg)}
+.fs-body{display:flex;flex-wrap:wrap;gap:8px;padding-top:12px} .fs-sec.cl .fs-body{display:none} .fs-br{flex-basis:100%;height:0}
+.fs-chip,.fs-rd{border:1px solid var(--line2);border-radius:99px;background:transparent;color:var(--muted);font:600 .85rem/1 var(--body);padding:11px 14px;cursor:pointer;min-height:40px} .fs-chip[aria-pressed=true]{background:var(--terra-soft);color:var(--terra-txt);border-color:var(--terra)}
+.fs-rd{display:inline-flex;align-items:center;gap:8px} .fs-rd::before{content:'';width:11px;height:11px;border-radius:50%;border:2px solid var(--track)} .fs-rd[aria-pressed=true]{background:var(--terra);color:var(--on-terra);border-color:var(--terra)} .fs-rd[aria-pressed=true]::before{border-color:var(--on-terra);background:var(--on-terra);box-shadow:inset 0 0 0 2px var(--terra)}
+.fs-rg{width:100%} .fs-rv{display:flex;justify-content:space-between;font:600 .85rem/1 var(--mono);color:var(--terra-txt);margin-bottom:10px} .fs-dual{position:relative;height:28px} .fs-tr,.fs-fl{position:absolute;top:12px;height:4px;border-radius:4px} .fs-tr{left:0;right:0;background:var(--line2)} .fs-fl{background:var(--terra)}
+.fs-dual input{position:absolute;inset:0;width:100%;margin:0;background:none;pointer-events:none;-webkit-appearance:none;appearance:none} .fs-dual input::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;width:22px;height:22px;border-radius:50%;background:var(--ink);border:4px solid var(--terra);box-shadow:0 2px 8px rgba(0,0,0,.5);cursor:grab} .fs-dual input::-moz-range-thumb{pointer-events:auto;width:14px;height:14px;border-radius:50%;background:var(--ink);border:4px solid var(--terra);cursor:grab} .fs-dual input::-webkit-slider-runnable-track,.fs-dual input::-moz-range-track{background:none}
+.fs-cta{padding:12px 20px 16px;border-top:1px solid var(--line);flex:none} .fs-go{width:100%;border:0;border-radius:99px;background:var(--terra);color:var(--on-terra);font:800 1rem/1 var(--head);letter-spacing:.02em;padding:16px;cursor:pointer;transition:transform .2s cubic-bezier(.32,.72,0,1)} .fs-go:active{transform:scale(.98)} .fs-go:disabled{opacity:.5;cursor:default}
+@media (prefers-reduced-motion:reduce){.fs-sheet,.fs-scrim{transition:none}}
 .fchips{display:flex;flex-wrap:wrap;gap:6px} .fchip{font:600 .85rem/1 var(--body);border:1px solid var(--line2);border-radius:99px;background:transparent;color:var(--muted);padding:9px 14px;cursor:pointer} .fchip[aria-pressed=true]{background:var(--terra);border-color:var(--terra);color:var(--on-terra)} .fsel{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px} @media (max-width:560px){ .fsel{grid-template-columns:1fr 1fr} .fsel>:first-child{grid-column:1/-1} }
 .sticky-up{position:sticky;bottom:calc(78px + env(safe-area-inset-bottom,0px));z-index:6;display:flex;justify-content:center;pointer-events:none;padding-top:8px} .sticky-up button{pointer-events:auto;box-shadow:0 8px 24px rgba(0,0,0,.55);padding:14px 26px;font-size:1rem} @media (min-width:1000px){ .sticky-up{bottom:18px} }
 .alertbar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;border:1px solid var(--warn);background:var(--warn-soft);border-radius:12px;padding:10px 14px;color:var(--ink)}
@@ -1194,29 +1207,85 @@ function viewSeg(){
       h('div',{class:'row', style:'gap:8px;flex-wrap:nowrap'}, h('button',{class:'b o s', disabled:!pv, 'aria-label':'Caminho anterior', onclick:()=>pv && go(pv)}, '←'), h('span',{class:'mono small muted'}, pad2(sg.n) + ' / ' + pad2(S.segs.length)), h('button',{class:'b o s', disabled:!nx, 'aria-label':'Caminho seguinte', onclick:()=>nx && go(nx)}, '→'))),
       h('div',{id:'segdet', class:'stack', style:'gap:22px'}, ...segDetail(sg))];
   }
-  const F = S.segF || (S.segF = {q:'', pf:'all', loc:'all', dif:'all', ord:'desn-d'});
-  const PF = [['all','Todos'],['Subida','Subida'],['Descida','Descida'],['Outros','Cumeada e Loop']];
-  const norm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const dMax = Math.max(1, Math.ceil(Math.max(0, ...S.segs.map(x => (x.dist || 0) / 1000)))), hMax = Math.max(50, Math.ceil(Math.max(0, ...S.segs.map(x => x.desn || 0)) / 50) * 50);
+  const defF = () => ({q:'', perfil:[], loc:[], dif:[], d:[0, dMax], hh:[0, hMax], ord:'desn-d'});
+  if (!S.segF || !Array.isArray(S.segF.perfil)) S.segF = defF();
+  const F = S.segF; F.d = [Math.min(F.d[0], dMax), Math.min(F.d[1], dMax)]; F.hh = [Math.min(F.hh[0], hMax), Math.min(F.hh[1], hMax)];
+  const PERFIS_F = ['Subida','Descida','Cumeada','Loop'];
+  const ORD = [['desn-d','Desnível: maior para menor'], ['desn-a','Desnível: menor para maior'], ['dist-d','Distância: maior para menor'], ['dist-a','Distância: menor para maior'], ['nivel-d','Dificuldade: maior para menor'], ['nivel-a','Dificuldade: menor para maior']];
+  const norm = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   const locs = [...new Set(S.segs.map(x => x.localidade).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt'));
-  const list = h('div',{class:'mosaic', role:'list'}), count = h('span',{class:'small muted'}), clear = h('button',{class:'linkb', onclick:()=>{ Object.assign(F, {q:'', pf:'all', loc:'all', dif:'all', ord:'desn-d'}); doRender(); }}, 'Limpar filtros');
-  const pass = x => (!F.q || norm(x.nome + ' ' + (x.localidade || '')).includes(norm(F.q))) && (F.pf === 'all' || (F.pf === 'Outros' ? x.tipo !== 'Subida' && x.tipo !== 'Descida' : x.tipo === F.pf)) && (F.loc === 'all' || x.localidade === F.loc) && (F.dif === 'all' || (x.nivel || 3) === +F.dif);
+  const nFmt = n => n.toLocaleString('pt-PT', {maximumFractionDigits:1});
+  const pass = (x, f) => (!f.q || norm(x.nome + ' ' + (x.localidade || '')).includes(norm(f.q))) && (!f.perfil.length || f.perfil.includes(x.tipo)) && (!f.loc.length || f.loc.includes(x.localidade)) && (!f.dif.length || f.dif.includes(x.nivel || 3)) && (x.dist || 0) / 1000 >= f.d[0] - 1e-9 && (x.dist || 0) / 1000 <= f.d[1] + 1e-9 && (x.desn || 0) >= f.hh[0] && (x.desn || 0) <= f.hh[1];
+  const dChanged = f => f.d[0] > 0 || f.d[1] < dMax, hChanged = f => f.hh[0] > 0 || f.hh[1] < hMax;
+  const nAct = f => f.perfil.length + f.loc.length + f.dif.length + (dChanged(f) ? 1 : 0) + (hChanged(f) ? 1 : 0);
+  const sortL = (L, ord) => { const [ok, od] = String(ord).split('-'), key = ok === 'dist' ? 'dist' : ok === 'nivel' ? 'nivel' : 'desn', dir = od === 'a' ? 1 : -1; return L.sort((a, b) => dir * ((a[key] || 0) - (b[key] || 0)) || a.n - b.n); };
+  const list = h('div',{class:'mosaic', role:'list'}), count = h('span',{class:'small muted'}), tagsEl = h('div',{class:'ftags'});
+  const ordTxt = h('span',{}), nBadge = h('span',{class:'fn'});
   const rows = () => {
-    const [ok, od] = String(F.ord).split('-'), key = ok === 'dist' ? 'dist' : ok === 'nivel' ? 'nivel' : 'desn', dir = od === 'a' ? 1 : -1;
-    const L = S.segs.filter(pass).sort((a, b) => dir * ((a[key]||0) - (b[key]||0)) || a.n - b.n);
+    const L = sortL(S.segs.filter(x => pass(x, F)), F.ord);
     count.textContent = L.length === S.segs.length ? S.segs.length + ' caminhos' : L.length + ' de ' + S.segs.length + ' caminhos';
-    clear.hidden = !(F.q || F.pf !== 'all' || F.loc !== 'all' || F.dif !== 'all' || F.ord !== 'desn-d');
+    ordTxt.textContent = (ORD.find(o => o[0] === F.ord) || ORD[0])[1];
+    const n = nAct(F); nBadge.hidden = !n; nBadge.textContent = n;
+    const tg = [];
+    F.perfil.forEach(v => tg.push([v, () => F.perfil = F.perfil.filter(y => y !== v)]));
+    F.loc.forEach(v => tg.push([v, () => F.loc = F.loc.filter(y => y !== v)]));
+    F.dif.forEach(v => tg.push([NIVEIS[v - 1], () => F.dif = F.dif.filter(y => y !== v)]));
+    if (dChanged(F)) tg.push([nFmt(F.d[0]) + '–' + nFmt(F.d[1]) + ' km', () => F.d = [0, dMax]]);
+    if (hChanged(F)) tg.push([F.hh[0] + '–' + F.hh[1] + ' m', () => F.hh = [0, hMax]]);
+    if (F.ord !== 'desn-d' || n) tg.push(['Limpar tudo', () => { const q = F.q; Object.assign(F, defF(), {q}); }, true]);
+    tagsEl.replaceChildren(...tg.map(([t, fn, clr]) => h('button',{class:'ftag' + (clr ? ' clr' : ''), 'aria-label':(clr ? '' : 'Remover filtro ') + t, onclick:()=>{ fn(); rows(); }}, t, clr ? null : h('i',{'aria-hidden':'true'}, '✕'))));
+    tagsEl.hidden = !tg.length;
     list.replaceChildren(...(L.length ? L.map(x => h('button',{class:'mt', role:'listitem', 'aria-label':'Abrir o caminho ' + x.nome, onclick:()=>{ S.segSel = x.n; S.segOpen = true; doRender(); window.scrollTo(0, 0); }},
         h('span',{class:'mt-ph'}, segPic(x), h('span',{class:'mt-top'}, h('span',{class:'mt-chip ' + x.tipo}, x.tipo))),
         h('span',{class:'mt-bot'}, h('span',{class:'mt-k'}, pad2(x.n) + (x.localidade ? ' · ' + x.localidade : '')), h('strong',{class:'mt-nm'}, x.nome),
           h('span',{class:'mt-m num'}, km(x.dist).replace(' km', 'km') + ' · ' + (x.tipo === 'Descida' ? '−' : '+') + Math.round(x.desn || 0) + 'm', pips(x.nivel || 3)))))
       : [h('div',{class:'card empty'}, 'Nenhum caminho com estes filtros.')]));
   };
-  const chip = (k, v, l) => h('button',{class:'fchip', 'aria-pressed':String(F[k] === v), onclick:e=>{ F[k] = v; [...e.currentTarget.parentNode.children].forEach(c => c.setAttribute('aria-pressed', String(c === e.currentTarget))); rows(); }}, l);
-  const sel = (k, opts, lbl) => h('label',{class:'stack', style:'gap:4px;min-width:0'}, h('span',{class:'lbl'}, lbl), h('select',{onchange:e=>{ F[k] = e.target.value; rows(); }}, opts.map(([v, l]) => h('option',{value:v, selected:String(F[k]) === String(v)}, l))));
+  const IC_SORT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16M7 20l-3-3M7 20l3-3M17 20V4M17 4l-3 3M17 4l3 3"/></svg>', IC_FILT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>', IC_CHEV = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+  const withIcon = (svg, ...kids) => { const sp = h('span',{class:'fico'}); sp.innerHTML = svg; return [sp, ...kids]; };
+  // folha de filtros
+  let sheetOpen = false;
+  const openSheet = () => {
+    if (sheetOpen) return; sheetOpen = true;
+    const D = JSON.parse(JSON.stringify(F));
+    const go = h('button',{class:'fs-go', onclick:()=>{ Object.assign(F, JSON.parse(JSON.stringify(D)), {q:F.q}); closeSheet(); rows(); }});
+    const upd = () => { const c = S.segs.filter(x => pass(x, {...D, q:F.q})).length; go.textContent = c ? 'Mostrar ' + c + (c === 1 ? ' caminho' : ' caminhos') : 'Nenhum caminho'; go.disabled = !c; };
+    const toggle = (arr, v) => { const i = arr.indexOf(v); i < 0 ? arr.push(v) : arr.splice(i, 1); };
+    const chip = (label, arr, v) => h('button',{class:'fs-chip', type:'button', 'aria-pressed':String(arr.includes(v)), onclick:e=>{ toggle(arr, v); e.currentTarget.setAttribute('aria-pressed', String(arr.includes(v))); upd(); }}, label);
+    const radio = (label, on, set, grp) => h('button',{class:'fs-rd', type:'button', 'aria-pressed':String(on()), onclick:e=>{ set(); [...e.currentTarget.parentNode.querySelectorAll('.fs-rd')].forEach(c => c.setAttribute('aria-pressed', String(c === e.currentTarget))); upd(); }}, label);
+    const sec = (title, ...kids) => { const body = h('div',{class:'fs-body'}, ...kids), box = h('div',{class:'fs-sec'}); const btn = h('button',{class:'fs-st', type:'button', 'aria-expanded':'true', onclick:()=>{ const c = box.classList.toggle('cl'); btn.setAttribute('aria-expanded', String(!c)); }}, title); const ic = h('span',{class:'fico'}); ic.innerHTML = IC_CHEV; btn.append(ic); box.append(btn, body); return box; };
+    const dual = (key, max, step, unit, label) => {
+      const lab = h('div',{class:'fs-rv'}, h('span',{}), h('span',{})), fl = h('div',{class:'fs-fl'});
+      const mk = i => h('input',{type:'range', min:0, max, step, value:D[key][i], 'aria-label':label + (i ? ' máximo' : ' mínimo')});
+      const i1 = mk(0), i2 = mk(1);
+      const sync = () => { let a = +i1.value, b = +i2.value; if (a > b) [a, b] = [b, a]; D[key] = [a, b]; const p = v => v / max * 100; fl.style.left = 'calc(' + p(a) + '% + ' + (11 - p(a) * .22) + 'px)'; fl.style.right = 'calc(' + (100 - p(b)) + '% + ' + (11 - (100 - p(b)) * .22) + 'px)'; lab.children[0].textContent = nFmt(a) + ' ' + unit; lab.children[1].textContent = nFmt(b) + ' ' + unit; };
+      [i1, i2].forEach(i => i.addEventListener('input', () => { sync(); upd(); })); sync();
+      return h('div',{class:'fs-rg'}, lab, h('div',{class:'fs-dual'}, h('div',{class:'fs-tr'}), fl, i1, i2));
+    };
+    const crit = [['desn','Desnível'], ['dist','Distância'], ['nivel','Dificuldade']], dirs = [['d','Maior para menor'], ['a','Menor para maior']];
+    const sc = h('div',{class:'fs-sc'},
+      sec('Ordenar', crit.map(([v, l]) => radio(l, () => D.ord.split('-')[0] === v, () => D.ord = v + '-' + D.ord.split('-')[1])), h('div',{class:'fs-br'}), dirs.map(([v, l]) => radio(l, () => D.ord.split('-')[1] === v, () => D.ord = D.ord.split('-')[0] + '-' + v))),
+      sec('Perfil', PERFIS_F.map(v => chip(v, D.perfil, v))),
+      sec('Localidade', locs.map(v => chip(v, D.loc, v))),
+      sec('Dificuldade', NIVEIS.map((l, i) => chip(l, D.dif, i + 1))),
+      sec('Distância', dual('d', dMax, .5, 'km', 'Distância')),
+      sec('Desnível', dual('hh', hMax, 10, 'm', 'Desnível')));
+    const scrim = h('div',{class:'fs-scrim', onclick:()=>closeSheet()});
+    const sheet = h('div',{class:'fs-sheet', role:'dialog', 'aria-modal':'true', 'aria-label':'Filtrar caminhos'}, h('div',{class:'fs-grab'}),
+      h('div',{class:'fs-h'}, h('h2',{}, 'Filtrar'), h('button',{class:'fs-lk', type:'button', onclick:()=>{ Object.assign(F, defF(), {q:F.q}); closeSheet(true); rows(); openSheet(); }}, 'Limpar tudo')), sc, h('div',{class:'fs-cta'}, go));
+    const onKey = e => { if (e.key === 'Escape') closeSheet(); };
+    document.addEventListener('keydown', onKey);
+    document.body.append(scrim, sheet); document.body.style.overflow = 'hidden';
+    requestAnimationFrame(() => requestAnimationFrame(() => { scrim.classList.add('on'); sheet.classList.add('on'); }));
+    upd();
+    closeSheet = (now) => { document.removeEventListener('keydown', onKey); sheetOpen = false; document.body.style.overflow = ''; scrim.classList.remove('on'); sheet.classList.remove('on'); const rm = () => { scrim.remove(); sheet.remove(); }; now ? rm() : setTimeout(rm, 420); ordBtn.focus && ordBtn.focus({preventScroll:true}); };
+  };
+  let closeSheet = () => {};
+  const ordBtn = h('button',{class:'fpill fgrow', type:'button', 'aria-haspopup':'dialog', onclick:openSheet}, ...withIcon(IC_SORT, ordTxt));
+  const fBtn = h('button',{class:'fpill', type:'button', 'aria-haspopup':'dialog', onclick:openSheet}, ...withIcon(IC_FILT, 'Filtros ', nBadge));
   const q = h('input',{type:'search', value:F.q, placeholder:'Procurar por nome ou localidade', 'aria-label':'Procurar caminho', autocomplete:'off', oninput:e=>{ F.q = e.target.value; rows(); }});
-  const bar = h('div',{class:'card stack', style:'gap:12px'}, q, h('div',{class:'fchips', role:'group', 'aria-label':'Perfil'}, ...PF.map(([v, l]) => chip('pf', v, l))),
-    h('div',{class:'fsel'}, sel('loc', [['all','Todas'], ...locs.map(l => [l, l])], 'Localidade'), sel('dif', [['all','Todas'], ...NIVEIS.map((l, i) => [i + 1, l])], 'Dificuldade'), sel('ord', [['desn-d','Desnível: maior para menor'], ['desn-a','Desnível: menor para maior'], ['dist-d','Distância: maior para menor'], ['dist-a','Distância: menor para maior'], ['nivel-d','Dificuldade: maior para menor'], ['nivel-a','Dificuldade: menor para maior']], 'Ordenar')),
-    h('div',{class:'row', style:'justify-content:space-between'}, count, clear));
+  const bar = h('div',{class:'stack', style:'gap:12px'}, q, h('div',{class:'fbar'}, ordBtn, fBtn), tagsEl, count);
   rows();
   return [h('h2',{},'Caminhos'), bar, list];
 }
