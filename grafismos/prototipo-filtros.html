@@ -1,0 +1,155 @@
+<title>Filtros dos Caminhos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{--bg:#141614;--surface:#1D201D;--surface2:#262A25;--ink:#ECEEE6;--muted:#B0B6A8;--line:#2C302B;--line2:#3D433B;--terra:#8FB573;--terra-txt:#A8CB8C;--terra-soft:rgba(143,181,115,.14);--on-terra:#121511;--track:#5A6158;
+--head:'Archivo','Arial Narrow',Arial,sans-serif;--body:'Archivo',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5}
+body{padding-inline:16px;padding-block:20px 120px}
+.wrap{max-width:520px;margin-inline:auto;display:flex;flex-direction:column;gap:14px}
+h1{font-family:var(--head);font-weight:900;font-stretch:62%;text-transform:uppercase;font-size:2.4rem;line-height:.95;margin:0}
+.search{width:100%;background:#0F110F;border:1px solid var(--line2);border-radius:12px;color:var(--ink);font:inherit;padding:13px 16px}
+.search::placeholder{color:#7d8478}
+.bar{display:flex;gap:10px;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line2);border-radius:99px;background:var(--surface);color:var(--ink);font:600 .9rem/1 var(--body);padding:11px 16px;cursor:pointer;white-space:nowrap}
+.pill svg{width:16px;height:16px;stroke:var(--terra-txt);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pill .n{background:var(--terra);color:var(--on-terra);border-radius:99px;font:700 .72rem/1 var(--mono);padding:3px 7px}
+.grow{flex:1;min-width:0}
+.sum{font-size:.85rem;color:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:10px}
+.act{display:flex;gap:6px;flex-wrap:wrap;min-height:30px}
+.tag{display:inline-flex;gap:6px;align-items:center;font:600 .78rem/1 var(--body);background:var(--terra-soft);color:var(--terra-txt);border:1px solid rgba(143,181,115,.35);border-radius:99px;padding:6px 6px 6px 10px;cursor:pointer}
+.tag i{font-style:normal;opacity:.8;padding:0 4px}
+.mosaic{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.mt{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.ph{aspect-ratio:4/3;position:relative;background:linear-gradient(160deg,#2d3a2a,#1a1f19)}
+.ph svg{position:absolute;inset:0;width:100%;height:100%}
+.chip{position:absolute;left:8px;top:8px;font:600 .66rem/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:99px;background:rgba(20,22,20,.78)}
+.chip.S{background:var(--terra);color:var(--on-terra)}
+.bot{padding:10px 12px 12px;display:flex;flex-direction:column;gap:4px}
+.k{font:600 .68rem/1.2 var(--mono);letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.nm{font-family:var(--head);font-weight:800;font-stretch:75%;text-transform:uppercase;font-size:1.05rem;line-height:1}
+.m{font:600 .78rem/1.2 var(--mono);color:var(--terra-txt)}
+.empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 0}
+/* folha */
+.scrim{position:fixed;inset:0;background:rgba(8,9,8,.62);opacity:0;pointer-events:none;transition:opacity .35s cubic-bezier(.32,.72,0,1)}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;margin-inline:auto;max-width:560px;max-height:88dvh;background:var(--surface);border:1px solid var(--line2);border-bottom:0;border-radius:24px 24px 0 0;display:flex;flex-direction:column;transform:translateY(105%);transition:transform .5s cubic-bezier(.32,.72,0,1);padding-bottom:env(safe-area-inset-bottom,0px)}
+.sheet.on{transform:none}
+.grab{width:40px;height:4px;border-radius:4px;background:var(--line2);margin:10px auto 2px}
+.sh-h{display:flex;align-items:center;justify-content:space-between;padding:10px 20px 6px}
+.sh-h h2{font-family:var(--head);font-weight:900;font-stretch:62%;text-transform:uppercase;font-size:1.7rem;line-height:1;margin:0}
+.lk{background:none;border:0;color:var(--terra-txt);font:600 .9rem/1 var(--body);text-decoration:underline;cursor:pointer;padding:8px 0}
+.sc{overflow:auto;padding:4px 20px 16px;display:flex;flex-direction:column}
+.seg{display:flex;gap:8px;padding:8px 0 14px}
+.rd{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line2);border-radius:99px;background:transparent;color:var(--muted);font:600 .85rem/1 var(--body);padding:9px 14px;cursor:pointer}
+.rd::before{content:'';width:11px;height:11px;border-radius:50%;border:2px solid var(--track)}
+.rd[aria-pressed=true]{background:var(--terra);color:var(--on-terra);border-color:var(--terra)}
+.rd[aria-pressed=true]::before{border-color:var(--on-terra);background:var(--on-terra);box-shadow:inset 0 0 0 2px var(--terra)}
+.sec{border-top:1px solid var(--line);padding:14px 0}
+.sec>button{width:100%;display:flex;justify-content:space-between;align-items:center;background:none;border:0;color:var(--ink);font-family:var(--head);font-weight:800;font-stretch:75%;text-transform:uppercase;letter-spacing:.03em;font-size:1.05rem;padding:0;cursor:pointer}
+.sec>button svg{width:18px;height:18px;stroke:var(--terra-txt);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .35s cubic-bezier(.32,.72,0,1)}
+.sec.cl>button svg{transform:rotate(-90deg)}
+.body{display:flex;flex-wrap:wrap;gap:8px;padding-top:12px}
+.sec.cl .body{display:none}
+.fc{border:1px solid var(--line2);border-radius:99px;background:transparent;color:var(--muted);font:600 .85rem/1 var(--body);padding:9px 14px;cursor:pointer}
+.fc[aria-pressed=true]{background:var(--terra-soft);color:var(--terra-txt);border-color:var(--terra)}
+.rg{width:100%}
+.rv{display:flex;justify-content:space-between;font:600 .85rem/1 var(--mono);color:var(--terra-txt);margin-bottom:10px}
+.dual{position:relative;height:28px}
+.dual .tr{position:absolute;left:0;right:0;top:12px;height:4px;border-radius:4px;background:var(--line2)}
+.dual .fl{position:absolute;top:12px;height:4px;border-radius:4px;background:var(--terra)}
+.dual input{position:absolute;inset:0;width:100%;margin:0;background:none;pointer-events:none;-webkit-appearance:none;appearance:none}
+.dual input::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;width:22px;height:22px;border-radius:50%;background:var(--ink);border:4px solid var(--terra);box-shadow:0 2px 8px rgba(0,0,0,.5);cursor:grab}
+.dual input::-moz-range-thumb{pointer-events:auto;width:14px;height:14px;border-radius:50%;background:var(--ink);border:4px solid var(--terra);cursor:grab}
+.dual input::-webkit-slider-runnable-track{background:none}.dual input::-moz-range-track{background:none}
+.cta{padding:12px 20px 16px;border-top:1px solid var(--line)}
+.go{width:100%;border:0;border-radius:99px;background:var(--terra);color:var(--on-terra);font:800 1rem/1 var(--head);letter-spacing:.02em;padding:16px;cursor:pointer;transition:transform .2s cubic-bezier(.32,.72,0,1)}
+.go:active{transform:scale(.98)}
+.note{font-size:.8rem;color:var(--muted);border:1px dashed var(--line2);border-radius:10px;padding:10px 12px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<div class="wrap">
+  <h1>Caminhos</h1>
+  <input class="search" placeholder="Procurar por nome ou localidade" aria-label="Procurar" id="q">
+  <div class="bar">
+    <button class="pill grow" id="ordBtn" style="justify-content:space-between"><span style="display:flex;gap:8px;align-items:center"><svg viewBox="0 0 24 24"><path d="M7 4v16M7 20l-3-3M7 20l3-3M17 20V4M17 4l-3 3M17 4l3 3"/></svg><span id="ordTxt">Desnível: maior para menor</span></span></button>
+    <button class="pill" id="fBtn"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg>Filtros <span class="n" id="fN" hidden>0</span></button>
+  </div>
+  <div class="act" id="act"></div>
+  <div class="sum"><span id="cnt"></span></div>
+  <div class="mosaic" id="list"></div>
+  <p class="note">Protótipo: os dados são de exemplo, só para mostrar o comportamento. Toca em «Filtros» ou na ordenação.</p>
+</div>
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-label="Filtrar caminhos">
+  <div class="grab"></div>
+  <div class="sh-h"><h2>Filtrar</h2><button class="lk" id="clr">Limpar tudo</button></div>
+  <div class="sc" id="sc"></div>
+  <div class="cta"><button class="go" id="go"></button></div>
+</div>
+<script>
+const LOC=['Alpedrinha','Castelo Novo','Alcongosta','Souto da Casa','Louriçal do Campo','São Vicente da Beira','Fundão'];
+const NIV=['Fácil','Moderado','Difícil','Muito difícil','Extremo'];
+const NOMES=['Castanheiros','Paradanta','Senhora da Orada','Alto da Moeda','Pedra d’Hera','Penha','Posto de Vigia','Baloiço','Castelo Velho','Miradouro','Castelo Novo','Antenas','Calçada','Pelourinho','Teatro','Picoto','Carvalhal','Praia','Cruzeiro','Capela','Fully','Cumeada','Barbas','Floresta'];
+let sd=9;const r=()=>{sd=(sd*16807)%2147483647;return sd/2147483647};
+const DATA=Array.from({length:36},(_,i)=>{const tipo=['Subida','Subida','Descida','Cumeada','Loop'][Math.floor(r()*5)];const niv=1+Math.floor(r()*5);
+ return {n:i+1,nome:NOMES[i%NOMES.length]+(i>=NOMES.length?' '+(i-NOMES.length+2):''),loc:LOC[Math.floor(r()*LOC.length)],tipo,niv,dist:+(1.2+r()*13+niv*.6).toFixed(1),desn:Math.round(30+r()*220+niv*90)}});
+const DMAX=Math.ceil(Math.max(...DATA.map(x=>x.dist))), HMAX=Math.ceil(Math.max(...DATA.map(x=>x.desn))/50)*50;
+const ORD=[['desn-d','Desnível: maior para menor'],['desn-a','Desnível: menor para maior'],['dist-d','Distância: maior para menor'],['dist-a','Distância: menor para maior'],['nivel-d','Dificuldade: maior para menor'],['nivel-a','Dificuldade: menor para maior']];
+const def=()=>({q:'',perfil:new Set(),loc:new Set(),niv:new Set(),d:[0,DMAX],h:[0,HMAX],ord:'desn-d'});
+let F=def(),D=def(); // F aplicado, D rascunho na folha
+const $=id=>document.getElementById(id);
+const pass=(x,f)=>(!f.q||(x.nome+' '+x.loc).toLowerCase().includes(f.q.toLowerCase()))&&(!f.perfil.size||f.perfil.has(x.tipo))&&(!f.loc.size||f.loc.has(x.loc))&&(!f.niv.size||f.niv.has(x.niv))&&x.dist>=f.d[0]&&x.dist<=f.d[1]&&x.desn>=f.h[0]&&x.desn<=f.h[1];
+const sortL=(L,o)=>{const [k,d]=o.split('-');const key=k==='dist'?'dist':k==='nivel'?'niv':'desn';return [...L].sort((a,b)=>(d==='a'?1:-1)*(a[key]-b[key])||a.n-b.n)};
+const nActive=f=>f.perfil.size+f.loc.size+f.niv.size+(f.d[0]>0||f.d[1]<DMAX?1:0)+(f.h[0]>0||f.h[1]<HMAX?1:0);
+const pad=n=>String(n).padStart(2,'0');
+const art=(i)=>{let p='';for(let k=0;k<6;k++){const y=14+k*17+(i*5%9);p+=`<path d="M-5 ${y} C 30 ${y-8},60 ${y+8},100 ${y-4} S 150 ${y+6},170 ${y-2}" fill="none" stroke="#A3A895" stroke-opacity="${k%3?.18:.35}" stroke-width=".8"/>`}return `<svg viewBox="0 0 160 120" preserveAspectRatio="xMidYMid slice">${p}<path d="M10 100 L55 60 L80 78 L112 36 L150 100Z" fill="#8FB573" fill-opacity=".16" stroke="#8FB573" stroke-opacity=".7" stroke-width="1.2"/></svg>`};
+function render(){
+  const L=sortL(DATA.filter(x=>pass(x,F)),F.ord);
+  $('cnt').textContent=L.length===36?'36 caminhos':L.length+' de 36 caminhos';
+  $('ordTxt').textContent=ORD.find(o=>o[0]===F.ord)[1];
+  const n=nActive(F);$('fN').hidden=!n;$('fN').textContent=n;
+  const tags=[];
+  F.perfil.forEach(v=>tags.push([v,()=>F.perfil.delete(v)]));F.loc.forEach(v=>tags.push([v,()=>F.loc.delete(v)]));F.niv.forEach(v=>tags.push([NIV[v-1],()=>F.niv.delete(v)]));
+  if(F.d[0]>0||F.d[1]<DMAX)tags.push([`${F.d[0]}–${F.d[1]} km`,()=>F.d=[0,DMAX]]);
+  if(F.h[0]>0||F.h[1]<HMAX)tags.push([`${F.h[0]}–${F.h[1]} m`,()=>F.h=[0,HMAX]]);
+  $('act').replaceChildren(...tags.map(([t,fn])=>{const b=document.createElement('button');b.className='tag';b.innerHTML=`${t}<i>✕</i>`;b.onclick=()=>{fn();render()};return b}));
+  $('list').innerHTML=L.length?L.slice(0,8).map((x,i)=>`<div class="mt"><div class="ph">${art(x.n)}<span class="chip ${x.tipo==='Subida'?'S':''}">${x.tipo}</span></div><div class="bot"><span class="k">${pad(x.n)} · ${x.loc}</span><strong class="nm">${x.nome}</strong><span class="m">${x.dist.toFixed(1).replace('.',',')}km · ${x.tipo==='Descida'?'−':'+'}${x.desn}m</span></div></div>`).join(''):'<div class="empty">Nenhum caminho com estes filtros.</div>';
+}
+const chev='<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
+function sec(title,key,inner,collapsed){const s=document.createElement('div');s.className='sec'+(collapsed?' cl':'');s.innerHTML=`<button>${title}${chev}</button>`;s.firstChild.onclick=()=>s.classList.toggle('cl');const b=document.createElement('div');b.className='body';b.append(...inner);s.append(b);return s}
+const fc=(label,on,fn)=>{const b=document.createElement('button');b.className='fc';b.textContent=label;b.setAttribute('aria-pressed',on);b.onclick=()=>{fn();b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')!=='true');upd()};return b};
+function dual(lbl,key,max,unit){const w=document.createElement('div');w.className='rg';
+  w.innerHTML=`<div class="rv"><span class="a"></span><span class="b"></span></div><div class="dual"><div class="tr"></div><div class="fl"></div><input type="range" min="0" max="${max}" step="${max>50?10:.5}"><input type="range" min="0" max="${max}" step="${max>50?10:.5}"></div>`;
+  const [i1,i2]=w.querySelectorAll('input'),fl=w.querySelector('.fl');
+  const sync=()=>{let a=+i1.value,b=+i2.value;if(a>b){[a,b]=[b,a]}D[key]=[a,b];const p=v=>v/max*100;fl.style.left=`calc(${p(a)}% + ${11-p(a)*.22}px)`;fl.style.right=`calc(${100-p(b)}% + ${11-(100-p(b))*.22}px)`;w.querySelector('.a').textContent=a+' '+unit;w.querySelector('.b').textContent=b+' '+unit;};
+  i1.value=D[key][0];i2.value=D[key][1];[i1,i2].forEach(i=>i.oninput=()=>{sync();upd()});sync();
+  return w}
+function build(){
+  const sc=$('sc');sc.replaceChildren();
+  const seg=document.createElement('div');seg.className='seg';
+  ORD.slice(0,0);
+  const [ck,cd]=D.ord.split('-');
+  const crit=[['desn','Desnível'],['dist','Distância'],['nivel','Dificuldade']],dirs=[['d','Maior para menor'],['a','Menor para maior']];
+  const mk=(arr,cur,set)=>arr.map(([v,l])=>{const b=document.createElement('button');b.className='rd';b.textContent=l;b.setAttribute('aria-pressed',cur()===v);b.onclick=()=>{set(v);[...b.parentNode.children].forEach(c=>c.setAttribute('aria-pressed',c===b));upd()};return b});
+  const ob=sec('Ordenar','ord',[...mk(crit,()=>D.ord.split('-')[0],v=>D.ord=v+'-'+D.ord.split('-')[1]),Object.assign(document.createElement('div'),{style:'flex-basis:100%;height:0'}),...mk(dirs,()=>D.ord.split('-')[1],v=>D.ord=D.ord.split('-')[0]+'-'+v)],false);
+  ob.querySelector('.body').style.rowGap='10px';
+  sc.append(ob);
+  sc.append(sec('Perfil','perfil',['Subida','Descida','Cumeada','Loop'].map(v=>fc(v,D.perfil.has(v),()=>D.perfil.has(v)?D.perfil.delete(v):D.perfil.add(v))),false));
+  sc.append(sec('Localidade','loc',LOC.map(v=>fc(v,D.loc.has(v),()=>D.loc.has(v)?D.loc.delete(v):D.loc.add(v))),false));
+  sc.append(sec('Dificuldade','niv',NIV.map((v,i)=>fc(v,D.niv.has(i+1),()=>D.niv.has(i+1)?D.niv.delete(i+1):D.niv.add(i+1))),false));
+  sc.append(sec('Distância','d',[dual('d','d',DMAX,'km')],false));
+  sc.append(sec('Desnível','h',[dual('h','h',HMAX,'m')],false));
+  upd();
+}
+function upd(){const c=DATA.filter(x=>pass(x,{...D,q:F.q})).length;$('go').textContent=c?`Mostrar ${c} caminho${c>1?'s':''}`:'Nenhum caminho';}
+const open=()=>{D={...F,perfil:new Set(F.perfil),loc:new Set(F.loc),niv:new Set(F.niv),d:[...F.d],h:[...F.h]};build();$('sheet').classList.add('on');$('scrim').classList.add('on')};
+const close=()=>{$('sheet').classList.remove('on');$('scrim').classList.remove('on')};
+$('fBtn').onclick=open;$('ordBtn').onclick=open;$('scrim').onclick=close;
+$('go').onclick=()=>{F={...D,q:F.q};close();render()};
+$('clr').onclick=()=>{const q=F.q;D=def();D.q=q;build()};
+$('q').oninput=e=>{F.q=e.target.value;render()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+render();
+</script>
