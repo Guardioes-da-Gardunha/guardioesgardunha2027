@@ -1283,17 +1283,26 @@ function loginBox(){
 let installEvt = null;
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; installBox(); });
 window.addEventListener('appinstalled', () => { installEvt = null; installBox(); });
+const APP_URL = 'https://guardioes-da-gardunha.github.io/guardioesgardunha2027/';
+async function shareApp(){
+  const data = {title:'Guardiões da Gardunha 2027', text:'Guardiões da Gardunha 2027: desafio de trail na Serra da Gardunha. Vê os caminhos e inscreve-te:', url:APP_URL};
+  try { if (navigator.share){ await navigator.share(data); return; } } catch(e){ if (e && e.name === 'AbortError') return; }
+  try { await navigator.clipboard.writeText(APP_URL); toast('Link copiado.'); return; } catch(e){}
+  const t = document.createElement('textarea'); t.value = APP_URL; t.style.cssText = 'position:fixed;opacity:0'; document.body.append(t); t.select();
+  let ok = false; try { ok = document.execCommand('copy'); } catch(e){} t.remove(); toast(ok ? 'Link copiado.' : APP_URL);
+}
 function installBox(){
   const el = document.getElementById('install'); if (!el) return;
+  const shareBtn = h('button',{class:'b o', type:'button', onclick:shareApp}, 'Partilhar a app');
   const standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone;
-  if (standalone){ el.replaceChildren(); return; }
+  if (standalone){ el.replaceChildren(h('div',{class:'row'}, shareBtn)); return; }
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent), open = !!S.open.inst;
   const steps = h('div',{class:'pbody stack', style:'gap:12px'},
     installEvt ? h('div',{}, h('button',{class:'b t', onclick:async()=>{ const ev = installEvt; installEvt = null; ev.prompt(); try { await ev.userChoice; } catch(e){} installBox(); }}, 'Instalar agora')) : null,
     h('div',{class:'stack', style:'gap:4px' + (ios ? ';order:-1' : '')}, h('strong',{}, 'iPhone (Safari)'), h('ol',{class:'isteps'}, h('li',{}, 'Abre o site no Safari.'), h('li',{}, 'Toca em Partilhar (o quadrado com a seta para cima).'), h('li',{}, 'Escolhe “Adicionar ao ecrã principal” e toca em Adicionar.'))),
     h('div',{class:'stack', style:'gap:4px'}, h('strong',{}, 'Android (Chrome)'), h('ol',{class:'isteps'}, h('li',{}, 'Abre o site no Chrome.'), h('li',{}, 'Toca nos três pontos ⋮, em cima à direita.'), h('li',{}, 'Escolhe “Instalar app” ou “Adicionar ao ecrã principal”.'))),
     h('p',{class:'small muted', style:'margin:0'}, 'Se abriste o link no WhatsApp, Instagram ou Facebook, abre-o primeiro no navegador. Depois de instalada, a app abre em ecrã inteiro com o escudo dos Guardiões.'));
-  el.replaceChildren(h('div',{class:'pbox' + (open ? ' on' : '')}, h('button',{class:'phead', 'aria-expanded':String(open), onclick:()=>{ S.open.inst = !open; installBox(); }}, h('span',{class:'pm', 'aria-hidden':'true'}, open ? '−' : '+'), h('span',{}, 'Instalar a app no telemóvel')), open ? steps : null));
+  el.replaceChildren(h('div',{class:'pbox' + (open ? ' on' : '')}, h('button',{class:'phead', 'aria-expanded':String(open), onclick:()=>{ S.open.inst = !open; installBox(); }}, h('span',{class:'pm', 'aria-hidden':'true'}, open ? '−' : '+'), h('span',{}, 'Instalar a app no telemóvel')), open ? steps : null), h('div',{class:'row', style:'margin-top:10px'}, shareBtn));
 }
 function orgFooter(){
   const f = document.getElementById('foot'); if (!f) return;
