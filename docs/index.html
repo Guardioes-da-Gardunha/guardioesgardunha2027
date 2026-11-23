@@ -1609,16 +1609,17 @@ function viewSeg(){
       h('div',{class:'row', style:'gap:8px;flex-wrap:nowrap'}, h('button',{class:'b o s', disabled:!pv, 'aria-label':'Caminho anterior', onclick:()=>pv && go(pv)}, '←'), h('span',{class:'mono small muted'}, pad2(sg.n) + ' / ' + pad2(S.segs.length)), h('button',{class:'b o s', disabled:!nx, 'aria-label':'Caminho seguinte', onclick:()=>nx && go(nx)}, '→'))),
       h('div',{id:'segdet', class:'stack', style:'gap:22px'}, ...segDetail(sg))];
   }
-  const F = S.segF || (S.segF = {q:'', pf:'all', loc:'all', dif:'all', ord:'n'});
+  const F = S.segF || (S.segF = {q:'', pf:'all', loc:'all', dif:'all', ord:'desn-d'});
   const PF = [['all','Todos'],['Subida','Subida'],['Descida','Descida'],['Outros','Cumeada e Loop']];
   const norm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   const locs = [...new Set(S.segs.map(x => x.localidade).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt'));
-  const list = h('div',{class:'mosaic', role:'list'}), count = h('span',{class:'small muted'}), clear = h('button',{class:'linkb', onclick:()=>{ Object.assign(F, {q:'', pf:'all', loc:'all', dif:'all', ord:'n'}); doRender(); }}, 'Limpar filtros');
+  const list = h('div',{class:'mosaic', role:'list'}), count = h('span',{class:'small muted'}), clear = h('button',{class:'linkb', onclick:()=>{ Object.assign(F, {q:'', pf:'all', loc:'all', dif:'all', ord:'desn-d'}); doRender(); }}, 'Limpar filtros');
   const pass = x => (!F.q || norm(x.nome + ' ' + (x.localidade || '')).includes(norm(F.q))) && (F.pf === 'all' || (F.pf === 'Outros' ? x.tipo !== 'Subida' && x.tipo !== 'Descida' : x.tipo === F.pf)) && (F.loc === 'all' || x.localidade === F.loc) && (F.dif === 'all' || (x.nivel || 3) === +F.dif);
   const rows = () => {
-    const L = S.segs.filter(pass).sort((a, b) => F.ord === 'n' ? a.n - b.n : F.ord === 'dist' ? (a.dist||0) - (b.dist||0) : F.ord === 'desn' ? (b.desn||0) - (a.desn||0) : (b.nivel||0) - (a.nivel||0) || a.n - b.n);
+    const [ok, od] = String(F.ord).split('-'), key = ok === 'dist' ? 'dist' : ok === 'nivel' ? 'nivel' : 'desn', dir = od === 'a' ? 1 : -1;
+    const L = S.segs.filter(pass).sort((a, b) => dir * ((a[key]||0) - (b[key]||0)) || a.n - b.n);
     count.textContent = L.length === S.segs.length ? S.segs.length + ' caminhos' : L.length + ' de ' + S.segs.length + ' caminhos';
-    clear.hidden = !(F.q || F.pf !== 'all' || F.loc !== 'all' || F.dif !== 'all' || F.ord !== 'n');
+    clear.hidden = !(F.q || F.pf !== 'all' || F.loc !== 'all' || F.dif !== 'all' || F.ord !== 'desn-d');
     list.replaceChildren(...(L.length ? L.map(x => h('button',{class:'mt', role:'listitem', 'aria-label':'Abrir o caminho ' + x.nome, onclick:()=>{ S.segSel = x.n; S.segOpen = true; doRender(); window.scrollTo(0, 0); }},
         h('span',{class:'mt-ph'}, segPic(x), h('span',{class:'mt-top'}, h('span',{class:'mt-chip ' + x.tipo}, x.tipo))),
         h('span',{class:'mt-bot'}, h('span',{class:'mt-k'}, pad2(x.n) + (x.localidade ? ' · ' + x.localidade : '')), h('strong',{class:'mt-nm'}, x.nome),
@@ -1629,7 +1630,7 @@ function viewSeg(){
   const sel = (k, opts, lbl) => h('label',{class:'stack', style:'gap:4px;min-width:0'}, h('span',{class:'lbl'}, lbl), h('select',{onchange:e=>{ F[k] = e.target.value; rows(); }}, opts.map(([v, l]) => h('option',{value:v, selected:String(F[k]) === String(v)}, l))));
   const q = h('input',{type:'search', value:F.q, placeholder:'Procurar por nome ou localidade', 'aria-label':'Procurar caminho', autocomplete:'off', oninput:e=>{ F.q = e.target.value; rows(); }});
   const bar = h('div',{class:'card stack', style:'gap:12px'}, q, h('div',{class:'fchips', role:'group', 'aria-label':'Perfil'}, ...PF.map(([v, l]) => chip('pf', v, l))),
-    h('div',{class:'fsel'}, sel('loc', [['all','Todas'], ...locs.map(l => [l, l])], 'Localidade'), sel('dif', [['all','Todas'], ...NIVEIS.map((l, i) => [i + 1, l])], 'Dificuldade'), sel('ord', [['n','N.º'], ['dist','Distância'], ['desn','Desnível'], ['nivel','Dificuldade']], 'Ordenar')),
+    h('div',{class:'fsel'}, sel('loc', [['all','Todas'], ...locs.map(l => [l, l])], 'Localidade'), sel('dif', [['all','Todas'], ...NIVEIS.map((l, i) => [i + 1, l])], 'Dificuldade'), sel('ord', [['desn-d','Desnível: maior para menor'], ['desn-a','Desnível: menor para maior'], ['dist-d','Distância: maior para menor'], ['dist-a','Distância: menor para maior'], ['nivel-d','Dificuldade: maior para menor'], ['nivel-a','Dificuldade: menor para maior']], 'Ordenar')),
     h('div',{class:'row', style:'justify-content:space-between'}, count, clear));
   rows();
   return [h('h2',{},'Caminhos'), bar, list];
