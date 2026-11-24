@@ -303,7 +303,7 @@ function bestPerAthlete(efforts, segN, mod) {
 /* Pontuação 2027 (Art. 5):
    pódio mensal por caminho e género 8/5/3 · check-in 1 por tentativa, até 3 por caminho em cada mês ·
    completismo metade 16 / todos 32 · roubos acumuláveis: líder do mês +3, Guardião da época +5,
-   Guardião de Todos os Tempos +8 (uma vez por caminho) · Dias de Ataque 8 por presença, até 40.
+   primeiro Guardião de cada caminho conta para o prémio Primeiro Guardião (sem pontos) · Dias de Ataque 8 por presença, até 40.
    month: 'all' (época) ou 'AAAA-MM' — os pontos contam no mês em que foram ganhos. */
 function monthKey(st) { const d = new Date(st * 1000); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); }
 function computePoints(efforts, segs, athletes, cfg, mod, month) {
@@ -334,9 +334,7 @@ function computePoints(efforts, segs, athletes, cfg, mod, month) {
       const kM = x.m + '|' + g, LM = leadM[kM];
       if (!LM || x.t < LM.t) { if (LM && LM.a !== x.a && cnt) { r.stM++; r.steals++; r.stl += SM; } leadM[kM] = { a: x.a, t: x.t }; }
       const LA = leadA[g];
-      if (!LA || x.t < LA.t) { if (LA && LA.a !== x.a && cnt) { r.stA++; r.steals++; r.stl += SA; } leadA[g] = { a: x.a, t: x.t }; }
-      const R = cfg.podiumBy === 'todos' ? null : ref[g];
-      if (R && R.t && x.t < R.t && !legend[x.a]) { legend[x.a] = 1; if (cnt) { r.lendas++; r.steals++; r.lpts += SL; r.stl += SL; } } }
+      if (!LA || x.t < LA.t) { if (!LA && cnt) r.lendas++; if (LA && LA.a !== x.a && cnt) { r.stA++; r.steals++; r.stl += SA; } leadA[g] = { a: x.a, t: x.t }; } }
     // bordões guardados: líder da época (ou do mês, na vista mensal)
     if (M) { for (const L of Object.values(byMG)) if (L.length) rows[L[0].a].wins++; }
     else for (const L of Object.values(leadA)) rows[L.a].wins++;

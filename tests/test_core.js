@@ -75,10 +75,13 @@ ok(g.d.done === 1, 'tentativa suspeita não aprovada fica fora');
 // check-in limitado a 3
 const many = [1, 2, 3, 4, 5].map(i => mk('a', 1, 200 - i, 0, J + i * D)).concat([mk('a', 1, 210, 0, F), mk('a', 1, 211, 0, F + D)]); let p3 = C.computePoints(many, segs, ath, cf, 'all').find(r => r.id === 'a');
 ok(p3.chk === 5 && p3.stl === 0, `check-in no máximo 3 por caminho em cada mês (3 jan + 2 fev = ${p3.chk}); bater o próprio tempo não é roubo`);
-// Guardião de Todos os Tempos
+// Primeiro Guardião (sem referência histórica): o primeiro tempo do caminho conta, mas não dá pontos de roubo
 const segsL = [{ n: 1, tipo: 'Subida', gtt: { M: { nome: 'X', t: 95 } } }, { n: 2, tipo: 'Descida' }];
 const pl = C.computePoints([mk('a', 1, 100, 0, J), mk('b', 1, 90, 0, J + D), { a: 'b', s: 1, h: [{ t: 85, st: J + 2 * D, mod: 'c' }] }], segsL, ath, cf, 'all');
-const bl = pl.find(r => r.id === 'b'); ok(bl.lendas === 1 && bl.lpts === 8 && bl.stl === 16, `+3 +5 +8 numa tentativa, lenda só uma vez (${bl.stl})`);
+const al = pl.find(r => r.id === 'a'), bl = pl.find(r => r.id === 'b');
+ok(al.lendas === 1 && al.stl === 0 && bl.lendas === 0 && bl.stl === 8, `primeiro Guardião conta 1 sem pontos; roubos só +3 +5, sem +8 (${bl.stl})`);
+const pall = C.computePoints([mk('a', 1, 100, 0, J), mk('a', 2, 100, 0, J)], segsL, ath, Object.assign({}, cf, {halfAt: 1, allAt: 2}), 'all').find(r => r.id === 'a');
+ok(pall.bonus === 32, `todos os caminhos dão 32 no total, não 16 + 32 (${pall.bonus})`);
 // mensal
 const pm = Object.fromEntries(C.computePoints(ef, segs, ath, cf, 'all', '2027-02').map(r => [r.id, r]));
 ok(pm.c.pod === 8 && pm.c.stl === 5 && pm.a.pod === 0 && pm.a.bonus === 0 && pm.d.trn === 0, 'ranking mensal só com o que foi ganho no mês');

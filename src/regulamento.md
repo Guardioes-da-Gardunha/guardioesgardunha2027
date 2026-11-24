@@ -3,7 +3,7 @@
 
 1.2. Corre-se quando se quer, sozinho ou em grupo: cada atleta escolhe os dias, os caminhos e quantas tentativas faz. Conta sempre o melhor tempo.
 
-1.3. Em cada caminho há um Guardião e uma Guardiã: quem tem o melhor tempo do seu género. O objetivo é tirar-lhes a guarda, correr mais a serra e chegar à Noite dos Guardiões com histórias para contar.
+1.3. A época começa sem guardiões: os registos antigos perderam-se. Em cada caminho, quem fizer o melhor tempo do seu género torna-se o Guardião ou a Guardiã. O objetivo é tirar-lhes a guarda, correr mais a serra e chegar à Noite dos Guardiões com histórias para contar.
 
 1.4. Só contam atividades **a pé** (corrida ou caminhada). Bicicleta, e-bike ou qualquer veículo estão excluídos.
 
@@ -75,29 +75,28 @@
 | 2.º lugar do mês | 5 |
 | 3.º lugar do mês | 3 |
 | Check-in: cada vez que concluis um caminho | +1, até 3 por caminho por mês |
-| Meio caminho: {MEIO} dos {N} caminhos concluídos | +{HALF_PTS} |
-| Mestre dos {N}: todos os caminhos concluídos | +{ALL_PTS} (substitui os {HALF_PTS}) |
+| Metade dos caminhos: {MEIO} dos {N} concluídos | +{HALF_PTS} |
+| Mestre dos {N}: todos os caminhos concluídos | +{ALL_PTS} no total (os {HALF_PTS} da metade passam a {ALL_PTS}, não se somam) |
 | Roubar a liderança do mês num caminho (Artigo 8) | +3 |
 | Roubar o bordão ao Guardião / Guardiã da época (Artigo 8) | +5 |
-| Bater o Guardião de Todos os Tempos (Artigo 8) | +8, uma vez por caminho |
 | Presença num Dia de Ataque (Artigo 7) | +8, até 40 |
 
 5.2. O pódio do mês fecha no último dia do mês, às 23:59. Até lá é provisório: quem perder o lugar dentro do mês perde esses pontos. Depois de fechado, ninguém os tira. Dezembro fecha a 15, com o fecho de contas.
 
 5.3. Cada tentativa válida num caminho dá +1 de check-in, até ao máximo de 3 pontos por caminho em cada mês. No mês seguinte o contador volta a zero.
 
-5.4. A pontuação total é a soma de todas as linhas da tabela, e os pontos acumulam: uma só tentativa pode dar check-in, roubos e, no fecho do mês, pódio. A única exceção é o completismo, onde os {ALL_PTS} do Mestre dos {N} substituem os {HALF_PTS} do meio caminho.
+5.4. A pontuação total é a soma de todas as linhas da tabela, e os pontos acumulam: uma só tentativa pode dar check-in, roubos e, no fecho do mês, pódio. A única exceção é o completismo: quem conclui metade dos caminhos ({MEIO} de {N}) ganha +{HALF_PTS}; quem os conclui todos fica com +{ALL_PTS} no total, e não {HALF_PTS} + {ALL_PTS}.
 
-## Artigo 6 — Guardiões, bordões e o Guardião de Todos os Tempos
-6.1. **Guardião e Guardiã:** quem tem o melhor tempo do seu género num caminho guarda esse caminho e detém o seu bordão. Há {N} bordões masculinos e {N} femininos em jogo.
+## Artigo 6 — Os novos Guardiões
+6.1. Os registos dos antigos guardiões perderam-se. Ninguém sabe quem guardou cada caminho, nem em quanto tempo. Por isso, em 2027, todos os caminhos começam sem dono: há {N} bordões masculinos e {N} femininos à espera de quem os reclame.
 
-6.2. O bordão é de quem tem o melhor tempo da época e muda de mãos sempre que alguém o bate. Tirá-lo a outro atleta dá pontos (Artigo 8). Bater o próprio tempo não é roubo.
+6.2. **Primeiro Guardião:** quem regista o primeiro tempo válido do seu género num caminho torna-se o primeiro Guardião (ou a primeira Guardiã) desse caminho. Não dá pontos de roubo, mas conta para o prémio Primeiro Guardião (Artigo 11).
 
-6.3. **Guardião de Todos os Tempos:** cada caminho tem uma referência histórica, masculina e feminina — o melhor tempo de sempre conhecido nesse caminho, com nome, tempo e ritmo. A Organização pesquisa e publica estas referências na página do desafio antes do arranque da época.
+6.3. **Guardião e Guardiã:** a partir daí, o bordão é de quem tem o melhor tempo da época do seu género e muda de mãos sempre que alguém o bate. Tirá-lo a outro atleta dá pontos (Artigo 8). Bater o próprio tempo não é roubo.
 
-6.4. Quem bater o Guardião de Todos os Tempos de um caminho ganha +8 pontos (Artigo 8) e o seu nome passa a ser a nova referência desse caminho para as épocas seguintes.
+6.4. Talvez um só atleta acabe a guardar a serra inteira, talvez sejam muitos, cada um no seu caminho. Na Noite dos Guardiões fica a saber-se quem a protege.
 
-6.5. Os roubos são públicos: a página mostra quem guarda cada caminho, a distância a que cada atleta está do Guardião de Todos os Tempos e o histórico de tentativas. Provocar é permitido, desde que com bom humor.
+6.5. Os roubos são públicos: a página mostra quem guarda cada caminho e o histórico de tentativas. Provocar é permitido, desde que com bom humor.
 
 ## Artigo 7 — Dias de Ataque
 7.1. Como nos tempos antigos, em certos dias a aldeia inteira junta-se ao pé do caminho. A Organização marca **5 Dias de Ataque** (treinos oficiais) ao longo do ano, com data, ponto de encontro e caminhos-alvo anunciados com 15 dias de antecedência.
@@ -107,13 +106,12 @@
 7.4. Sai-se em grupo e ataca-se em vagas. É o melhor dia para roubar bordões à frente de testemunhas. Farnel: cada um o seu.
 
 ## Artigo 8 — Roubar o bordão
-8.1. Em cada caminho há três guardas para tirar, e os roubos acumulam:
+8.1. Em cada caminho há duas guardas para tirar, e os roubos acumulam:
 
 - Líder do mês (+3): bater o melhor tempo do mês de outro atleta nesse caminho.
 - Guardião / Guardiã da época (+5): bater o melhor tempo da época de outro atleta nesse caminho e ficar com o bordão.
-- Guardião de Todos os Tempos (+8): bater a referência histórica do caminho (Artigo 6). Conta uma vez por caminho.
 
-8.2. Uma só tentativa pode valer as três: quem bate o recorde de sempre e, com isso, o líder do mês e o Guardião da época soma +16 em roubos, além do pódio e do check-in.
+8.2. Uma só tentativa pode valer as duas: quem bate o líder do mês e, com isso, o Guardião da época soma +8 em roubos, além do pódio e do check-in.
 
 8.3. Só se rouba a guarda a alguém. O primeiro tempo do mês num caminho não é roubo, e bater o próprio tempo também não.
 
@@ -150,15 +148,14 @@
 | Prémio | Quem ganha |
 | Campeão / Campeã 2027 (M e F) | Mais pontos na Geral |
 | Guardião / Guardiã da Serra (M e F) | Mais bordões guardados no fecho de contas |
-| A Lenda | Quem bateu o Guardião de Todos os Tempos em mais caminhos |
-| Ladrão de Bordões do Ano | Mais pontos de roubo na época (Artigo 8) |
+| Primeiro Guardião (M e F) | Quem foi o primeiro Guardião (ou a primeira Guardiã) em mais caminhos |
+| O Contrabandista | Mais pontos de roubo na época (Artigo 8) |
 | Rei / Rainha da Montanha (M e F) | Mais pontos nos {SUB} caminhos de Subida |
 | O Míssil (M e F) | Mais pontos nos {DESC} caminhos de Descida |
 | Diesel (M e F) | Mais pontos nos {CUM} caminhos de Cumeada e Loop |
 | Sentinela | Mais caminhos concluídos; desempata quem chegou primeiro a esse número |
 | Lanterna Vermelha | Mais check-ins entre quem nunca esteve num pódio no fecho |
 | A Revelação do Ano | Maior subida na Geral entre 1 de junho e o fecho de contas |
-| O Estratega | Mais pontos ganhos na Quinzena Cega |
 | Campeão / Campeã de escalão (M e F) | Mais pontos na Geral dentro de cada escalão (Artigo 2.6), desde que haja pelo menos 3 atletas classificados nesse escalão e género |
 | Campeão da Bifana | Mais presenças em Dias de Ataque; desempata a votação na Noite |
 | Fair Play | Votação secreta dos atletas na Noite dos Guardiões |
@@ -183,4 +180,4 @@
 12.4. Dúvidas e reclamações: {CANAL}.
 
 ## Anexo — Os caminhos
-A lista oficial dos caminhos é publicada e mantida pela Organização na página do desafio, no separador Caminhos: nome, perfil, distância, desnível, dificuldade, traçado de referência e Guardião de Todos os Tempos de cada um. Essa lista faz parte deste Regulamento.
+A lista oficial dos caminhos é publicada e mantida pela Organização na página do desafio, no separador Caminhos: nome, perfil, distância, desnível, dificuldade e traçado de referência de cada um. Essa lista faz parte deste Regulamento.
