@@ -1606,7 +1606,7 @@ const SEG_FOTOS = [
   [/cumeeira|cumeada/, ['penha']]
 ];
 /* escolhas manuais por número do caminho (têm prioridade sobre o nome) */
-const SEG_FOTO_N = {4:'souto-da-casa-praia', 7:'alcongosta-floresta', 9:'alcongosta-antenas', 19:'castelo-novo-antenas', 21:'fully-gardunha', 29:'castelo-novo', 33:'miradouro-castelo-novo'};
+const SEG_FOTO_N = {4:'souto-da-casa-praia', 7:'alcongosta-floresta', 9:'alcongosta-antenas', 19:'castelo-novo-antenas', 21:'fully-gardunha', 29:'castelo-novo', 33:'miradouro-castelo-novo', 40:'carvalhal-placa'};
 const segFotos = sg => {
   if (SEG_FOTO_N[sg.n]) return [SEG_FOTO_N[sg.n], pad2(sg.n)];
   const t = (sg.nome || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ' ').replace(/\s+/g, ' ');
@@ -2264,6 +2264,7 @@ function reviewCard(){
       h('td',{}, h('div',{class:'row', style:'flex-wrap:nowrap'}, h('button',{class:'b s', onclick:()=>safe(()=>setReview(x.key,'ok'), 'Aprovada.')}, 'Aprovar'), h('button',{class:'b o s', onclick:()=>safe(()=>setReview(x.key,'no'), 'Rejeitada.')}, 'Rejeitar')))); })))));
   return card;
 }
+const contactoOf = a => { const p = S.priv[a.id] || {}; if (p.contacto) return p.contacto; const r = Object.values(S.regs).find(x => x && x.aid === a.id); return (r && r.contacto) || ''; };
 function athCard(){
   const card = h('div',{class:'card stack'}, h('h3',{}, 'Atletas inscritos'), h('p',{class:'small muted', style:'margin:0'}, 'Data de nascimento e contacto só são visíveis para a organização. “Treinos” = presenças nos Dias de Ataque; “Ajuste” = pontos manuais (bónus ou penalizações).'));
   for (const [u, rg] of Object.entries(S.regs)) S.profiles[u] = rg.nome || '';
@@ -2275,6 +2276,7 @@ function athCard(){
       h('td',{}, h('input',{type:'date', value:(S.priv[a.id]||{}).nasc||'', 'aria-label':'Data de nascimento', onchange:e=>{ const v = e.target.value; safe(async()=>{ await S.db.doc('private/'+a.id).set(Object.assign({}, S.priv[a.id]||{}, {nasc:v})); await S.db.doc('athletes/'+a.id).update({vet:isVet(v), esc:escOf(v)}); }); }})),
       h('td',{class:'r num'}, (()=>{ const n = (S.priv[a.id]||{}).nasc, ag = ageIn2027(n); return ag != null ? String(ag) : '—'; })()),
       h('td',{}, (()=>{ const n = (S.priv[a.id]||{}).nasc, k = n ? escOf(n) : (a.esc || null); return h('span',{class:'tag' + (n && k !== (a.esc||null) ? ' warn' : '')}, k ? escName(k, a.g) : 'sem escalão'); })()),
+      h('td',{}, h('input',{type:'text', value:contactoOf(a), maxlength:80, placeholder:'telemóvel ou e-mail', 'aria-label':'Contacto', style:'min-width:11em', onchange:e=>{ const v = e.target.value.trim().slice(0,80); safe(()=>S.db.doc('private/'+a.id).set(Object.assign({}, S.priv[a.id]||{}, {contacto:v})), 'Contacto guardado.'); }})),
       h('td',{}, h('input',{type:'number', min:0, max:5, value:a.treinos||0, 'aria-label':'Treinos', style:'width:4.5em', onchange:e=>upd(a,{treinos:+e.target.value})})),
       h('td',{}, h('input',{type:'number', value:a.extra||0, 'aria-label':'Ajuste', style:'width:5em', onchange:e=>upd(a,{extra:+e.target.value})})),
       h('td',{}, own ? h('div',{}, h('span',{class:'tag ' + (a.uid ? 'ok' : 'warn')}, a.uid ? 'confirmada' : 'por confirmar'), ' ', h('span',{class:'small'}, who), a.uid ? h('div',{class:'row', style:'gap:6px;margin-top:4px;flex-wrap:nowrap'}, (()=>{ const i = h('input',{type:'text', inputmode:'numeric', maxlength:5, placeholder:'PIN novo', style:'width:7em', oninput:e=>{ e.target.value = e.target.value.replace(/\D/g,'').slice(0,5); }}); return [i, h('button',{class:'b o s', onclick:()=>{ if (!/^\d{5}$/.test(i.value)) return toast('O PIN tem 5 algarismos.'); safe(()=>S.user.adminSetPin(a.uid, i.value), 'PIN de ' + a.nome + ' alterado.'); }}, 'Definir PIN')]; })()) : null) : h('span',{class:'small muted'}, a.ex ? 'exemplo' : 'livre'),
@@ -2284,7 +2286,7 @@ function athCard(){
         own ? h('button',{class:'b o s', onclick:()=>upd(a,{uid:null, block:[...(a.block||[]), own]}, 'Associação removida.')}, 'Desassociar') : null,
         h('button',{class:'b o s', onclick:()=>{ if (S.confirmDel !== a.id){ S.confirmDel = a.id; doRender(); return; } S.confirmDel = null; safe(()=>S.db.doc('athletes/'+a.id).delete(), 'Atleta removido.'); }}, S.confirmDel === a.id ? 'Confirmar remoção' : 'Remover'))));
   }));
-  card.append(h('div',{class:'tw'}, h('table',{}, h('thead',{}, h('tr',{}, h('th',{},'Nome'), h('th',{},'Gén.'), h('th',{},'Nascimento'), h('th',{class:'r'},'Idade'), h('th',{},'Escalão'), h('th',{},'Treinos'), h('th',{},'Ajuste'), h('th',{},'Conta'), h('th',{},''))), body)));
+  card.append(h('div',{class:'tw'}, h('table',{}, h('thead',{}, h('tr',{}, h('th',{},'Nome'), h('th',{},'Gén.'), h('th',{},'Nascimento'), h('th',{class:'r'},'Idade'), h('th',{},'Escalão'), h('th',{},'Contacto'), h('th',{},'Treinos'), h('th',{},'Ajuste'), h('th',{},'Conta'), h('th',{},''))), body)));
   const stale = S.ath.filter(a => { const n = (S.priv[a.id]||{}).nasc; return n && escOf(n) !== (a.esc || null); });
   if (stale.length) card.append(h('div',{class:'notice f row'}, h('span',{}, stale.length + ' atleta' + (stale.length === 1 ? '' : 's') + ' com o escalão por atualizar.'), h('button',{class:'b s', onclick:()=>safe(async()=>{ for (const a of stale) await S.db.doc('athletes/'+a.id).update({esc:escOf((S.priv[a.id]||{}).nasc)}); }, 'Escalões atualizados.')}, 'Atualizar escalões')));
   const na = S.na;
